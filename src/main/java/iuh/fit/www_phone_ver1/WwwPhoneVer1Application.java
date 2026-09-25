@@ -16,5 +16,4 @@ public class WwwPhoneVer1Application extends SpringBootServletInitializer {
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(WwwPhoneVer1Application.class);
     }
-
 }
