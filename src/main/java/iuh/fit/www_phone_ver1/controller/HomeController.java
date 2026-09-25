@@ -9,7 +9,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model) {
-        model.addAttribute("message", "Xin chào từ Spring Boot + JSP!");
-        return "home"; // trỏ tới /WEB-INF/views/home.jsp
+        model.addAttribute("chuoi", "Chào mừng đến với Cửa hàng Điện thoại");
+        return "home"; // Trỏ tới /WEB-INF/views/home.jsp
     }
 }
