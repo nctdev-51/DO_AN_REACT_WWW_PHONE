@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div><h1 class="fw-bold mb-1">Quản lý sản phẩm</h1><a href="${pageContext.request.contextPath}/admin/categories">Quản lý danh mục</a></div>
         <div class="d-flex gap-2">
-            <form action="${pageContext.request.contextPath}/admin/logout" method="post">
+            <form action="${pageContext.request.contextPath}/logout" method="post">
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
                 <button class="btn btn-outline-secondary" type="submit">Đăng xuất</button>
             </form>
