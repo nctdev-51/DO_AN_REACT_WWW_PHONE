@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminLoginController {
     @GetMapping("/login")
     public String login() {
-        return "admin/login";
+        return "redirect:/login";
     }
 }
