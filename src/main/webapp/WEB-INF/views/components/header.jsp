@@ -111,11 +111,25 @@
                                 <span class="badge bg-danger rounded-pill badge-cart ms-1">0</span>
                             </a>
                         </li>
-                        <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-                            <a class="btn btn-outline-light btn-sm px-3 rounded-pill" href="${pageContext.request.contextPath}/admin/login">
-                                <i class="bi bi-person-circle me-1"></i> Đăng nhập
-                            </a>
-                        </li>
+                        <c:choose>
+                            <c:when test="${pageContext.request.userPrincipal != null}">
+                                <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                                    <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline">
+                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+                                        <button class="btn btn-outline-danger btn-sm px-3 rounded-pill" type="submit">
+                                            <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                                        </button>
+                                    </form>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                                    <a class="btn btn-outline-light btn-sm px-3 rounded-pill" href="${pageContext.request.contextPath}/login">
+                                        <i class="bi bi-person-circle me-1"></i> Đăng nhập
+                                    </a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
                     </ul>
                 </div>
             </div>
