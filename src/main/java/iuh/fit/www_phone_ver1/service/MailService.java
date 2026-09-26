@@ -65,4 +65,23 @@ public class MailService {
             e.printStackTrace();
         }
     }
+
+    public void sendWelcomeEmail(String toEmail, String fullName) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("Chào mừng đến với Cửa hàng Điện Thoại");
+
+            String content = "<h2>Xin chào " + fullName + ",</h2>"
+                    + "<p>Cảm ơn bạn đã đăng ký tài khoản tại Cửa hàng Điện Thoại.</p>"
+                    + "<p>Chúc bạn có trải nghiệm mua sắm tuyệt vời!</p>";
+
+            helper.setText(content, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -16,11 +16,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, MailService mailService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.mailService = mailService;
     }
 
     public void registerUser(UserRegistrationDto registrationDto) {
@@ -50,5 +52,8 @@ public class UserService {
         user.getRoles().add(role);
 
         userRepository.save(user);
+        
+        // Send welcome email asynchronously or synchronously
+        mailService.sendWelcomeEmail(user.getEmail(), user.getFullName());
     }
 }
