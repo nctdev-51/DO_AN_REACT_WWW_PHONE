@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
 <!-- Include Header Component -->
 <jsp:include page="components/header.jsp" />
@@ -91,97 +92,29 @@
         </div>
 
         <div class="row g-4">
-            <!-- Sample Card 1 -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card h-100 shadow-sm border-0 rounded-4 product-card overflow-hidden">
-                    <div class="position-relative bg-light text-center p-4">
-                        <span class="badge bg-danger position-absolute top-0 start-0 m-3 rounded-pill">-15%</span>
-                        <i class="bi bi-phone text-muted" style="font-size: 5rem;"></i>
-                    </div>
-                    <div class="card-body d-flex flex-column p-4">
-                        <small class="text-muted text-uppercase fw-semibold">Apple</small>
-                        <h5 class="card-title fw-bold mt-1 mb-2">iPhone 16 Pro Max 256GB</h5>
-                        <div class="mb-3">
-                            <span class="text-danger fw-bold fs-5">32.990.000₫</span>
-                            <span class="text-muted text-decoration-line-through small ms-2">34.990.000₫</span>
-                        </div>
-                        <div class="mt-auto">
-                            <button class="btn btn-primary w-100 rounded-pill">
-                                <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ
-                            </button>
+            <c:forEach items="${featuredProducts}" var="product">
+                <div class="col-lg-3 col-md-6">
+                    <div class="card h-100 shadow-sm border-0 rounded-4 product-card overflow-hidden">
+                        <a class="position-relative bg-light text-center p-4 d-block" href="${pageContext.request.contextPath}/products/${product.id}">
+                            <c:choose>
+                                <c:when test="${not empty product.image}">
+                                    <img src="${pageContext.request.contextPath}${product.image}" alt="<c:out value='${product.name}'/>" class="img-fluid" style="height: 160px; object-fit: contain;">
+                                </c:when>
+                                <c:otherwise><i class="bi bi-phone text-muted" style="font-size: 5rem;"></i></c:otherwise>
+                            </c:choose>
+                        </a>
+                        <div class="card-body d-flex flex-column p-4">
+                            <small class="text-muted text-uppercase fw-semibold"><c:out value="${product.brand}"/></small>
+                            <h5 class="card-title fw-bold mt-1 mb-2"><a class="text-dark text-decoration-none" href="${pageContext.request.contextPath}/products/${product.id}"><c:out value="${product.name}"/></a></h5>
+                            <div class="mb-3 text-danger fw-bold fs-5"><fmt:formatNumber value="${product.price}" pattern="#,##0"/>₫</div>
+                            <a class="btn btn-primary w-100 rounded-pill mt-auto" href="${pageContext.request.contextPath}/products/${product.id}">Xem chi tiết</a>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Sample Card 2 -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card h-100 shadow-sm border-0 rounded-4 product-card overflow-hidden">
-                    <div class="position-relative bg-light text-center p-4">
-                        <span class="badge bg-primary position-absolute top-0 start-0 m-3 rounded-pill">Mới</span>
-                        <i class="bi bi-phone text-muted" style="font-size: 5rem;"></i>
-                    </div>
-                    <div class="card-body d-flex flex-column p-4">
-                        <small class="text-muted text-uppercase fw-semibold">Samsung</small>
-                        <h5 class="card-title fw-bold mt-1 mb-2">Samsung Galaxy S25 Ultra</h5>
-                        <div class="mb-3">
-                            <span class="text-danger fw-bold fs-5">31.490.000₫</span>
-                            <span class="text-muted text-decoration-line-through small ms-2">33.990.000₫</span>
-                        </div>
-                        <div class="mt-auto">
-                            <button class="btn btn-primary w-100 rounded-pill">
-                                <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sample Card 3 -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card h-100 shadow-sm border-0 rounded-4 product-card overflow-hidden">
-                    <div class="position-relative bg-light text-center p-4">
-                        <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-3 rounded-pill">Hot</span>
-                        <i class="bi bi-phone text-muted" style="font-size: 5rem;"></i>
-                    </div>
-                    <div class="card-body d-flex flex-column p-4">
-                        <small class="text-muted text-uppercase fw-semibold">Xiaomi</small>
-                        <h5 class="card-title fw-bold mt-1 mb-2">Xiaomi 14 Ultra 512GB</h5>
-                        <div class="mb-3">
-                            <span class="text-danger fw-bold fs-5">24.990.000₫</span>
-                            <span class="text-muted text-decoration-line-through small ms-2">26.990.000₫</span>
-                        </div>
-                        <div class="mt-auto">
-                            <button class="btn btn-primary w-100 rounded-pill">
-                                <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sample Card 4 -->
-            <div class="col-lg-3 col-md-6">
-                <div class="card h-100 shadow-sm border-0 rounded-4 product-card overflow-hidden">
-                    <div class="position-relative bg-light text-center p-4">
-                        <span class="badge bg-success position-absolute top-0 start-0 m-3 rounded-pill">Bán chạy</span>
-                        <i class="bi bi-phone text-muted" style="font-size: 5rem;"></i>
-                    </div>
-                    <div class="card-body d-flex flex-column p-4">
-                        <small class="text-muted text-uppercase fw-semibold">Apple</small>
-                        <h5 class="card-title fw-bold mt-1 mb-2">iPhone 15 128GB Chính Hãng</h5>
-                        <div class="mb-3">
-                            <span class="text-danger fw-bold fs-5">18.490.000₫</span>
-                            <span class="text-muted text-decoration-line-through small ms-2">20.490.000₫</span>
-                        </div>
-                        <div class="mt-auto">
-                            <button class="btn btn-primary w-100 rounded-pill">
-                                <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </c:forEach>
+            <c:if test="${empty featuredProducts}">
+                <div class="col-12 text-center text-muted py-5">Chưa có sản phẩm. Quản trị viên có thể thêm sản phẩm trong mục Quản trị.</div>
+            </c:if>
         </div>
     </div>
 </section>

@@ -21,6 +21,9 @@ public class Product {
     @Column(nullable = false, length = 200)
     private String name;
 
+    @Column(length = 100)
+    private String brand;
+
     @Column(length = 255)
     private String image;
 

@@ -112,7 +112,7 @@
                             </a>
                         </li>
                         <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-                            <a class="btn btn-outline-light btn-sm px-3 rounded-pill" href="${pageContext.request.contextPath}/login">
+                            <a class="btn btn-outline-light btn-sm px-3 rounded-pill" href="${pageContext.request.contextPath}/admin/login">
                                 <i class="bi bi-person-circle me-1"></i> Đăng nhập
                             </a>
                         </li>
