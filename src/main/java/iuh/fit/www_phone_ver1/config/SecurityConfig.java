@@ -42,8 +42,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationSuccessHandler customSuccessHandler() {
+    public AuthenticationSuccessHandler customSuccessHandler(UserRepository userRepository) {
         return (request, response, authentication) -> {
+            String email = authentication.getName();
+            userRepository.findByEmail(email).ifPresent(user -> {
+                request.getSession().setAttribute("currentUser", user);
+            });
+            
             boolean isAdmin = authentication.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
             if (isAdmin) {
@@ -55,7 +60,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationSuccessHandler customSuccessHandler) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -65,7 +70,7 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .successHandler(customSuccessHandler())
+                .successHandler(customSuccessHandler)
                 .failureUrl("/login?error")
                 .permitAll()
             )
