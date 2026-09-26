@@ -61,7 +61,8 @@ public class MailService {
 
             helper.setText(content, true);
             mailSender.send(message);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
+            System.err.println("Gửi email xác nhận thất bại: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -80,7 +81,8 @@ public class MailService {
 
             helper.setText(content, true);
             mailSender.send(message);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
+            System.err.println("Gửi email thất bại: " + e.getMessage());
             e.printStackTrace();
         }
     }
