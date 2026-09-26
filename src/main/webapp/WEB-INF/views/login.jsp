@@ -19,6 +19,7 @@
                     </c:if>
                     
                     <form action="${pageContext.request.contextPath}/login" method="post">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
                         <div class="mb-3">
                             <label for="username" class="form-label">Email</label>
                             <input type="email" id="username" name="username" class="form-control" required />
