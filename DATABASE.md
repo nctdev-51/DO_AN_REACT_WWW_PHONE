@@ -35,20 +35,6 @@ $env:ADMIN_PASSWORD = "mat_khau_admin_manh"
 
 Trong IntelliJ, đặt các biến trên ở **Run → Edit Configurations → Environment variables**. Có thể thay URL bằng `DB_URL`. Hibernate tự tạo/cập nhật các bảng khi khởi động.
 
-Khi dùng profile MariaDB, dữ liệu sản phẩm mẫu không tự chèn. Có thể thêm qua trang Admin hoặc chạy SQL sau khi Hibernate đã tạo bảng:
-
-Chạy ứng dụng một lần để Hibernate tạo bảng, sau đó chạy:
-
-```sql
-INSERT INTO categories (name, description)
-VALUES ('Điện thoại', 'Điện thoại thông minh');
-
-INSERT INTO products (name, brand, image, price, description, status, category_id)
-VALUES
-  ('Galaxy S25', 'Samsung', NULL, 19990000, 'Điện thoại Samsung Galaxy S25.', 1,
-   (SELECT id FROM categories WHERE name = 'Điện thoại' ORDER BY id DESC LIMIT 1)),
-  ('iPhone 16', 'Apple', NULL, 22990000, 'Điện thoại Apple iPhone 16.', 1,
-   (SELECT id FROM categories WHERE name = 'Điện thoại' ORDER BY id DESC LIMIT 1));
-```
+Khi dùng profile MariaDB, dữ liệu mẫu không tự chèn. Sau khi đã tạo các bảng (khởi động ứng dụng một lần), mở file `database/sample-data.sql` trong HeidiSQL, chọn database `webshop_db` rồi chạy. Script thêm 4 danh mục và 15 sản phẩm, đồng thời bỏ qua tên đã tồn tại nên có thể chạy lại an toàn. Có thể thêm dữ liệu khác qua trang Admin.
 
 Ảnh tải lên chỉ nhận PNG/JPEG tối đa 5 MB, được lưu ngoài source code trong `uploads/products` (có thể đổi bằng biến `UPLOAD_DIR`). Xóa sản phẩm đã xuất hiện trong đơn hàng sẽ chuyển sản phẩm sang trạng thái ngừng kinh doanh để giữ lịch sử đơn.

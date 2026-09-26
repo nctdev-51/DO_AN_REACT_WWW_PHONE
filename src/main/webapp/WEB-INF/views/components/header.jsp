@@ -96,17 +96,17 @@
                     <!-- Nav Items -->
                     <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
                         <li class="nav-item">
-                            <a class="nav-link active text-white" href="${pageContext.request.contextPath}/">
+                            <a class="nav-link text-white-50" id="homeNavLink" href="${pageContext.request.contextPath}/">
                                 <i class="bi bi-house-door me-1"></i> Trang chủ
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white-50" href="${pageContext.request.contextPath}/products">
+                            <a class="nav-link text-white-50" id="productsNavLink" href="${pageContext.request.contextPath}/products">
                                 <i class="bi bi-grid me-1"></i> Sản phẩm
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white-50 position-relative" href="${pageContext.request.contextPath}/cart">
+                            <a class="nav-link position-relative text-white-50" id="cartNavLink" href="${pageContext.request.contextPath}/cart">
                                 <i class="bi bi-cart3 me-1"></i> Giỏ hàng
                                 <span class="badge bg-danger rounded-pill badge-cart ms-1">0</span>
                             </a>
@@ -125,3 +125,23 @@
     <!-- Main Content Container Start -->
     <main class="flex-grow-1">
     </main>
+    <script>
+        (() => {
+            const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+            const links = [
+                { id: 'homeNavLink', matches: path => currentPath === (path.replace(/\/+$/, '') || '/') },
+                { id: 'productsNavLink', matches: path => currentPath === path || currentPath.startsWith(path + '/') },
+                { id: 'cartNavLink', matches: path => currentPath === path || currentPath.startsWith(path + '/') }
+            ];
+
+            links.forEach(({ id, matches }) => {
+                const link = document.getElementById(id);
+                const path = new URL(link.href).pathname.replace(/\/+$/, '') || '/';
+                if (matches(path)) {
+                    link.classList.remove('text-white-50');
+                    link.classList.add('active', 'text-white');
+                    link.setAttribute('aria-current', 'page');
+                }
+            });
+        })();
+    </script>
