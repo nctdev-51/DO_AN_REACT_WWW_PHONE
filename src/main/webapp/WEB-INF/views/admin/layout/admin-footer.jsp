@@ -6,16 +6,18 @@
 <!-- ===== FOOTER BAR ===== -->
 <div style="
     margin-left: var(--sidebar-width);
-    background-color: #fff;
-    border-top: 1px solid #e9ecef;
-    padding: 12px 28px;
-    font-size: 0.8rem;
-    color: #adb5bd;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding: 14px 28px;
+    font-size: 0.78rem;
+    color: #9ca3af;
     display: flex;
     justify-content: space-between;
     align-items: center;
 ">
-    <span>&copy; 2025 <strong style="color:#495057;">PhoneStore Admin</strong> &mdash; Đồ án Lập trình WWW - FIT IUH</span>
+    <span>&copy; 2025 <strong style="color:#1a1a2e;">PhoneStore Admin</strong> &mdash; Đồ án Lập trình WWW - FIT IUH</span>
     <span>Spring Boot 4 &amp; Bootstrap 5</span>
 </div>
 
