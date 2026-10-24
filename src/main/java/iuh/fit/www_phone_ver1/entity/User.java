@@ -1,12 +1,11 @@
 package iuh.fit.www_phone_ver1.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.*;
 
 @Entity
 @Table(name = "users")
@@ -15,44 +14,51 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class User {
+  public boolean isAdmin() {
+    return roles.stream().anyMatch(role -> "ADMIN".equals(role.getName()));
+  }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(name = "full_name", nullable = false, length = 100)
-    private String fullName;
+  @Column(name = "full_name", nullable = false, length = 100)
+  private String fullName;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String email;
+  @Column(nullable = false, unique = true, length = 100)
+  private String email;
 
-    @Column(length = 20)
-    private String phone;
+  @Column(nullable = false, columnDefinition = "boolean default true")
+  @Builder.Default
+  private boolean emailVerified = true;
 
-    @Column(nullable = false)
-    private String password;
+  @Column(length = 20)
+  private String phone;
 
-    @Column(length = 255)
-    private String address;
+  @Column(nullable = false)
+  @ToString.Exclude
+  private String password;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Integer status = 1; // 1: Hoạt động, 0: Đã khóa
+  @Column(length = 255)
+  private String address;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @Builder.Default
-    private Set<Role> roles = new HashSet<>();
+  @Column(nullable = false)
+  @Builder.Default
+  private Integer status = 1; // 1: Hoạt động, 0: Đã khóa
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @Builder.Default
-    private List<Order> orders = new ArrayList<>();
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(
+      name = "user_roles",
+      joinColumns = @JoinColumn(name = "user_id"),
+      inverseJoinColumns = @JoinColumn(name = "role_id"))
+  @ToString.Exclude
+  @EqualsAndHashCode.Exclude
+  @Builder.Default
+  private Set<Role> roles = new HashSet<>();
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @ToString.Exclude
+  @EqualsAndHashCode.Exclude
+  @Builder.Default
+  private List<Order> orders = new ArrayList<>();
 }

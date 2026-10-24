@@ -1,0 +1,130 @@
+.comparison-tools,.comparison-search{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:16px
+}
+.comparison-tools{
+  margin-bottom:20px;
+  padding:17px 22px
+}
+.comparison-tools>label{
+  margin:0 auto 0 0;
+  width:auto;
+  font-size:.83rem;
+  display:flex;
+  gap:9px;
+  align-items:center
+}
+.comparison-search input{
+  flex:1;
+  min-width:160px
+}
+.comparison-scroll{
+  padding:0;
+  overflow-x:auto
+}
+.comparison-table{
+  border-collapse:collapse;
+  width:100%;
+  min-width:650px;
+  table-layout:fixed;
+  font-size:.82rem
+}
+.comparison-table th,.comparison-table td{
+  padding:20px;
+  border-bottom:1px solid var(--line);
+  border-right:1px solid var(--line);
+  vertical-align:top;
+  overflow-wrap:anywhere
+}
+.comparison-table tr>:first-child{
+  width:165px;
+  background:#f4f6f0;
+  font-weight:550;
+  color:#5c6e65
+}
+.comparison-table thead th{
+  text-align:center;
+  background:#fff
+}
+.comparison-table thead th>a{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+  font-size:1.02rem;
+  line-height:1.4;
+  letter-spacing:-.02em
+}
+.compare-image{
+  width:120px;
+  height:160px;
+  object-fit:contain
+}
+.comparison-table .form-select{
+  font-size:.75rem
+}
+.comparison-different td{
+  background:#fcf5ee
+}
+.comparison-table tr[hidden]{
+  display:none
+}
+.comparison-table tfoot td{
+  background:white
+}
+.comparison-suggestions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  margin-top:22px
+}
+.comparison-suggestions article{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:17px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:white
+}
+.comparison-suggestions article>div{
+  flex:1;
+  min-width:0;
+  font-size:.84rem;
+  font-weight:550
+}
+.comparison-suggestions p{
+  margin:7px 0 0;
+  font-weight:650;
+  color:var(--brand);
+  font-size:.83rem
+}
+.comparison-suggestions img{
+  width:48px;
+  height:65px;
+  object-fit:contain
+}
+@media(max-width:640px){
+  .comparison-suggestions{
+    grid-template-columns:1fr
+  }
+  .comparison-table th,.comparison-table td{
+    padding:14px
+  }
+  .comparison-table tr>:first-child{
+    width:125px
+  }
+  .comparison-tools{
+    padding:16px;
+    gap:10px
+  }
+  .comparison-tools>label{
+    width:100%;
+    margin-bottom:6px
+  }
+  .comparison-tools .btn{
+    font-size:.75rem
+  }
+}

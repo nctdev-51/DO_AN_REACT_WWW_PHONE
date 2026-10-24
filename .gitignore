@@ -36,3 +36,7 @@ build/
 application-local.properties
 application-secret.properties
 .env
+uploads/
+.local-backups/
+__pycache__/
+*.pyc

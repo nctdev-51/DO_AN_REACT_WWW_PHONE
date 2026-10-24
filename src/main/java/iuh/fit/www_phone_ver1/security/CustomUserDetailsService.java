@@ -2,6 +2,8 @@ package iuh.fit.www_phone_ver1.security;
 
 import iuh.fit.www_phone_ver1.entity.User;
 import iuh.fit.www_phone_ver1.repository.UserRepository;
+import java.util.Collection;
+import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,35 +11,34 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+  public CustomUserDetailsService(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  @Override
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    User user =
+        userRepository
+            .findByEmail(email.trim().toLowerCase(java.util.Locale.ROOT))
+            .orElseThrow(
+                () ->
+                    new UsernameNotFoundException("Không tìm thấy người dùng với email: " + email));
+
+    if (user.getStatus() != 1) {
+      throw new UsernameNotFoundException("Tài khoản đã bị khóa");
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng với email: " + email));
+    Collection<GrantedAuthority> authorities =
+        user.getRoles().stream()
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+            .collect(Collectors.toList());
 
-        if (user.getStatus() != 1) {
-            throw new UsernameNotFoundException("Tài khoản đã bị khóa");
-        }
-
-        Collection<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
-                .collect(Collectors.toList());
-
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                authorities
-        );
-    }
+    return new org.springframework.security.core.userdetails.User(
+        user.getEmail(), user.getPassword(), user.isEmailVerified(), true, true, true, authorities);
+  }
 }

@@ -1,40 +1,68 @@
 package iuh.fit.www_phone_ver1.repository;
 
 import iuh.fit.www_phone_ver1.entity.Product;
+import java.math.BigDecimal;
+import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
-    List<Product> findByStatus(Integer status);
+public interface ProductRepository
+    extends JpaRepository<Product, Long>,
+        org.springframework.data.jpa.repository.JpaSpecificationExecutor<Product> {
+  java.util.Optional<Product> findBySku(String sku);
 
-    Page<Product> findByStatus(Integer status, Pageable pageable);
+  List<Product> findTop4ByCategory_IdAndStatusAndIdNot(Long categoryId, Integer status, Long id);
 
-    @Query("""
-            select p from Product p
-            where p.status = 1
-              and (:keyword is null or lower(p.name) like lower(concat('%', :keyword, '%')))
-              and (:brand is null or p.brand = :brand)
-              and (:categoryId is null or p.category.id = :categoryId)
-              and (:minPrice is null or p.price >= :minPrice)
-              and (:maxPrice is null or p.price <= :maxPrice)
-            """)
-    Page<Product> search(@Param("keyword") String keyword,
-                         @Param("brand") String brand,
-                         @Param("categoryId") Long categoryId,
-                         @Param("minPrice") Double minPrice,
-                         @Param("maxPrice") Double maxPrice,
-                         Pageable pageable);
+  List<Product> findByStatus(Integer status);
 
-    @Query("select distinct p.brand from Product p where p.status = 1 and p.brand is not null order by p.brand")
-    List<String> findAvailableBrands();
+  Page<Product> findByStatus(Integer status, Pageable pageable);
 
-    @Query("select count(p) from Product p where p.category.id = :categoryId")
-    long countByCategoryId(@Param("categoryId") Long categoryId);
+  default Page<Product> search(
+      String keyword,
+      String brand,
+      Long categoryId,
+      BigDecimal minPrice,
+      BigDecimal maxPrice,
+      Pageable pageable) {
+    return searchFiltered(
+        keyword, brand, categoryId, minPrice, maxPrice, null, null, false, pageable);
+  }
+
+  default Page<Product> searchFiltered(
+      String keyword,
+      String brand,
+      Long categoryId,
+      BigDecimal minPrice,
+      BigDecimal maxPrice,
+      String storage,
+      String ram,
+      boolean inStock,
+      Pageable pageable) {
+    String sort =
+        pageable.getSort().getOrderFor("price") == null
+            ? "newest"
+            : pageable.getSort().getOrderFor("price").isAscending() ? "price-asc" : "price-desc";
+    var filter =
+        new iuh.fit.www_phone_ver1.service.catalog.CatalogFilter(
+            keyword, brand, categoryId, minPrice, maxPrice, storage, ram, inStock);
+    if (pageable.isUnpaged())
+      return new org.springframework.data.domain.PageImpl<>(findAll(filter.specification(sort)));
+    return findAll(
+        filter.specification(sort),
+        org.springframework.data.domain.PageRequest.of(
+            pageable.getPageNumber(), pageable.getPageSize()));
+  }
+
+  @Query(
+      "select distinct p.brand from Product p where p.status = 1 and p.brand is not null order by"
+          + " p.brand")
+  List<String> findAvailableBrands();
+
+  @Query("select count(p) from Product p where p.category.id = :categoryId")
+  long countByCategoryId(@Param("categoryId") Long categoryId);
 }

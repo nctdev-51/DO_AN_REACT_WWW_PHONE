@@ -1,0 +1,318 @@
+/* Operations workspace */
+.chart-empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; background: #f7f9f5; border-radius: 8px; }
+.chart-empty strong { font-size: .95rem; font-weight: 550; }
+.chart-empty p { font-size: .8rem; color: var(--muted); margin: 8px 0 0; }
+.admin-body{
+  background:#f3f5f2
+}
+.admin-sidebar{
+  position:fixed;
+  inset:0 auto 0 0;
+  width:244px;
+  background:#183c3c;
+  padding:30px 20px;
+  color:#dae7e1;
+  display:flex;
+  flex-direction:column;
+  overflow-y:auto;
+  z-index:101
+}
+.admin-sidebar .brand{
+  color:white;
+  margin:0 8px 32px;
+  font-size:1.4rem
+}
+.admin-sidebar .brand::before{
+  background:#f1f5ed;
+  color:#183c3c
+}
+.admin-sidebar .eyebrow{
+  font-size:.6rem;
+  color:#9bb4a9;
+  margin-left:12px;
+  margin-bottom:15px
+}
+.admin-sidebar nav{
+  display:grid;
+  gap:5px
+}
+.admin-sidebar nav a{
+  padding:12px 13px;
+  font-size:.8rem;
+  color:#c0d3c9;
+  border-radius:6px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  line-height:1.4
+}
+.admin-sidebar nav a::before{
+  content:"";
+  width:5px;
+  height:5px;
+  flex-shrink:0;
+  background:#7e9c8d;
+  border-radius:1px
+}
+.admin-sidebar nav a:hover{
+  background:#244b49;
+  color:white
+}
+.admin-sidebar nav a.active{
+  background:#e8efe4;
+  color:#183c3c;
+  font-weight:650
+}
+.admin-sidebar nav a.active::before{
+  background:#bf4d2e
+}
+.admin-sidebar>form{
+  margin-top:auto;
+  padding-top:35px
+}
+.admin-sidebar>form .btn{
+  border-color:#56756a;
+  color:#dbe7e0;
+  font-size:.78rem
+}
+.admin-main{
+  margin-left:244px;
+  padding:0 32px 50px;
+  max-width:1900px
+}
+.admin-topbar{
+  min-height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  font-size:.76rem;
+  color:var(--muted);
+  gap:16px;
+  margin-bottom:32px
+}
+.admin-topbar strong{
+  font-weight:600;
+  color:var(--ink)
+}
+.admin-topbar a{
+  font-size:.76rem;
+  display:flex;
+  align-items:center;
+  gap:7px
+}
+.admin-main>.page-heading{
+  margin:0 0 26px
+}
+.admin-main .page-heading h1{
+  font-size:1.8rem
+}
+.admin-main .page-heading .eyebrow{
+  font-size:.62rem
+}
+.admin-main .panel{
+  padding:24px
+}
+.admin-main .table th{
+  font-size:.7rem;
+  padding:14px 12px
+}
+.admin-main .table td{
+  padding:16px 12px
+}
+.admin-main .table tbody tr:hover{
+  background:#f6f8f3
+}
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+  margin-bottom:22px
+}
+.stat-grid article{
+  border-top:3px solid #bed0bf
+}
+.stat-grid article:nth-child(2){
+  border-top-color:#c34d2d
+}
+.stat-grid article span{
+  display:block;
+  font-size:.75rem;
+  color:var(--muted)
+}
+.stat-grid article strong{
+  display:block;
+  margin-top:18px;
+  font-size:clamp(1.25rem,1.9vw,2rem);
+  letter-spacing:-.045em;
+  line-height:1.2;
+  font-variant-numeric:tabular-nums
+}
+.chart-box{
+  position:relative;
+  height:290px
+}
+.table-actions{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap
+}
+.table-product{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  min-width:200px
+}
+.table-product img{
+  width:45px;
+  height:55px;
+  object-fit:contain
+}
+.table-product small{
+  display:block;
+  color:var(--muted);
+  font-size:.66rem;
+  margin-top:4px
+}
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0 22px
+}
+.variant-form-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px
+}
+.image-preview{
+  display:block;
+  height:145px;
+  margin-top:15px;
+  object-fit:contain;
+  background:#f6f8f3;
+  border:1px solid var(--line);
+  border-radius:7px;
+  padding:15px
+}
+.admin-main .form-panel{
+  max-width:900px
+}
+.admin-main .panel>form:not(.form-grid){
+  max-width:100%
+}
+.admin-main .section-heading{
+  margin-top:0
+}
+.admin-main .btn-sm{
+  font-size:.72rem
+}
+.admin-main h2{
+  font-size:1.15rem
+}
+.admin-main .table-responsive{
+  border-color:#e4e8e1
+}
+.admin-main .field>label{
+  font-size:.8rem
+}
+.admin-main .form-control,.admin-main .form-select{
+  font-size:.83rem
+}
+.admin-sidebar nav a[href$="/admin/support"]{
+  margin-bottom:12px
+}
+@media(max-width:1100px){
+  .admin-sidebar{
+    width:215px;
+    padding:25px 14px
+  }
+  .admin-main{
+    margin-left:215px;
+    padding-left:22px;
+    padding-right:22px
+  }
+  .stat-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+  .variant-form-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+}
+@media(max-width:800px){
+  .admin-sidebar{
+    position:static;
+    width:100%;
+    padding:16px;
+    overflow:visible
+  }
+  .admin-sidebar .brand{
+    margin:0 0 15px
+  }
+  .admin-sidebar .eyebrow{
+    display:none
+  }
+  .admin-sidebar nav{
+    display:flex;
+    overflow-x:auto;
+    gap:5px;
+    padding-bottom:5px
+  }
+  .admin-sidebar nav a{
+    white-space:nowrap;
+    font-size:.74rem;
+    padding:10px 12px
+  }
+  .admin-sidebar nav a::before{
+    display:none
+  }
+  .admin-sidebar nav a[href$="/admin/support"]{
+    margin-bottom:0
+  }
+  .admin-sidebar>form{
+    display:block;
+    padding:0;
+    margin:10px 0 0;
+    align-self:flex-end
+  }
+  .admin-sidebar>form .btn{
+    margin-top:0!important;
+    min-height:30px;
+    padding:4px 12px
+  }
+  .admin-main{
+    margin:0;
+    padding:0 16px 35px
+  }
+  .admin-topbar{
+    min-height:56px;
+    margin-bottom:25px
+  }
+  .admin-main .page-heading h1{
+    font-size:1.55rem
+  }
+  .admin-main .panel{
+    padding:18px
+  }
+  .stat-grid{
+    gap:10px
+  }
+  .stat-grid article strong{
+    font-size:1.45rem;
+    margin-top:12px;
+    overflow-wrap:anywhere
+  }
+  .form-grid,.variant-form-grid{
+    grid-template-columns:1fr
+  }
+  .chart-box{
+    height:240px
+  }
+  .admin-topbar>span{
+    font-size:.67rem
+  }
+}
+
+.media-admin-grid {display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:16px; margin-top:20px}
+.media-admin-grid article {padding:14px; border:1px solid #e0e5e1; border-radius:10px; min-width:0}
+.media-admin-grid img {width:100%; height:130px; object-fit:contain}.media-admin-grid p {font-size:12px; overflow-wrap:anywhere; margin:12px 0}
