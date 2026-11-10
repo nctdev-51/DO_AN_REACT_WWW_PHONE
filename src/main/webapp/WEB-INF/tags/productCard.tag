@@ -2,11 +2,43 @@
 <%@ attribute name="product" required="true" type="iuh.fit.www_phone_ver1.entity.Product" %>
 <%@ attribute name="selectedVariant" required="false" type="iuh.fit.www_phone_ver1.entity.ProductVariant" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <c:set var="initial" value="${empty selectedVariant ? product.defaultVariant : selectedVariant}"/>
+<c:set var="primaryImg" value="${empty initial ? product.image : initial.image}"/>
+<c:set var="displayPrice" value="${empty initial ? product.price : initial.price}"/>
+<c:set var="hoverImg" value=""/>
+<c:forEach var="m" items="${product.media}">
+  <c:if test="${empty hoverImg and m.kind == 'PHOTO' and m.path != primaryImg}">
+    <c:set var="hoverImg" value="${m.path}"/>
+  </c:if>
+</c:forEach>
+<c:if test="${empty hoverImg}">
+  <c:forEach var="v" items="${product.variants}">
+    <c:if test="${empty hoverImg and v.active and v.image != primaryImg}">
+      <c:set var="hoverImg" value="${v.image}"/>
+    </c:if>
+  </c:forEach>
+</c:if>
+<c:set var="isNewModel" value="${fn:contains(product.name, '17') or fn:contains(product.name, 'iPhone Air') or fn:contains(product.name, 'S25') or fn:contains(product.name, 'Fold7') or fn:contains(product.name, 'Flip7') or fn:contains(product.name, 'Find X8') or fn:contains(product.name, 'Xiaomi 15') or fn:contains(product.name, 'HONOR 400')}"/>
+<c:set var="hasDiscount" value="${not empty product.originalPrice and product.originalPrice > displayPrice}"/>
 <article class="product-card" data-selected-variant="${initial.id}" data-product-card data-product-url="${pageContext.request.contextPath}/products/${product.id}" data-original-price="${product.originalPrice}">
-  <a data-product-link class="product-card-image" href="${pageContext.request.contextPath}/products/${product.id}?variantId=${initial.id}">
-    <img src="${pageContext.request.contextPath}${empty initial ? product.image : initial.image}" alt="<c:out value='${product.name}'/>" loading="lazy">
+  <a data-product-link class="product-card-image ${not empty hoverImg ? 'has-hover-image' : ''}" href="${pageContext.request.contextPath}/products/${product.id}?variantId=${initial.id}">
+    <div class="card-badges">
+      <c:if test="${isNewModel}">
+        <span class="card-badge card-badge-new">MỚI</span>
+      </c:if>
+      <span class="card-badge card-badge-sale" data-card-badge-sale ${hasDiscount ? '' : 'hidden'}>
+        <c:if test="${hasDiscount}">
+          −<fmt:formatNumber value="${(1 - (displayPrice / product.originalPrice)) * 100}" maxFractionDigits="0"/>%
+        </c:if>
+      </span>
+    </div>
+    <img class="img-primary" src="${pageContext.request.contextPath}${primaryImg}" alt="<c:out value='${product.name}'/>" loading="lazy">
+    <c:if test="${not empty hoverImg}">
+      <img class="img-hover" src="${pageContext.request.contextPath}${hoverImg}" alt="" loading="lazy" aria-hidden="true">
+    </c:if>
   </a>
   <div class="product-card-body">
     <span class="eyebrow">
@@ -25,12 +57,12 @@
         <span hidden data-variant data-id="${variant.id}" data-color="<c:out value='${variant.color}'/>" data-storage="<c:out value='${variant.storage}'/>" data-ram="<c:out value='${variant.ram}'/>" data-price="${variant.price}" data-stock="${variant.stock}" data-image="${pageContext.request.contextPath}${variant.image}"></span>
       </c:if></c:forEach>
     </div>
-    <p class="muted small" data-selected-caption><c:out value="${initial.storage}"/> · <c:out value="${initial.color}"/></p>
+    <p class="muted small" data-selected-caption><c:out value="${initial.storage}"/><c:if test="${not empty initial.storage and not empty initial.color}"> · </c:if><c:out value="${initial.color}"/></p>
     <div class="price" data-card-price>
-      <ui:money value="${empty initial ? product.price : initial.price}"/>
+      <ui:money value="${displayPrice}"/>
     </div>
     <div class="card-old-price">
-      <del class="muted small" data-card-original ${product.originalPrice > product.price ? '' : 'hidden'}>
+      <del class="muted small" data-card-original ${hasDiscount ? '' : 'hidden'}>
         <ui:money value="${product.originalPrice}"/>
       </del>
     <span data-card-discount></span></div>

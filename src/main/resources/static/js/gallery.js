@@ -146,29 +146,90 @@ document.addEventListener('DOMContentLoaded', () => {
   select.before(choices);
   select.hidden = true;
   document.querySelector('label[for="variant-select"]').hidden = true;
+  const resolveColor = window.ptvResolveColor || (() => ({bg: '#8e949b', light: false}));
   const options = [...select.options];
   const groups = [];
-  for (const [key, label] of [['storage', 'Dung lượng'], ['color', 'Màu sắc'], ['ram', 'RAM']]) {
+  for (const [key, label] of [['color', 'Màu sắc'], ['storage', 'Dung lượng'], ['ram', 'RAM']]) {
     const values = [...new Set(options.map(o => o.dataset[key]).filter(Boolean))];
     if (!values.length || (key === 'ram' && values.length < 2)) continue;
-    const group = document.createElement('div'); group.className = 'variant-chips'; group.setAttribute('role', 'group'); group.setAttribute('aria-label', label);
-    const heading = document.createElement('span'); heading.className = 'variant-heading'; heading.textContent = label; group.append(heading);
+    const isColor = key === 'color';
+    const group = document.createElement('div');
+    group.className = isColor ? 'variant-picker-group swatch-picker-group' : 'variant-picker-group pill-picker-group';
+    group.setAttribute('role', 'radiogroup');
+    group.setAttribute('aria-label', label);
+
+    const heading = document.createElement('span');
+    heading.className = 'variant-heading';
+    const headingLabel = document.createTextNode(`${label}: `);
+    const selectedText = document.createElement('strong');
+    selectedText.className = 'variant-selected-label';
+    heading.append(headingLabel, selectedText);
+    group.append(heading);
+
+    const track = document.createElement('div');
+    track.className = isColor ? 'color-swatch-grid' : 'storage-pill-grid';
+
     values.forEach(value => {
-      const button = document.createElement('button'); button.type = 'button'; button.textContent = value;
+      const button = document.createElement('button');
+      button.type = 'button';
       button.dataset.value = value;
+      button.setAttribute('aria-label', `${label}: ${value}`);
+      button.title = value;
+      if (isColor) {
+        button.className = 'swatch-btn';
+        const swatch = resolveColor(value);
+        const circle = document.createElement('span');
+        circle.className = 'swatch-circle' + (swatch.light ? ' is-light' : '');
+        circle.style.background = swatch.bg;
+        button.append(circle);
+      } else {
+        button.className = 'pill-btn';
+        button.textContent = value;
+      }
       button.addEventListener('click', () => {
         const old = select.selectedOptions[0];
         const candidates = options.filter(o => o.dataset[key] === value);
-        const selected = candidates.find(o => o.dataset.storage === old.dataset.storage && o.dataset.color === old.dataset.color && o.dataset.ram === old.dataset.ram)
-          || candidates.find(o => key === 'color' ? o.dataset.storage === old.dataset.storage : o.dataset.color === old.dataset.color) || candidates[0];
-        select.value = selected.value; select.dispatchEvent(new Event('change', {bubbles: true}));
+        const matchSame = (o, requireStock) => {
+          const sameOthers = (!isColor || o.dataset.storage === old.dataset.storage)
+            && (key !== 'color' ? o.dataset.color === old.dataset.color : true)
+            && (key !== 'storage' ? (o.dataset.storage === old.dataset.storage || !old.dataset.storage) : true)
+            && (key !== 'ram' ? (o.dataset.ram === old.dataset.ram || !old.dataset.ram) : true);
+          return sameOthers && (!requireStock || Number(o.dataset.stock) > 0);
+        };
+        const selected = candidates.find(o => matchSame(o, true))
+          || candidates.find(o => matchSame(o, false))
+          || candidates.find(o => isColor ? (o.dataset.storage === old.dataset.storage && Number(o.dataset.stock) > 0) : (o.dataset.color === old.dataset.color && Number(o.dataset.stock) > 0))
+          || candidates.find(o => isColor ? o.dataset.storage === old.dataset.storage : o.dataset.color === old.dataset.color)
+          || candidates.find(o => Number(o.dataset.stock) > 0)
+          || candidates[0];
+        select.value = selected.value;
+        select.dispatchEvent(new Event('change', {bubbles: true}));
       });
-      group.append(button);
+      track.append(button);
     });
-    choices.append(group); groups.push([key, group]);
+    group.append(track);
+    choices.append(group);
+    groups.push([key, group, selectedText]);
   }
   function refresh() {
-    groups.forEach(([key, group]) => group.querySelectorAll('button').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.value === select.selectedOptions[0]?.dataset[key]))));
+    const active = select.selectedOptions[0];
+    groups.forEach(([key, group, selectedText]) => {
+      if (active) selectedText.textContent = active.dataset[key] || '';
+      group.querySelectorAll('button').forEach(button => {
+        const val = button.dataset.value;
+        const pressed = active && val === active.dataset[key];
+        button.setAttribute('aria-pressed', String(Boolean(pressed)));
+        button.classList.toggle('is-active', Boolean(pressed));
+        if (key !== 'color' && active) {
+          const matchingInColor = options.filter(o => o.dataset.color === active.dataset.color && o.dataset[key] === val);
+          const anyInStock = matchingInColor.length ? matchingInColor.some(o => Number(o.dataset.stock) > 0) : options.some(o => o.dataset[key] === val && Number(o.dataset.stock) > 0);
+          button.classList.toggle('is-out-of-stock', !anyInStock);
+        } else if (key === 'color') {
+          const anyInStock = options.some(o => o.dataset.color === val && Number(o.dataset.stock) > 0);
+          button.classList.toggle('is-out-of-stock', !anyInStock);
+        }
+      });
+    });
     load();
   }
   select.addEventListener('change', refresh); refresh();

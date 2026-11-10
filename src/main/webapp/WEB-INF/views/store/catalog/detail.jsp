@@ -93,6 +93,38 @@
     </section>
     <section class="panel" id="reviews">
       <h2>Đánh giá từ khách đã mua</h2>
+      <c:if test="${not empty reviews}">
+        <div class="rating-summary">
+          <div class="rating-score-box">
+            <div class="rating-big-number"><fmt:formatNumber value="${averageRating}" maxFractionDigits="1"/></div>
+            <div class="rating-stars-display" aria-label="Điểm trung bình ${averageRating} trên 5">
+              <c:forEach begin="1" end="5" var="s">
+                <span class="${averageRating >= s - 0.3 ? 'is-filled' : ''}">★</span>
+              </c:forEach>
+            </div>
+            <span class="muted small">${reviews.size()} đánh giá đã xác thực</span>
+          </div>
+          <div class="rating-bars">
+            <c:forEach begin="1" end="5" var="step">
+              <c:set var="star" value="${6 - step}"/>
+              <c:set var="starCount" value="0"/>
+              <c:forEach var="r" items="${reviews}">
+                <c:if test="${r.rating == star}">
+                  <c:set var="starCount" value="${starCount + 1}"/>
+                </c:if>
+              </c:forEach>
+              <c:set var="starPct" value="${(starCount * 100) / reviews.size()}"/>
+              <div class="rating-bar-row">
+                <span class="rating-bar-label">${star} ★</span>
+                <div class="rating-bar-track" role="progressbar" aria-valuenow="${starPct}" aria-valuemin="0" aria-valuemax="100">
+                  <div class="rating-bar-fill" style="width: ${starPct}%"></div>
+                </div>
+                <span class="rating-bar-count">${starCount}</span>
+              </div>
+            </c:forEach>
+          </div>
+        </div>
+      </c:if>
       <c:if test="${canReview}">
         <form action="${pageContext.request.contextPath}/products/${product.id}/reviews" method="post" class="review-form">
           <ui:csrf/>
@@ -103,8 +135,7 @@
             </c:forEach>
           </select>
           <label for="review-content">Trải nghiệm của bạn</label>
-          <textarea id="review-content" name="content" class="form-control" required maxlength="2000" rows="3">
-          </textarea>
+          <textarea id="review-content" name="content" class="form-control" required maxlength="2000" rows="3"></textarea>
           <button class="btn btn-brand mt-3">Gửi / cập nhật đánh giá</button>
         </form>
       </c:if>
@@ -135,5 +166,10 @@
         <ui:productCard product="${related}"/>
       </c:forEach>
     </div>
-    <aside class="sticky-purchase" aria-label="Mua sản phẩm đang xem"><div><strong><c:out value="${product.name}"/></strong><span data-sticky-variant></span></div><strong data-sticky-price><ui:money value="${product.price}"/></strong><button class="btn btn-brand" type="submit" form="product-purchase" name="buyNow" value="true" data-buy-now>Mua ngay</button></aside>
+    <aside class="sticky-purchase" aria-label="Mua sản phẩm đang xem">
+      <img class="sticky-thumb" data-sticky-thumb src="${pageContext.request.contextPath}${product.image}" alt="<c:out value='${product.name}'/>">
+      <div><strong><c:out value="${product.name}"/></strong><span data-sticky-variant></span></div>
+      <strong data-sticky-price><ui:money value="${product.price}"/></strong>
+      <button class="btn btn-brand" type="submit" form="product-purchase" name="buyNow" value="true" data-buy-now>Mua ngay</button>
+    </aside>
     <jsp:include page="/WEB-INF/views/shared/store/footer.jsp" />

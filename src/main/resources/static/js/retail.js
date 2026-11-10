@@ -62,9 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const refresh = () => {
       const selected = variants.selectedOptions[0];
       document.querySelectorAll('[data-buy-now]').forEach(button => button.disabled = !selected || Number(selected.dataset.stock) <= 0);
-      const label = document.querySelector('[data-sticky-variant]'), price = document.querySelector('[data-sticky-price]');
-      if (selected && label) label.textContent = `${selected.dataset.storage} · ${selected.dataset.color} · ${selected.dataset.ram}`;
+      const label = document.querySelector('[data-sticky-variant]'), price = document.querySelector('[data-sticky-price]'), thumb = document.querySelector('[data-sticky-thumb]');
+      if (selected && label) label.textContent = [selected.dataset.storage, selected.dataset.color, selected.dataset.ram].filter(Boolean).join(' · ');
       if (selected && price) price.textContent = new Intl.NumberFormat('vi-VN', {style:'currency',currency:'VND'}).format(selected.dataset.price);
+      if (selected && thumb && selected.dataset.image) { thumb.src = selected.dataset.image; thumb.alt = selected.dataset.color || ''; }
     };
     variants.addEventListener('change', refresh); refresh();
   }

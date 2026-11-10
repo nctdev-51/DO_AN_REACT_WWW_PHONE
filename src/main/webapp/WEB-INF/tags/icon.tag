@@ -12,6 +12,8 @@
     <c:when test="${name == 'arrow'}"><path d="M4 12h16m-6-6 6 6-6 6"/></c:when>
     <c:when test="${name == 'check'}"><path d="m5 12 4 4L19 6"/></c:when>
     <c:when test="${name == 'phone'}"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/></c:when>
+    <c:when test="${name == 'home'}"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1Z"/></c:when>
+    <c:when test="${name == 'filter'}"><path d="M4 6h16M7 12h10M10 18h4"/></c:when>
     <c:otherwise><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></c:otherwise>
   </c:choose>
 </svg>
