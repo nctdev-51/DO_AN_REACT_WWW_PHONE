@@ -5,6 +5,7 @@ import iuh.fit.www_phone_ver1.service.catalog.ComparisonService;
 import jakarta.servlet.http.HttpSession;
 import java.util.*;
 import org.springframework.data.domain.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -113,6 +114,68 @@ public class ComparisonController {
       session.removeAttribute(SELECTION);
     }
     return "redirect:/compare";
+  }
+
+  @PostMapping("/api/add")
+  @ResponseBody
+  public ResponseEntity<Map<String, Object>> apiAdd(
+      @RequestParam(required = false) Long productId,
+      @RequestParam(required = false) Long variantId,
+      HttpSession session) {
+    try {
+      List<Long> updated;
+      synchronized (session) {
+        updated = comparison.select(selection(session), productId, variantId);
+        session.setAttribute(SELECTION, updated);
+      }
+      return ResponseEntity.ok(trayPayload(updated, null));
+    } catch (IllegalArgumentException ex) {
+      return ResponseEntity.badRequest().body(trayPayload(selection(session), ex.getMessage()));
+    }
+  }
+
+  @PostMapping("/api/remove")
+  @ResponseBody
+  public ResponseEntity<Map<String, Object>> apiRemove(
+      @RequestParam Long variantId, HttpSession session) {
+    List<Long> updated;
+    synchronized (session) {
+      updated = selection(session).stream().filter(id -> !id.equals(variantId)).toList();
+      session.setAttribute(SELECTION, updated);
+    }
+    return ResponseEntity.ok(trayPayload(updated, null));
+  }
+
+  @PostMapping("/api/clear")
+  @ResponseBody
+  public ResponseEntity<Map<String, Object>> apiClear(HttpSession session) {
+    synchronized (session) {
+      session.removeAttribute(SELECTION);
+    }
+    return ResponseEntity.ok(trayPayload(List.of(), null));
+  }
+
+  private Map<String, Object> trayPayload(List<Long> ids, String error) {
+    var items =
+        comparison.available(ids).stream()
+            .map(
+                v -> {
+                  var map = new LinkedHashMap<String, Object>();
+                  map.put("variantId", v.getId());
+                  map.put("productId", v.getProduct().getId());
+                  map.put("name", v.getProduct().getName());
+                  map.put("variantLabel", Objects.toString(v.getLabel(), ""));
+                  map.put("price", v.getPrice());
+                  map.put("image", Objects.toString(v.getImage(), v.getProduct().getImage()));
+                  return (Map<String, Object>) map;
+                })
+            .toList();
+    var body = new LinkedHashMap<String, Object>();
+    body.put("count", items.size());
+    body.put("limit", ComparisonService.LIMIT);
+    body.put("items", items);
+    if (error != null) body.put("error", error);
+    return body;
   }
 
   @SuppressWarnings("unchecked")

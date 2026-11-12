@@ -16,6 +16,9 @@
   </c:if>
   <form action="${pageContext.request.contextPath}/login" method="post">
     <ui:csrf/>
+    <c:if test="${not empty redirectTarget}">
+      <input type="hidden" name="redirect" value="<c:out value='${redirectTarget}'/>">
+    </c:if>
     <div class="field">
       <label for="username">Email / tài khoản</label>
       <input id="username" name="username" class="form-control" required autocomplete="username">

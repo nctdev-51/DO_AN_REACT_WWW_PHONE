@@ -28,9 +28,20 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
   @Query("select o from Order o where o.id = :id")
   Optional<Order> findForUpdate(@Param("id") Long id);
 
+  @org.springframework.data.jpa.repository.EntityGraph(
+      attributePaths = {"orderDetails", "orderDetails.product", "orderDetails.variant"})
   List<Order> findByUser_EmailOrderByOrderDateDesc(String email);
 
+  @org.springframework.data.jpa.repository.EntityGraph(
+      attributePaths = {"orderDetails", "orderDetails.product", "orderDetails.variant"})
   Optional<Order> findByIdAndUser_Email(Long id, String email);
+
+  @org.springframework.data.jpa.repository.EntityGraph(
+      attributePaths = {"orderDetails", "orderDetails.product", "orderDetails.variant"})
+  @Query(
+      "select o from Order o where o.user.email = :email and o.status = 'Đã giao' "
+          + "order by coalesce(o.deliveredAt, o.orderDate) desc, o.id desc")
+  List<Order> findDeliveredWithDetailsByUserEmail(@Param("email") String email);
 
   long countByUser_Id(Long userId);
 
@@ -56,4 +67,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
   List<Order> findByPaymentMethodAndPaymentStatusAndStatusAndOrderDateBefore(
       String method, String paymentStatus, String status, LocalDateTime cutoff);
+
+  List<Order> findByPaymentMethodAndPaymentStatusInAndStatusAndOrderDateBefore(
+      String method,
+      java.util.Collection<String> paymentStatuses,
+      String status,
+      LocalDateTime cutoff);
 }

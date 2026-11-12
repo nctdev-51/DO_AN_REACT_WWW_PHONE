@@ -90,6 +90,67 @@ public class MailService {
         "<p>Mật khẩu tài khoản đã được đặt lại. Các phiên đăng nhập cũ đã được đăng xuất.</p>");
   }
 
+  public void sendPaymentSuccess(String email, Order order) {
+    if (email == null || email.isBlank() || order == null) return;
+    var money = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN"));
+    String body =
+        "<h2>Thanh toán thành công cho đơn hàng #"
+            + order.getId()
+            + "</h2><p>Phương thức: "
+            + escape(order.getPaymentMethod())
+            + "</p><p>Số tiền đã thanh toán: <strong>"
+            + money.format(order.getTotalAmount())
+            + "</strong></p><p>Đơn hàng đang được cửa hàng xác nhận và chuẩn bị giao đến: "
+            + escape(order.getFullShippingAddress())
+            + ".</p>";
+    deliver(email, "PTV Mobile — Xác nhận thanh toán đơn #" + order.getId(), body);
+  }
+
+  public void sendOrderStatusUpdate(String email, Order order) {
+    if (email == null || email.isBlank() || order == null) return;
+    StringBuilder body =
+        new StringBuilder(
+            "<h2>Cập nhật đơn hàng #"
+                + order.getId()
+                + "</h2><p>Trạng thái mới: <strong>"
+                + escape(order.getStatus())
+                + "</strong></p>");
+    if (order.getTrackingCode() != null && !order.getTrackingCode().isBlank()) {
+      body.append("<p>Đơn vị vận chuyển: ")
+          .append(escape(order.getCarrier()))
+          .append(" · Mã vận đơn: <strong>")
+          .append(escape(order.getTrackingCode()))
+          .append("</strong></p>");
+    }
+    if (order.getCancellationReason() != null && !order.getCancellationReason().isBlank()) {
+      body.append("<p>Lý do: ").append(escape(order.getCancellationReason())).append("</p>");
+    }
+    deliver(
+        email,
+        "PTV Mobile — Đơn #" + order.getId() + ": " + order.getStatus(),
+        body.toString());
+  }
+
+  public void sendRefundUpdate(String email, Order order, iuh.fit.www_phone_ver1.entity.Refund refund) {
+    if (email == null || email.isBlank() || order == null || refund == null) return;
+    var money = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN"));
+    String statusText =
+        "COMPLETED".equals(refund.getStatus())
+            ? "Đã xác nhận hoàn tiền"
+            : "Đã từ chối yêu cầu hoàn tiền";
+    String body =
+        "<h2>Thông báo hoàn tiền đơn hàng #"
+            + order.getId()
+            + "</h2><p>Trạng thái: <strong>"
+            + statusText
+            + "</strong></p><p>Số tiền: "
+            + money.format(refund.getAmount())
+            + "</p><p>Tham chiếu / Ghi chú: "
+            + escape(refund.getSettlementReference())
+            + "</p>";
+    deliver(email, "PTV Mobile — Hoàn tiền đơn #" + order.getId(), body);
+  }
+
   private void deliver(String email, String subject, String body) {
     try {
       var message = sender.createMimeMessage();

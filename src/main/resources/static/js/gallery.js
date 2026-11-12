@@ -224,9 +224,13 @@ document.addEventListener('DOMContentLoaded', () => {
           const matchingInColor = options.filter(o => o.dataset.color === active.dataset.color && o.dataset[key] === val);
           const anyInStock = matchingInColor.length ? matchingInColor.some(o => Number(o.dataset.stock) > 0) : options.some(o => o.dataset[key] === val && Number(o.dataset.stock) > 0);
           button.classList.toggle('is-out-of-stock', !anyInStock);
+          button.title = anyInStock ? val : `${val} — Tạm hết hàng`;
+          button.setAttribute('aria-label', `${label}: ${val}${anyInStock ? '' : ' (Tạm hết hàng)'}`);
         } else if (key === 'color') {
           const anyInStock = options.some(o => o.dataset.color === val && Number(o.dataset.stock) > 0);
           button.classList.toggle('is-out-of-stock', !anyInStock);
+          button.title = anyInStock ? val : `${val} — Tạm hết hàng`;
+          button.setAttribute('aria-label', `${label}: ${val}${anyInStock ? '' : ' (Tạm hết hàng)'}`);
         }
       });
     });

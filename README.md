@@ -154,3 +154,11 @@ Chạy `./mvnw.cmd test` để kiểm tra các bất biến kho, mã, điểm, h
 - Khi đã gửi yêu cầu GHN, hủy vận đơn trên GHN và đồng bộ xác nhận `cancel` trước khi hủy đơn trong shop. Hàng đã vận chuyển trả về cần kiểm tra tồn riêng, không tự nhập kho qua trạng thái hãng.
 
 Hướng dẫn biến môi trường, môi trường thử và giới hạn tại [INTEGRATIONS-SETUP.md](docs/INTEGRATIONS-SETUP.md). Các kiểm thử API GHN dùng HTTP server local, không tạo vận đơn thật.
+
+## Nâng cấp trải nghiệm mua sắm, checkout và hậu mãi
+
+- **Điều hướng 4 nhóm & giữ trạng thái lọc**: Header chia 4 nhóm chính (*Sản phẩm*, *Chọn máy phù hợp*, *Ưu đãi & dịch vụ*, *Hỗ trợ đơn hàng*); thanh điều hướng di động gồm 5 mục (*Trang chủ*, *Sản phẩm*, *Tìm kiếm*, *Giỏ hàng*, *Tài khoản*). Lịch sử lọc/cuộn danh sách sản phẩm được khôi phục qua `sessionStorage`; `/login?redirect=...` xác thực URL nội bộ an toàn sau đăng nhập.
+- **Tư vấn chọn máy 4 bước (`/choose`)**: `PhoneAdvisorService` chấm điểm theo quy tắc minh bạch trên dữ liệu thực tế về ngân sách, nhu cầu (*EVERYDAY, STUDY_WORK, CAMERA, GAMING, CREATOR*), ưu tiên phần cứng và kích thước màn hình (không dùng AI tạo sinh), chỉ đề xuất phiên bản còn hàng.
+- **Chi tiết sản phẩm & Khay so sánh nhanh**: Bổ sung ước tính giao nhận theo tỉnh (`GET /products/{id}/delivery-estimate`), tính tham khảo trả góp 6/12 kỳ theo giá phiên bản, mã giảm giá áp dụng trực tiếp và khay so sánh nổi cập nhật qua `/compare/api/*` không làm mất vị trí cuộn.
+- **Checkout an toàn & Khôi phục VNPay**: Hiển thị stepper 4 bước, token `checkoutToken` trong session chống gửi trùng đơn, modal thêm địa chỉ (`POST /checkout/addresses`) giữ nguyên mã giảm giá/điểm thưởng. Đơn VNPay thất bại/chưa hoàn tất vẫn giữ tồn kho trong 15 phút để **Thanh toán lại qua VNPay** (`POST /orders/{id}/retry-vnpay`) hoặc **Chuyển sang COD** (`POST /orders/{id}/switch-cod`) trước khi `PaymentExpiryJob` hủy tự động. `/payments/vnpay/return` không tự đánh dấu `PAID`; chỉ IPN hợp lệ mới chốt thanh toán.
+- **Hậu mãi & Thiết bị của tôi (`/account/devices`)**: Hiển thị tiến trình 5 bước trên chi tiết đơn, liên kết tra cứu mã vận đơn GHN, quy tắc hủy/đổi trả minh bạch, danh sách thiết bị đã nhận kèm hạn bảo hành còn lại và gửi email thông báo theo mốc (thanh toán, đang giao/đã giao/hủy, hoàn tiền) ra `target/mail-outbox` khi SMTP tắt.

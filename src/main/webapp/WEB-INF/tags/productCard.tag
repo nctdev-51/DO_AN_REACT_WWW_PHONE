@@ -32,6 +32,9 @@
       <c:if test="${not empty soldQuantities and soldQuantities[product.id] >= 50}">
         <span class="card-badge card-badge-popular">BÁN CHẠY</span>
       </c:if>
+      <c:if test="${not empty initial and initial.stock > 0 and initial.stock <= 3}">
+        <span class="card-badge card-badge-low" data-card-badge-low>SẮP HẾT</span>
+      </c:if>
       <span class="card-badge card-badge-sale" data-card-badge-sale ${hasDiscount ? '' : 'hidden'}>
         <c:if test="${hasDiscount}">
           −<fmt:formatNumber value="${(1 - (displayPrice / product.originalPrice)) * 100}" maxFractionDigits="0"/>%
@@ -73,7 +76,7 @@
       <span data-card-stock class="${initial.stock > 0 ? 'stock-text' : 'text-danger'}">${initial.stock > 0 ? 'Còn hàng' : 'Tạm hết hàng'}</span>
       <a data-product-link href="${pageContext.request.contextPath}/products/${product.id}?variantId=${initial.id}" aria-label="Xem chi tiết">→</a>
     </div>
-    <form class="mt-3" action="${pageContext.request.contextPath}/compare/add" method="post">
+    <form class="mt-3" action="${pageContext.request.contextPath}/compare/add" method="post" data-compare-form data-api-action="${pageContext.request.contextPath}/compare/api/add">
       <ui:csrf/><input type="hidden" name="productId" value="${product.id}"><input type="hidden" name="variantId" data-card-comparison value="${initial.id}" ${empty initial ? 'disabled' : ''}>
       <button class="btn btn-sm btn-outline-dark w-100"><ui:icon name="compare"/> So sánh</button>
     </form>

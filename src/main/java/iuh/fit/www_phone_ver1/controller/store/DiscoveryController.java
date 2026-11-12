@@ -1,10 +1,13 @@
 package iuh.fit.www_phone_ver1.controller.store;
 
+import iuh.fit.www_phone_ver1.dto.catalog.AdvisorForm;
+import iuh.fit.www_phone_ver1.dto.catalog.AdvisorRecommendation;
 import iuh.fit.www_phone_ver1.repository.*;
 import iuh.fit.www_phone_ver1.service.catalog.*;
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,12 +18,23 @@ public class DiscoveryController {
   private final ProductRepository products;
   private final StoreExperienceService settings;
   private final StorePolicyRepository policies;
+  private final PhoneAdvisorService advisor;
 
+  @Autowired
   public DiscoveryController(
-      ProductRepository products, StoreExperienceService settings, StorePolicyRepository policies) {
+      ProductRepository products,
+      StoreExperienceService settings,
+      StorePolicyRepository policies,
+      PhoneAdvisorService advisor) {
     this.products = products;
     this.settings = settings;
     this.policies = policies;
+    this.advisor = advisor;
+  }
+
+  public DiscoveryController(
+      ProductRepository products, StoreExperienceService settings, StorePolicyRepository policies) {
+    this(products, settings, policies, new PhoneAdvisorService(products));
   }
 
   @GetMapping("/search/suggestions")
@@ -46,38 +60,36 @@ public class DiscoveryController {
   @GetMapping("/choose")
   public String choose(
       @RequestParam(required = false) BigDecimal budget,
+      @RequestParam(required = false) String need,
+      @RequestParam(required = false) String priority,
+      @RequestParam(required = false) String sizePreference,
       @RequestParam(required = false) String brand,
       @RequestParam(required = false) String purpose,
+      @RequestParam(required = false) Integer step,
       Model model) {
     model.addAttribute("brands", products.findAvailableBrands());
-    purpose =
-        Set.of("EVERYDAY", "CAMERA", "GAMING", "BATTERY", "COMPACT")
-                .contains(Objects.toString(purpose, ""))
-            ? purpose
-            : null;
+    AdvisorForm form;
+    try {
+      form = advisor.normalize(budget, need, priority, sizePreference, brand, purpose, step);
+    } catch (IllegalArgumentException ex) {
+      model.addAttribute("errorMsg", ex.getMessage());
+      form = advisor.normalize(null, need, priority, sizePreference, brand, purpose, 1);
+    }
+    List<AdvisorRecommendation> recommendations =
+        form.getBudget() != null ? advisor.recommend(form) : List.of();
+    model.addAttribute("advisorForm", form);
+    model.addAttribute("budget", form.getBudget());
+    model.addAttribute("brand", form.getBrand());
     model.addAttribute("purpose", purpose);
-    model.addAttribute("budget", budget);
-    model.addAttribute("brand", brand);
-    if (budget != null && budget.signum() > 0)
+    model.addAttribute("need", form.getNeed());
+    model.addAttribute("priority", form.getPriority());
+    model.addAttribute("sizePreference", form.getSizePreference());
+    model.addAttribute("recommendations", recommendations);
+    if (form.getBudget() != null) {
       model.addAttribute(
           "matches",
-          products
-              .findAll(
-                  new CatalogFilter(
-                          null,
-                          brand == null || brand.isBlank() ? null : brand,
-                          null,
-                          null,
-                          budget,
-                          null,
-                          null,
-                          true,
-                          "PHONE",
-                          null,
-                          purpose)
-                      .specification("price-desc"),
-                  PageRequest.of(0, 6))
-              .getContent());
+          recommendations.stream().map(AdvisorRecommendation::getProduct).toList());
+    }
     return "store/discovery/choose";
   }
 

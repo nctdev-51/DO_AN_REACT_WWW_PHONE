@@ -30,13 +30,31 @@
   </div>
   <div class="container footer-bottom"><span>PTV Mobile</span><span>Xem kỹ thông số. Chọn đúng phiên bản.</span><a href="#main-content">Lên đầu trang ↑</a></div>
 </footer>
+<aside class="compare-tray panel" data-compare-tray data-context="${pageContext.request.contextPath}" data-csrf-name="${_csrf.parameterName}" data-csrf-value="${_csrf.token}" ${empty comparisonTrayItems ? 'hidden' : ''} aria-label="Khay so sánh nhanh">
+  <div class="compare-tray-head">
+    <strong>So sánh nhanh (<span data-compare-tray-count>${empty comparisonTrayItems ? 0 : comparisonTrayItems.size()}</span>/3)</strong>
+    <div class="compare-tray-actions">
+      <a class="btn btn-brand btn-sm" href="${pageContext.request.contextPath}/compare">Xem bảng so sánh →</a>
+      <button type="button" class="btn btn-light btn-sm" data-compare-tray-clear>Xóa hết</button>
+    </div>
+  </div>
+  <div class="compare-tray-items" data-compare-tray-items>
+    <c:forEach var="item" items="${comparisonTrayItems}">
+      <div class="compare-tray-item" data-tray-variant-id="${item.id}">
+        <img src="${pageContext.request.contextPath}${empty item.image ? item.product.image : item.image}" alt="" loading="lazy">
+        <div class="compare-tray-meta">
+          <span><c:out value="${item.product.name}"/></span>
+          <small class="muted"><c:out value="${item.label}"/></small>
+        </div>
+        <button type="button" class="compare-tray-remove" data-compare-tray-remove="${item.id}" aria-label="Bỏ <c:out value='${item.product.name}'/> khỏi so sánh">×</button>
+      </div>
+    </c:forEach>
+  </div>
+</aside>
 <nav class="mobile-bottom-nav" aria-label="Điều hướng nhanh trên di động">
   <a href="${pageContext.request.contextPath}/"><ui:icon name="home"/><span>Trang chủ</span></a>
   <a href="${pageContext.request.contextPath}/products"><ui:icon name="phone"/><span>Sản phẩm</span></a>
-  <a href="${pageContext.request.contextPath}/compare">
-    <span class="mobile-nav-icon"><ui:icon name="compare"/><c:if test="${not empty sessionScope.comparisonIds and sessionScope.comparisonIds.size() > 0}"><em class="mobile-nav-badge">${sessionScope.comparisonIds.size()}</em></c:if></span>
-    <span>So sánh</span>
-  </a>
+  <button type="button" class="mobile-bottom-btn" data-mobile-search-trigger><ui:icon name="search"/><span>Tìm kiếm</span></button>
   <a href="${pageContext.request.contextPath}/cart">
     <span class="mobile-nav-icon"><ui:icon name="cart"/><c:if test="${not empty sessionScope.cart and sessionScope.cart.totalQuantity > 0}"><em class="mobile-nav-badge">${sessionScope.cart.totalQuantity}</em></c:if></span>
     <span>Giỏ hàng</span>
@@ -46,7 +64,7 @@
       <a href="${pageContext.request.contextPath}/account"><ui:icon name="user"/><span>Tài khoản</span></a>
     </c:when>
     <c:otherwise>
-      <a href="${pageContext.request.contextPath}/login"><ui:icon name="user"/><span>Đăng nhập</span></a>
+      <a href="${pageContext.request.contextPath}/login"><ui:icon name="user"/><span>Tài khoản</span></a>
     </c:otherwise>
   </c:choose>
 </nav>
@@ -55,7 +73,6 @@
 <script src="${pageContext.request.contextPath}/js/store.js" defer>
 </script>
 <script src="${pageContext.request.contextPath}/js/catalog-cards.js" defer></script>
-<script src="${pageContext.request.contextPath}/js/catalog-search.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/motion.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/retail.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/addresses.js" defer></script>

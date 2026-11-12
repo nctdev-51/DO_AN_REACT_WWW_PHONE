@@ -30,10 +30,47 @@
           <button type="submit" aria-label="Tìm kiếm"><ui:icon name="search"/></button>
         </form>
         <nav class="store-nav" aria-label="Điều hướng chính">
-          <a href="${pageContext.request.contextPath}/products">Sản phẩm</a>
-          <a href="${pageContext.request.contextPath}/offers">Ưu đãi</a>
-          <a href="${pageContext.request.contextPath}/compare"><ui:icon name="compare"/> So sánh <span class="count-badge">${empty sessionScope.comparisonIds ? 0 : sessionScope.comparisonIds.size()}</span></a>
-          <a href="${pageContext.request.contextPath}/cart"><ui:icon name="cart"/> Giỏ hàng <span class="count-badge">${empty sessionScope.cart ? 0 : sessionScope.cart.totalQuantity}</span>
+          <div class="dropdown nav-group-dropdown">
+            <button class="nav-link-btn dropdown-toggle" data-bs-toggle="dropdown" type="button" aria-expanded="false">Sản phẩm</button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/products?kind=PHONE">Điện thoại</a></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/products?kind=ACCESSORY">Phụ kiện chính hãng</a></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/products?sort=newest">Sản phẩm mới</a></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/products?sort=bestselling">Bán chạy nhất</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/products">Tất cả sản phẩm</a></li>
+            </ul>
+          </div>
+          <div class="dropdown nav-group-dropdown">
+            <button class="nav-link-btn dropdown-toggle" data-bs-toggle="dropdown" type="button" aria-expanded="false">Chọn máy phù hợp</button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/choose">Tư vấn chọn máy (4 bước)</a></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/compare">So sánh thông số</a></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/recently-viewed">Đã xem gần đây</a></li>
+            </ul>
+          </div>
+          <div class="dropdown nav-group-dropdown">
+            <button class="nav-link-btn dropdown-toggle" data-bs-toggle="dropdown" type="button" aria-expanded="false">Ưu đãi &amp; dịch vụ</button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/offers">Khuyến mãi &amp; mã giảm giá</a></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/consultations?type=INSTALLMENT">Tư vấn trả góp</a></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/consultations?type=TRADE_IN">Thu cũ đổi mới</a></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/points">Điểm thưởng thành viên</a></li>
+            </ul>
+          </div>
+          <div class="dropdown nav-group-dropdown">
+            <button class="nav-link-btn dropdown-toggle" data-bs-toggle="dropdown" type="button" aria-expanded="false">Hỗ trợ đơn hàng</button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/orders">Tra cứu &amp; theo dõi đơn</a></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/devices">Thiết bị của tôi &amp; bảo hành</a></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/support">Yêu cầu đổi trả &amp; bảo hành</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/policies/shipping">Chính sách giao hàng</a></li>
+              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/policies/contact">Liên hệ cửa hàng</a></li>
+            </ul>
+          </div>
+          <a href="${pageContext.request.contextPath}/compare"><ui:icon name="compare"/> So sánh <span class="count-badge" data-header-compare-count>${empty sessionScope.comparisonIds ? 0 : sessionScope.comparisonIds.size()}</span></a>
+          <a href="${pageContext.request.contextPath}/cart"><ui:icon name="cart"/> Giỏ hàng <span class="count-badge" data-header-cart-count>${empty sessionScope.cart ? 0 : sessionScope.cart.totalQuantity}</span>
           </a>
           <c:choose>
             <c:when test="${pageContext.request.userPrincipal != null}">
@@ -44,10 +81,16 @@
                     <a class="dropdown-item" href="${pageContext.request.contextPath}/account">Thông tin tài khoản</a>
                   </li>
                   <li>
+                    <a class="dropdown-item" href="${pageContext.request.contextPath}/account/devices">Thiết bị của tôi</a>
+                  </li>
+                  <li>
                     <a class="dropdown-item" href="${pageContext.request.contextPath}/account/addresses">Sổ địa chỉ</a>
                   </li>
                   <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/wishlist">Sản phẩm yêu thích</a></li>
-                  <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/points">Điểm thưởng</a></li><li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/consultations">Trả góp & thu cũ</a></li><li><a class="dropdown-item" href="${pageContext.request.contextPath}/recently-viewed">Đã xem gần đây</a></li><li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/support">Đổi trả & bảo hành</a></li>
+                  <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/points">Điểm thưởng</a></li>
+                  <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/consultations">Trả góp &amp; thu cũ</a></li>
+                  <li><a class="dropdown-item" href="${pageContext.request.contextPath}/recently-viewed">Đã xem gần đây</a></li>
+                  <li><a class="dropdown-item" href="${pageContext.request.contextPath}/account/support">Đổi trả &amp; bảo hành</a></li>
                   <li>
                     <a class="dropdown-item" href="${pageContext.request.contextPath}/orders">Đơn hàng của tôi</a>
                   </li>

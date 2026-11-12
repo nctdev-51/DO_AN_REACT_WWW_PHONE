@@ -17,16 +17,28 @@ public class RefundService {
   private final OrderRepository orders;
   private final LoyaltyService loyalty;
   private final OrderHistoryService history;
+  private final iuh.fit.www_phone_ver1.service.mail.MailService mail;
 
   public RefundService(
       RefundRepository refunds,
       OrderRepository orders,
       LoyaltyService loyalty,
       OrderHistoryService history) {
+    this(refunds, orders, loyalty, history, null);
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired
+  public RefundService(
+      RefundRepository refunds,
+      OrderRepository orders,
+      LoyaltyService loyalty,
+      OrderHistoryService history,
+      iuh.fit.www_phone_ver1.service.mail.MailService mail) {
     this.refunds = refunds;
     this.orders = orders;
     this.loyalty = loyalty;
     this.history = history;
+    this.mail = mail;
   }
 
   @Transactional
@@ -90,5 +102,21 @@ public class RefundService {
         o,
         "Quản trị viên",
         "Hoàn tiền #" + id + ": " + status + ". Tham chiếu: " + reference.trim());
+    if (mail != null && o.getUser() != null) {
+      String recipient = o.getUser().getEmail();
+      if (org.springframework.transaction.support.TransactionSynchronizationManager
+          .isSynchronizationActive()) {
+        org.springframework.transaction.support.TransactionSynchronizationManager
+            .registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                  @Override
+                  public void afterCommit() {
+                    mail.sendRefundUpdate(recipient, o, r);
+                  }
+                });
+      } else {
+        mail.sendRefundUpdate(recipient, o, r);
+      }
+    }
   }
 }

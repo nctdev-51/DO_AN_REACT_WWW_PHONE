@@ -1,11 +1,18 @@
 package iuh.fit.www_phone_ver1.controller.store;
 
+import iuh.fit.www_phone_ver1.entity.*;
 import iuh.fit.www_phone_ver1.repository.*;
 import iuh.fit.www_phone_ver1.service.catalog.ReviewService;
+import iuh.fit.www_phone_ver1.service.catalog.StoreExperienceService;
+import iuh.fit.www_phone_ver1.service.order.AddressDirectory;
+import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.Principal;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 import org.springframework.data.domain.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,18 +26,30 @@ public class ProductController {
   private final ReviewRepository reviews;
   private final ReviewService reviewService;
   private final ProductVariantRepository variants;
+  private final PromotionRepository promotions;
+  private final StorePolicyRepository policies;
+  private final StoreExperienceService experienceService;
+  private final AddressDirectory addressDirectory;
 
   public ProductController(
       ProductRepository products,
       CategoryRepository categories,
       ReviewRepository reviews,
       ReviewService reviewService,
-      ProductVariantRepository variants) {
+      ProductVariantRepository variants,
+      PromotionRepository promotions,
+      StorePolicyRepository policies,
+      StoreExperienceService experienceService,
+      AddressDirectory addressDirectory) {
     this.products = products;
     this.categories = categories;
     this.reviews = reviews;
     this.reviewService = reviewService;
     this.variants = variants;
+    this.promotions = promotions;
+    this.policies = policies;
+    this.experienceService = experienceService;
+    this.addressDirectory = addressDirectory;
   }
 
   @GetMapping
@@ -48,6 +67,7 @@ public class ProductController {
       @RequestParam(required = false) String storage,
       @RequestParam(required = false) String ram,
       @RequestParam(defaultValue = "false") boolean inStock,
+      HttpSession session,
       Model model) {
     sort =
         java.util.Set.of("newest", "price-asc", "price-desc", "bestselling", "popular", "rating")
@@ -113,6 +133,8 @@ public class ProductController {
     model.addAttribute("inStock", inStock);
     model.addAttribute("storageOptions", variants.availableStorage());
     model.addAttribute("ramOptions", variants.availableRam());
+    model.addAttribute("recentProducts", recentProducts(session, null));
+    model.addAttribute("storePolicy", policies.findById(1L).orElseGet(StorePolicy::new));
     return "store/catalog/list";
   }
 
@@ -152,29 +174,36 @@ public class ProductController {
                     "recentProducts", List.copyOf(recent.subList(0, Math.min(10, recent.size()))));
               }
               model.addAttribute("product", product);
-              model.addAttribute(
-                  "variants", product.getVariants().stream().filter(v -> v.isActive()).toList());
-              model.addAttribute(
-                  "selectedVariantId",
-                  product.getVariants().stream()
-                      .filter(v -> v.isActive() && v.getStock() > 0)
+              List<ProductVariant> activeVariants =
+                  product.getVariants().stream().filter(ProductVariant::isActive).toList();
+              model.addAttribute("variants", activeVariants);
+              ProductVariant chosenVariant =
+                  activeVariants.stream()
+                      .filter(v -> v.getId().equals(variantId))
                       .findFirst()
-                      .or(
+                      .orElseGet(
                           () ->
-                              product.getVariants().stream().filter(v -> v.isActive()).findFirst())
-                      .map(v -> v.getId())
-                      .orElse(null));
-              product.getVariants().stream()
-                  .filter(v -> v.isActive() && v.getId().equals(variantId))
-                  .findFirst()
-                  .ifPresent(v -> model.addAttribute("selectedVariantId", v.getId()));
+                              activeVariants.stream()
+                                  .filter(v -> v.getStock() > 0)
+                                  .findFirst()
+                                  .orElse(activeVariants.isEmpty() ? null : activeVariants.get(0)));
+              model.addAttribute(
+                  "selectedVariantId", chosenVariant == null ? null : chosenVariant.getId());
+              BigDecimal effectivePrice =
+                  chosenVariant == null ? product.getPrice() : chosenVariant.getPrice();
+              model.addAttribute(
+                  "installment12Monthly",
+                  effectivePrice.divide(BigDecimal.valueOf(12), 0, RoundingMode.HALF_UP));
+              model.addAttribute(
+                  "installment6Monthly",
+                  effectivePrice.divide(BigDecimal.valueOf(6), 0, RoundingMode.HALF_UP));
               var accessories =
                   products.findByStatus(1).stream()
                       .filter(
                           p ->
                               "ACCESSORY".equals(p.getKind())
                                   && p.getCompatibleSkus() != null
-                                  && java.util.Arrays.stream(p.getCompatibleSkus().split(","))
+                                  && Arrays.stream(p.getCompatibleSkus().split(","))
                                       .map(String::trim)
                                       .anyMatch(product.getSku()::equals))
                       .limit(4)
@@ -184,9 +213,15 @@ public class ProductController {
               model.addAttribute("reviews", feedback);
               model.addAttribute(
                   "averageRating",
-                  feedback.stream().mapToInt(r -> r.getRating()).average().orElse(0));
+                  feedback.stream().mapToInt(Review::getRating).average().orElse(0));
+              model.addAttribute("ratingCounts", ratingCounts(feedback));
               model.addAttribute(
                   "canReview", user != null && reviewService.canReview(user.getName(), id));
+              model.addAttribute("applicablePromotions", applicablePromotions(product));
+              model.addAttribute("usageFitReasons", usageFitReasons(product));
+              model.addAttribute("recentProducts", recentProducts(session, id));
+              model.addAttribute("storePolicy", policies.findById(1L).orElseGet(StorePolicy::new));
+              model.addAttribute("experience", experienceService.get());
               model.addAttribute(
                   "relatedProducts",
                   product.getCategory() == null
@@ -196,6 +231,122 @@ public class ProductController {
               return "store/catalog/detail";
             })
         .orElse("redirect:/products");
+  }
+
+  @GetMapping("/{id}/delivery-estimate")
+  @ResponseBody
+  public ResponseEntity<Map<String, Object>> deliveryEstimate(
+      @PathVariable Long id,
+      @RequestParam String provinceCode,
+      @RequestParam(required = false) Long variantId) {
+    var productOpt = products.findById(id).filter(p -> p.getStatus() == 1);
+    if (productOpt.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    var provinceOpt =
+        addressDirectory.provinces().stream()
+            .filter(p -> p.code().equals(provinceCode))
+            .findFirst();
+    if (provinceOpt.isEmpty()) {
+      return ResponseEntity.badRequest()
+          .body(Map.of("error", "Vui lòng chọn tỉnh/thành phố hợp lệ."));
+    }
+    Product product = productOpt.get();
+    BigDecimal itemPrice =
+        product.getVariants().stream()
+            .filter(v -> v.isActive() && v.getId().equals(variantId))
+            .findFirst()
+            .map(ProductVariant::getPrice)
+            .orElse(product.getPrice());
+    StorePolicy policy = policies.findById(1L).orElseGet(StorePolicy::new);
+    StoreExperience exp = experienceService.get();
+    BigDecimal fee =
+        itemPrice.compareTo(policy.getFreeShippingThreshold()) >= 0
+            ? BigDecimal.ZERO
+            : policy.getShippingFee();
+    String pName = provinceOpt.get().name();
+    boolean majorHub =
+        pName.contains("Hồ Chí Minh") || pName.contains("Hà Nội") || pName.contains("Đà Nẵng");
+    int minDays = majorHub ? Math.max(1, exp.getDeliveryMinDays() - 1) : exp.getDeliveryMinDays();
+    int maxDays = majorHub ? Math.max(minDays, exp.getDeliveryMaxDays() - 1) : exp.getDeliveryMaxDays();
+    var body = new LinkedHashMap<String, Object>();
+    body.put("provinceName", pName);
+    body.put("fee", fee);
+    body.put("freeThreshold", policy.getFreeShippingThreshold());
+    body.put("minDays", minDays);
+    body.put("maxDays", maxDays);
+    body.put("windowLabel", minDays == maxDays ? minDays + " ngày" : minDays + "–" + maxDays + " ngày");
+    body.put(
+        "note",
+        "Thời gian dự kiến theo khung tiêu chuẩn của cửa hàng; phí vận chuyển thực tế xác nhận tại bước Thanh toán.");
+    return ResponseEntity.ok(body);
+  }
+
+  private List<Product> recentProducts(HttpSession session, Long excludeId) {
+    if (session == null) return List.of();
+    Object raw = session.getAttribute("recentProducts");
+    if (!(raw instanceof List<?> list) || list.isEmpty()) return List.of();
+    List<Long> ids =
+        list.stream()
+            .filter(Long.class::isInstance)
+            .map(Long.class::cast)
+            .filter(pid -> excludeId == null || !pid.equals(excludeId))
+            .limit(4)
+            .toList();
+    if (ids.isEmpty()) return List.of();
+    var found = products.findAllById(ids);
+    return ids.stream()
+        .flatMap(pid -> found.stream().filter(p -> p.getId().equals(pid) && p.getStatus() == 1))
+        .toList();
+  }
+
+  private Map<Integer, Long> ratingCounts(List<Review> feedback) {
+    Map<Integer, Long> counts = new LinkedHashMap<>();
+    for (int star = 5; star >= 1; star--) {
+      int target = star;
+      counts.put(star, feedback.stream().filter(r -> r.getRating() == target).count());
+    }
+    return counts;
+  }
+
+  private List<Promotion> applicablePromotions(Product product) {
+    LocalDateTime now = LocalDateTime.now();
+    return promotions
+        .findByActiveTrueAndStartsAtLessThanEqualAndEndsAtGreaterThanOrderByEndsAtAsc(now, now)
+        .stream()
+        .filter(
+            promo -> {
+              if (promo.getScopeSkus() != null && !promo.getScopeSkus().isBlank()) {
+                return Arrays.stream(promo.getScopeSkus().split(","))
+                    .map(String::trim)
+                    .anyMatch(s -> s.equals(product.getSku()));
+              }
+              if (promo.getScopeBrand() != null && !promo.getScopeBrand().isBlank()) {
+                return promo.getScopeBrand().equalsIgnoreCase(product.getBrand());
+              }
+              return true;
+            })
+        .limit(4)
+        .toList();
+  }
+
+  private List<String> usageFitReasons(Product product) {
+    List<String> list = new ArrayList<>();
+    String tags = Objects.toString(product.getUsageTags(), "").toUpperCase(Locale.ROOT);
+    if (tags.contains("CAMERA")) list.add("Chụp ảnh & quay video sắc nét");
+    if (tags.contains("GAMING")) list.add("Chơi game & xử lý tác vụ nặng mượt mà");
+    if (tags.contains("BATTERY")) list.add("Ưu tiên pin bền bỉ cho cả ngày dài");
+    if (tags.contains("COMPACT")) list.add("Thiết kế gọn nhẹ, thao tác thoải mái một tay");
+    if (tags.contains("EVERYDAY")) list.add("Học tập, làm việc & giải trí hằng ngày");
+    if (list.isEmpty()) {
+      if (product.getCamera() != null && !product.getCamera().isBlank())
+        list.add("Camera " + product.getCamera());
+      if (product.getChipset() != null && !product.getChipset().isBlank())
+        list.add("Hiệu năng " + product.getChipset());
+      if (product.getBattery() != null && !product.getBattery().isBlank())
+        list.add("Pin " + product.getBattery());
+    }
+    return list;
   }
 
   @PostMapping("/{id}/reviews")
