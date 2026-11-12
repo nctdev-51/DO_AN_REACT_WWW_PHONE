@@ -55,6 +55,7 @@
 <script src="${pageContext.request.contextPath}/js/store.js" defer>
 </script>
 <script src="${pageContext.request.contextPath}/js/catalog-cards.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/catalog-search.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/motion.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/retail.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/addresses.js" defer></script>

@@ -1,6 +1,7 @@
 package iuh.fit.www_phone_ver1.repository;
 
 import iuh.fit.www_phone_ver1.entity.Product;
+import iuh.fit.www_phone_ver1.repository.projection.ProductSales;
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -62,6 +63,23 @@ public interface ProductRepository
       "select distinct p.brand from Product p where p.status = 1 and p.brand is not null order by"
           + " p.brand")
   List<String> findAvailableBrands();
+
+  @Query(
+      "select distinct p.name from Product p where p.status = 1 and "
+          + "lower(p.name) like lower(concat('%', :keyword, '%')) order by p.name")
+  List<String> findNameSuggestions(@Param("keyword") String keyword, Pageable pageable);
+
+  @Query(
+      "select d.product from OrderDetail d where d.product.status = 1 "
+          + "and d.order.status = 'Đã giao' and d.order.paymentStatus in ('PAID', 'PARTIALLY_REFUNDED') "
+          + "group by d.product order by sum(d.quantity) desc, d.product.id desc")
+  List<Product> findTopSellers(Pageable pageable);
+
+  @Query(
+      "select d.product.id as productId, sum(d.quantity) as soldQuantity from OrderDetail d "
+          + "where d.product.id in :productIds and d.order.status = 'Đã giao' "
+          + "and d.order.paymentStatus in ('PAID', 'PARTIALLY_REFUNDED') group by d.product.id")
+  List<ProductSales> findSalesForProducts(@Param("productIds") List<Long> productIds);
 
   @Query("select count(p) from Product p where p.category.id = :categoryId")
   long countByCategoryId(@Param("categoryId") Long categoryId);

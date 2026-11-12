@@ -4,6 +4,27 @@ Java 17, Spring Boot, Spring MVC/JSP, Spring Security và MariaDB.
 
 ## Chạy local
 
+### Profiles và môi trường
+
+Mặc định ứng dụng dùng profile `dev` (MariaDB + Flyway). Sao chép `.env.example` thành `.env`, thay mọi giá trị mẫu rồi export biến môi trường phù hợp với shell trước khi chạy. Dùng `demo` cho H2 in-memory/test; dùng `prod` trong Docker hoặc môi trường triển khai và không có secret mặc định.
+
+```powershell
+Copy-Item .env.example .env
+docker compose up -d mariadb
+./mvnw.cmd spring-boot:run
+```
+
+Đóng gói và chạy đầy đủ qua Docker cần build WAR trước:
+
+```powershell
+./mvnw.cmd package -DskipTests
+docker compose up --build
+```
+
+Kiểm tra sống của ứng dụng: `GET /actuator/health`.
+
+Xem [CONTRIBUTING.md](CONTRIBUTING.md), [ARCHITECTURE.md](docs/ARCHITECTURE.md) và [API-CONTRACTS.md](docs/API-CONTRACTS.md) trước khi bắt đầu feature mới.
+
 ```powershell
 # Trên máy mới chưa cấu hình MariaDB:
 .\scripts\setup-local.ps1

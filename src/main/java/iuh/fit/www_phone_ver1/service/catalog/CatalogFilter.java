@@ -87,7 +87,10 @@ public record CatalogFilter(
                   cb.like(cb.lower(root.get("name")), pattern, '\\'),
                   cb.like(cb.lower(root.get("brand")), pattern, '\\'),
                   cb.like(cb.lower(root.get("sku")), pattern, '\\'),
-                  cb.like(cb.lower(root.get("chipset")), pattern, '\\')));
+                  cb.like(cb.lower(root.get("chipset")), pattern, '\\'),
+                  cb.like(cb.lower(root.get("display")), pattern, '\\'),
+                  cb.like(cb.lower(root.get("camera")), pattern, '\\'),
+                  cb.like(cb.lower(root.get("battery")), pattern, '\\')));
         }
       }
       Subquery<BigDecimal> price = query.subquery(BigDecimal.class);
@@ -134,7 +137,7 @@ public record CatalogFilter(
           var rating = count.from(Review.class);
           count.select(cb.count(rating)).where(cb.equal(rating.get("product"), root));
           query.orderBy(cb.desc(cb.coalesce(average, 0d)), cb.desc(count), cb.desc(root.get("id")));
-        } else if ("bestselling".equals(sort)) {
+        } else if ("bestselling".equals(sort) || "popular".equals(sort)) {
           var sold = query.subquery(Long.class);
           var detail = sold.from(OrderDetail.class);
           sold.select(cb.sumAsLong(detail.<Integer>get("quantity")))

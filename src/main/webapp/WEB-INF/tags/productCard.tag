@@ -29,6 +29,9 @@
       <c:if test="${isNewModel}">
         <span class="card-badge card-badge-new">MỚI</span>
       </c:if>
+      <c:if test="${not empty soldQuantities and soldQuantities[product.id] >= 50}">
+        <span class="card-badge card-badge-popular">BÁN CHẠY</span>
+      </c:if>
       <span class="card-badge card-badge-sale" data-card-badge-sale ${hasDiscount ? '' : 'hidden'}>
         <c:if test="${hasDiscount}">
           −<fmt:formatNumber value="${(1 - (displayPrice / product.originalPrice)) * 100}" maxFractionDigits="0"/>%

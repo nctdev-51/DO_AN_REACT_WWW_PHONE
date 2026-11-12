@@ -1,0 +1,30 @@
+.header-search { position: relative; }
+.search-suggestions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+.search-suggestion {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 10px 12px;
+  background: #fff;
+  color: var(--ink);
+  text-align: left;
+  font-size: .82rem;
+}
+.search-suggestion:last-child { border-bottom: 0; }
+.search-suggestion:hover, .search-suggestion:focus-visible { background: #f1f6ef; outline: none; }
+.catalog-filter-accordion .accordion-item { border: 0; border-bottom: 1px solid var(--line); }
+.catalog-filter-accordion .accordion-button { padding: .85rem 0; color: var(--ink); font-size: .85rem; font-weight: 600; box-shadow: none; }
+.catalog-filter-accordion .accordion-button:not(.collapsed) { background: transparent; color: var(--brand); }
+.catalog-filter-accordion .accordion-body { padding: 0 0 1rem; }
+.card-badge-popular { background: #8d6c34; color: #fff; }

@@ -12,8 +12,15 @@
 <nav class="quick-links" aria-label="Loại sản phẩm"><a href="${pageContext.request.contextPath}/products">Tất cả sản phẩm</a><a href="${pageContext.request.contextPath}/products?kind=PHONE">Điện thoại</a><a href="${pageContext.request.contextPath}/products?kind=ACCESSORY">Phụ kiện</a></nav><jsp:include page="/WEB-INF/views/shared/store/brand-nav.jsp" />
 <div class="catalog-layout">
   <aside class="catalog-sidebar" aria-label="Bộ lọc tìm kiếm">
-    <details class="catalog-filters" ${not empty keyword or not empty categoryId or not empty minPrice or not empty maxPrice or not empty storage or not empty ram or not empty color or not empty purpose or inStock ? 'open' : ''}>
-      <summary><span><ui:icon name="filter"/> Lọc sản phẩm</span><small>Giá, bộ nhớ, RAM, màu sắc</small></summary>
+    <div class="accordion catalog-filter-accordion" id="filterAccordion">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="filterHeading">
+          <button class="accordion-button ${not empty keyword or not empty categoryId or not empty minPrice or not empty maxPrice or not empty storage or not empty ram or not empty color or not empty purpose or inStock ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="${not empty keyword or not empty categoryId or not empty minPrice or not empty maxPrice or not empty storage or not empty ram or not empty color or not empty purpose or inStock ? 'true' : 'false'}" aria-controls="filterPanel">
+            <ui:icon name="filter"/> Bộ lọc sản phẩm
+          </button>
+        </h2>
+        <div id="filterPanel" class="accordion-collapse collapse ${not empty keyword or not empty categoryId or not empty minPrice or not empty maxPrice or not empty storage or not empty ram or not empty color or not empty purpose or inStock ? 'show' : ''}" aria-labelledby="filterHeading">
+          <div class="accordion-body">
       <form class="panel filter-sidebar-form" action="${pageContext.request.contextPath}/products" method="get">
         <input type="hidden" name="kind" value="<c:out value='${kind}'/>">
         <input type="hidden" name="sort" value="<c:out value='${sort}'/>">
@@ -105,7 +112,10 @@
           <a class="btn btn-light w-100" href="${pageContext.request.contextPath}/products">Đặt lại</a>
         </div>
       </form>
-    </details>
+          </div>
+        </div>
+      </div>
+    </div>
   </aside>
   <div class="catalog-main">
     <nav class="catalog-sort" aria-label="Sắp xếp sản phẩm"><span>Sắp xếp theo:</span>

@@ -129,6 +129,18 @@ class StoreJourneysTests {
   }
 
   @Test
+  void searchSuggestionsArePublicBoundedAndIgnoreOneCharacterQueries() throws Exception {
+    mvc.perform(get("/products/search/suggestions").param("q", "UXTEST"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith("application/json"))
+        .andExpect(jsonPath("$[0]").value(phone.getName()));
+
+    mvc.perform(get("/products/search/suggestions").param("q", "x"))
+        .andExpect(status().isOk())
+        .andExpect(content().json("[]"));
+  }
+
+  @Test
   void priceFiltersAndOrderingUseMatchingVariant() {
     var large = variant(phone, "512GB", 3000000, 10);
     var p2 = product("UXTEST Other", 2000000);

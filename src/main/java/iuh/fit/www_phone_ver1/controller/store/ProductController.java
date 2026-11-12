@@ -49,6 +49,11 @@ public class ProductController {
       @RequestParam(required = false) String ram,
       @RequestParam(defaultValue = "false") boolean inStock,
       Model model) {
+    sort =
+        java.util.Set.of("newest", "price-asc", "price-desc", "bestselling", "popular", "rating")
+                .contains(sort)
+            ? sort
+            : "newest";
     kind = java.util.Set.of("PHONE", "ACCESSORY").contains(kind == null ? "" : kind) ? kind : null;
     color = color == null || color.isBlank() ? null : color.trim();
     purpose =
@@ -86,6 +91,11 @@ public class ProductController {
     var selected = new java.util.HashMap<Long, iuh.fit.www_phone_ver1.entity.ProductVariant>();
     result.forEach(p -> selected.put(p.getId(), filter.selected(p)));
     model.addAttribute("selectedVariants", selected);
+    var ids = result.getContent().stream().map(iuh.fit.www_phone_ver1.entity.Product::getId).toList();
+    var sales = new java.util.HashMap<Long, Long>();
+    if (!ids.isEmpty())
+      products.findSalesForProducts(ids).forEach(sale -> sales.put(sale.getProductId(), sale.getSoldQuantity()));
+    model.addAttribute("soldQuantities", sales);
     model.addAttribute("categories", categories.findAll(Sort.by("name")));
     model.addAttribute("brands", products.findAvailableBrands());
     model.addAttribute("keyword", keyword);
@@ -104,6 +114,20 @@ public class ProductController {
     model.addAttribute("storageOptions", variants.availableStorage());
     model.addAttribute("ramOptions", variants.availableRam());
     return "store/catalog/list";
+  }
+
+  @GetMapping(value = "/search/suggestions", produces = "application/json")
+  @ResponseBody
+  public List<String> suggestions(@RequestParam(required = false) String q) {
+    if (q == null || q.isBlank()) return List.of();
+    String keyword = q.trim();
+    if (keyword.length() < 2) return List.of();
+    return products.findNameSuggestions(keyword.substring(0, Math.min(80, keyword.length())), PageRequest.of(0, 8));
+  }
+
+  @GetMapping("/popular")
+  public String popular() {
+    return "redirect:/products?sort=bestselling";
   }
 
   @GetMapping("/{id}")
