@@ -20,6 +20,7 @@ public class CustomerBenefitsController {
   private final UserRepository users;
   private final LoyaltyRepository ledger;
   private final StoreExperienceService settings;
+  private final DeviceService deviceService;
 
   public CustomerBenefitsController(
       ConsultationRepository requests,
@@ -27,13 +28,15 @@ public class CustomerBenefitsController {
       ProductRepository products,
       UserRepository users,
       LoyaltyRepository ledger,
-      StoreExperienceService settings) {
+      StoreExperienceService settings,
+      DeviceService deviceService) {
     this.requests = requests;
     this.consultations = consultations;
     this.products = products;
     this.users = users;
     this.ledger = ledger;
     this.settings = settings;
+    this.deviceService = deviceService;
   }
 
   private void options(Model model, String email) {
@@ -106,5 +109,12 @@ public class CustomerBenefitsController {
     model.addAttribute("entries", ledger.findTop100ByUser_EmailOrderByIdDesc(principal.getName()));
     model.addAttribute("experience", settings.get());
     return "account/points";
+  }
+
+  @GetMapping("/account/devices")
+  public String devices(Principal principal, Model model) {
+    model.addAttribute("currentAccountPage", "devices");
+    model.addAttribute("devices", deviceService.devicesForCustomer(principal.getName()));
+    return "account/devices";
   }
 }

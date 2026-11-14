@@ -66,15 +66,35 @@ public class OrderService {
     for (CartItem item : items) {
       ProductVariant variant = locked.get(item.getVariantId());
       if (variant == null || !variant.isActive() || variant.getProduct().getStatus() != 1)
-        throw new IllegalArgumentException(item.getProductName() + " đã ngừng bán.");
+        throw new IllegalArgumentException(
+            item.getProductName()
+                + " ("
+                + item.getVariantLabel()
+                + ") đã ngừng kinh doanh. Vui lòng quay lại giỏ hàng để cập nhật.");
       if (item.getQuantity() < 1
           || item.getQuantity() > 99
           || item.getQuantity() > variant.getStock())
-        throw new IllegalArgumentException("Không đủ tồn kho cho " + item.getProductName() + ".");
+        throw new IllegalArgumentException(
+            variant.getStock() <= 0
+                ? item.getProductName()
+                    + " ("
+                    + item.getVariantLabel()
+                    + ") vừa hết hàng. Vui lòng chọn phiên bản khác trong giỏ hàng."
+                : "Chỉ còn "
+                    + variant.getStock()
+                    + " sản phẩm cho "
+                    + item.getProductName()
+                    + " ("
+                    + variant.getLabel()
+                    + "). Vui lòng điều chỉnh số lượng trong giỏ hàng.");
       if (variant.getPrice().compareTo(item.getUnitPrice()) != 0) {
         item.setUnitPrice(variant.getPrice());
         throw new IllegalArgumentException(
-            "Giá sản phẩm đã thay đổi. Vui lòng kiểm tra tổng tiền và đặt lại.");
+            "Giá của "
+                + item.getProductName()
+                + " ("
+                + item.getVariantLabel()
+                + ") đã thay đổi. Vui lòng kiểm tra lại tổng tiền và xác nhận đặt lại.");
       }
     }
     Order order =
@@ -172,6 +192,54 @@ public class OrderService {
       loyalty.delivered(order);
     }
     history.append(order, "Quản trị viên", "Cập nhật đơn hàng: " + next + ".");
+    notifyAfterCommit(() -> mail.sendOrderStatusUpdate(order.getUser() == null ? null : order.getUser().getEmail(), order));
+  }
+
+  @Transactional
+  public Order retryVnPay(Long id, String email) {
+    Order order = locked(id);
+    if (order.getUser() == null || !order.getUser().getEmail().equals(email))
+      throw new IllegalArgumentException("Không tìm thấy đơn hàng.");
+    if (!PENDING.equals(order.getStatus())
+        || !"VNPAY".equals(order.getPaymentMethod())
+        || !Set.of("UNPAID", "FAILED").contains(order.getPaymentStatus()))
+      throw new IllegalArgumentException("Đơn hàng không ở trạng thái chờ thanh toán VNPay.");
+    if (isPaymentWindowExpired(order)) {
+      cancelLocked(order, "Quá thời hạn 15 phút thanh toán VNPay");
+      throw new IllegalArgumentException(
+          "Đơn hàng đã quá hạn giữ chỗ 15 phút và đã được hủy tự động.");
+    }
+    order.setPaymentStatus("UNPAID");
+    order.setPaymentReference(UUID.randomUUID().toString().replace("-", ""));
+    history.append(order, "Khách hàng", "Khách hàng yêu cầu thanh toán lại qua VNPay.");
+    return orders.saveAndFlush(order);
+  }
+
+  @Transactional
+  public Order switchToCod(Long id, String email) {
+    Order order = locked(id);
+    if (order.getUser() == null || !order.getUser().getEmail().equals(email))
+      throw new IllegalArgumentException("Không tìm thấy đơn hàng.");
+    if (!PENDING.equals(order.getStatus())
+        || !"VNPAY".equals(order.getPaymentMethod())
+        || !Set.of("UNPAID", "FAILED").contains(order.getPaymentStatus()))
+      throw new IllegalArgumentException("Chỉ có thể chuyển sang COD khi đơn VNPay chưa thanh toán.");
+    if (isPaymentWindowExpired(order)) {
+      cancelLocked(order, "Quá thời hạn 15 phút thanh toán VNPay");
+      throw new IllegalArgumentException(
+          "Đơn hàng đã quá hạn giữ chỗ 15 phút và đã được hủy tự động.");
+    }
+    order.setPaymentMethod("COD");
+    order.setPaymentStatus("UNPAID");
+    history.append(order, "Khách hàng", "Chuyển phương thức thanh toán từ VNPay sang COD.");
+    Order saved = orders.saveAndFlush(order);
+    notifyAfterCommit(() -> mail.sendOrderConfirmation(email, saved));
+    return saved;
+  }
+
+  public boolean isPaymentWindowExpired(Order order) {
+    return order.getOrderDate() != null
+        && LocalDateTime.now().isAfter(order.getOrderDate().plusMinutes(15));
   }
 
   @Transactional
@@ -216,6 +284,24 @@ public class OrderService {
     order.setStatus(CANCELLED);
     order.setCancellationReason(reason);
     history.append(order, "Hệ thống", "Hủy đơn: " + reason);
+    notifyAfterCommit(
+        () ->
+            mail.sendOrderStatusUpdate(
+                order.getUser() == null ? null : order.getUser().getEmail(), order));
+  }
+
+  private void notifyAfterCommit(Runnable action) {
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      TransactionSynchronizationManager.registerSynchronization(
+          new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+              action.run();
+            }
+          });
+    } else {
+      action.run();
+    }
   }
 
   private Order locked(Long id) {
@@ -227,11 +313,12 @@ public class OrderService {
   @Transactional
   public void expireUnpaidOrders() {
     var expired =
-        orders.findByPaymentMethodAndPaymentStatusAndStatusAndOrderDateBefore(
-            "VNPAY", "UNPAID", PENDING, LocalDateTime.now().minusMinutes(15));
+        orders.findByPaymentMethodAndPaymentStatusInAndStatusAndOrderDateBefore(
+            "VNPAY", List.of("UNPAID", "FAILED"), PENDING, LocalDateTime.now().minusMinutes(15));
     for (Order candidate : expired) {
       Order order = locked(candidate.getId());
-      if (PENDING.equals(order.getStatus()) && "UNPAID".equals(order.getPaymentStatus()))
+      if (PENDING.equals(order.getStatus())
+          && Set.of("UNPAID", "FAILED").contains(order.getPaymentStatus()))
         cancelLocked(order, "Quá thời hạn thanh toán VNPay");
     }
   }

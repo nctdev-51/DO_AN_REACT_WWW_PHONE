@@ -29,7 +29,21 @@ public class VnPayService {
   private final OrderRepository orders;
   private final OrderService orderService;
   private final OrderHistoryService history;
+  private final iuh.fit.www_phone_ver1.service.mail.MailService mail;
 
+  public VnPayService(
+      String terminal,
+      String secret,
+      String paymentUrl,
+      String returnUrl,
+      boolean enabled,
+      OrderRepository orders,
+      OrderService orderService,
+      OrderHistoryService history) {
+    this(terminal, secret, paymentUrl, returnUrl, enabled, orders, orderService, history, null);
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired
   public VnPayService(
       @Value("${app.vnpay.terminal:}") String terminal,
       @Value("${app.vnpay.secret:}") String secret,
@@ -40,7 +54,8 @@ public class VnPayService {
       @Value("${app.vnpay.enabled:false}") boolean enabled,
       OrderRepository orders,
       OrderService orderService,
-      OrderHistoryService history) {
+      OrderHistoryService history,
+      iuh.fit.www_phone_ver1.service.mail.MailService mail) {
     this.terminal = terminal;
     this.secret = secret;
     this.paymentUrl = paymentUrl;
@@ -49,6 +64,7 @@ public class VnPayService {
     this.orders = orders;
     this.orderService = orderService;
     this.history = history;
+    this.mail = mail;
   }
 
   public boolean isAvailable() {
@@ -104,26 +120,68 @@ public class VnPayService {
     } catch (NumberFormatException error) {
       return result("04", "Invalid amount");
     }
-    if (!"UNPAID".equals(order.getPaymentStatus())) return result("02", "Order already confirmed");
+    if (!Set.of("UNPAID", "FAILED").contains(order.getPaymentStatus()))
+      return result("02", "Order already confirmed");
     boolean paid =
         "00".equals(values.get("vnp_ResponseCode"))
             && "00".equals(values.get("vnp_TransactionStatus"));
     order.setGatewayTransaction(values.get("vnp_TransactionNo"));
-    if (paid)
+    if (paid) {
       order.setPaymentStatus(
           OrderStatuses.CANCELLED.equals(order.getStatus()) ? "REFUND_REQUIRED" : "PAID");
-    else {
+      if (mail != null && order.getUser() != null && "PAID".equals(order.getPaymentStatus())) {
+        String recipient = order.getUser().getEmail();
+        if (org.springframework.transaction.support.TransactionSynchronizationManager
+            .isSynchronizationActive()) {
+          org.springframework.transaction.support.TransactionSynchronizationManager
+              .registerSynchronization(
+                  new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                      mail.sendPaymentSuccess(recipient, order);
+                    }
+                  });
+        } else {
+          mail.sendPaymentSuccess(recipient, order);
+        }
+      }
+    } else {
       order.setPaymentStatus("FAILED");
-      if (OrderStatuses.PENDING.equals(order.getStatus()))
-        orderService.cancelLocked(order, "Thanh toán VNPay không thành công");
     }
     history.append(
         order,
         "VNPay",
         paid
             ? "Đã nhận xác nhận thanh toán từ VNPay."
-            : "VNPay thông báo thanh toán không thành công.");
+            : "VNPay thông báo thanh toán không thành công. Đơn hàng vẫn được giữ chỗ trong 15 phút để bạn thử lại hoặc chuyển sang COD.");
     return result("00", "Confirm success");
+  }
+
+  /** Never trusts return params to mark PAID; only records verified cancellation/failure notice. */
+  @Transactional
+  public void recordReturnFailureIfPending(String reference, Map<String, String> values) {
+    if (!verify(values) || !terminal.equals(values.get("vnp_TmnCode"))) return;
+    boolean isSuccessCode =
+        "00".equals(values.get("vnp_ResponseCode"))
+            && "00".equals(values.getOrDefault("vnp_TransactionStatus", "00"));
+    if (isSuccessCode) return;
+    orders
+        .lockByPaymentReference(reference)
+        .filter(
+            o ->
+                "VNPAY".equals(o.getPaymentMethod())
+                    && OrderStatuses.PENDING.equals(o.getStatus())
+                    && "UNPAID".equals(o.getPaymentStatus()))
+        .ifPresent(
+            o -> {
+              o.setPaymentStatus("FAILED");
+              history.append(
+                  o,
+                  "VNPay",
+                  "Giao dịch VNPay chưa hoàn tất khi quay về cửa hàng (mã "
+                      + values.getOrDefault("vnp_ResponseCode", "khác")
+                      + "). Bạn có thể thử lại hoặc chuyển COD trong 15 phút.");
+            });
   }
 
   String canonical(Map<String, String> input) {

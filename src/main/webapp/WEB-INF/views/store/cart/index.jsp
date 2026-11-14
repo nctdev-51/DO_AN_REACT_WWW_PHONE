@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/store/header.jsp" />
+<ui:breadcrumb currentLabel="Giỏ hàng"/>
 <div class="page-heading">
   <div>
     <span class="eyebrow">MUA SẮM CỦA BẠN</span>

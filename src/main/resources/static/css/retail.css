@@ -117,4 +117,108 @@ html:has(.sticky-purchase){scroll-padding-bottom:var(--space-19)}
   .storefront:has(.sticky-purchase){padding-bottom:calc(148px + env(safe-area-inset-bottom,0px))}
   .sticky-purchase{bottom:calc(66px + env(safe-area-inset-bottom,0px))}
 }
-@media print{.mobile-bottom-nav{display:none}}
+@media print{.mobile-bottom-nav,.compare-tray{display:none}}
+
+/* Navigation 4-group dropdowns & mobile search trigger */
+.nav-link-btn{border:0;background:transparent;color:var(--ink,var(--color-text));display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 2px;font-weight:500;cursor:pointer}
+.nav-link-btn:hover{color:var(--brand,var(--color-action))}
+.nav-group-dropdown .dropdown-menu{min-width:230px;padding:.5rem}
+.mobile-bottom-btn{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:var(--font-weight-medium);color:var(--color-text-muted);padding:4px 2px;min-height:46px;cursor:pointer}
+@media(max-width:1100px){.store-nav{gap:.65rem}}
+@media(max-width:767px){.nav-group-dropdown{display:none}}
+
+/* Search recent header */
+.search-recent-header{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-muted);padding:6px 10px 4px}
+
+/* Low stock badge & accessible out-of-stock pill state */
+.card-badge-low{background:#854d0e;color:#fff}
+.pill-btn.is-out-of-stock::after{content:" · Hết";font-size:11px;font-weight:400}
+
+/* Catalog toolbar & mobile offcanvas filter */
+.catalog-mobile-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.catalog-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+@media(max-width:991px){
+  .catalog-sidebar.offcanvas-lg{padding:16px;background:var(--color-card);width:min(340px,88vw)}
+  .catalog-sidebar .accordion-button{display:none}
+  .catalog-sidebar .filter-sidebar-form{border:0;padding:0;box-shadow:none}
+}
+
+/* Detail page enhancements */
+.detail-top-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+.detail-top-bar .breadcrumb-line{margin-bottom:0}
+.price-transparency-box{margin-top:12px}
+.installment-hint{margin:8px 0 0;padding:10px 12px;border-radius:var(--radius-field);background:var(--color-canvas);border:1px solid var(--color-divider);font-size:var(--font-size-sm)}
+.promo-offer-box{padding:14px 16px;background:var(--color-canvas)}
+.promo-offer-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed var(--color-divider)}
+.promo-offer-row:last-of-type{border-bottom:0}
+.detail-secondary-actions{display:grid;grid-template-columns:1fr;gap:8px}
+@media(min-width:576px){.detail-secondary-actions{grid-template-columns:1.2fr 1fr 1fr}}
+.delivery-estimator{padding:14px 16px}
+.usage-fit-list{padding-left:18px;display:grid;gap:6px;font-size:var(--font-size-sm);color:var(--ink)}
+
+/* Sticky quick compare tray */
+.compare-tray{position:fixed;right:20px;bottom:20px;z-index:85;width:min(440px,calc(100vw - 32px));padding:14px 16px;box-shadow:var(--shadow-hover);border:1px solid var(--color-divider);background:var(--color-card)}
+.storefront:has(.sticky-purchase) .compare-tray{bottom:96px}
+@media(max-width:767px){
+  .compare-tray{right:12px;left:12px;width:auto;bottom:74px}
+  .storefront:has(.sticky-purchase) .compare-tray{bottom:156px}
+}
+.compare-tray-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:var(--font-size-sm)}
+.compare-tray-actions{display:flex;gap:6px;align-items:center}
+.compare-tray-items{display:grid;gap:8px;max-height:210px;overflow-y:auto}
+.compare-tray-item{display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid var(--color-divider);border-radius:var(--radius-small);background:var(--color-canvas)}
+.compare-tray-item img{width:36px;height:36px;object-fit:contain;flex-shrink:0}
+.compare-tray-meta{flex:1;min-width:0;display:flex;flex-direction:column;font-size:var(--font-size-xs)}
+.compare-tray-meta span{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compare-tray-remove{border:0;background:transparent;color:var(--color-error);font-size:18px;line-height:1;padding:4px 6px;cursor:pointer}
+
+/* 4-step Phone Advisor Wizard */
+.advisor-wizard{padding:24px;margin-bottom:28px}
+.advisor-progress{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.advisor-step-tab{border:1px solid var(--color-divider);background:var(--color-canvas);color:var(--color-text-muted);border-radius:var(--radius-field);padding:10px 12px;text-align:left;font-size:var(--font-size-xs);cursor:pointer}
+.advisor-step-tab.is-active{border-color:var(--color-action);background:var(--color-action-tint);color:var(--color-action);font-weight:600}
+.advisor-preset-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.advisor-choice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px}
+.advisor-choice-card{position:relative;display:flex;flex-direction:column;gap:4px;padding:14px;border:1px solid var(--color-divider);border-radius:var(--radius-field);background:var(--color-canvas);cursor:pointer;margin:0}
+.advisor-choice-card:has(input:checked){border-color:var(--color-action);background:var(--color-action-tint)}
+.advisor-choice-card input{position:absolute;top:12px;right:12px}
+.advisor-nav-actions{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:20px}
+.advisor-results-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.advisor-result-card{display:flex;flex-direction:column;gap:14px}
+.advisor-result-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.advisor-result-body{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:start}
+.advisor-result-body img{width:110px;height:130px;object-fit:contain}
+.advisor-reason-list{padding-left:18px;margin:0;display:grid;gap:4px;font-size:var(--font-size-xs);color:var(--color-text-muted)}
+.advisor-result-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+@media(max-width:767px){
+  .advisor-progress{grid-template-columns:1fr 1fr}
+  .advisor-results-grid{grid-template-columns:1fr}
+  .advisor-result-body{grid-template-columns:84px 1fr}
+  .advisor-result-body img{width:84px;height:105px}
+}
+
+/* Checkout Stepper & Order Milestones */
+.checkout-stepper,.order-milestones{list-style:none;padding:0;margin:0 0 22px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.order-milestones{grid-template-columns:repeat(5,1fr);margin-bottom:0}
+.checkout-stepper li,.order-milestones li{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius-field);border:1px solid var(--color-divider);background:var(--color-card);font-size:var(--font-size-xs);color:var(--color-text-muted)}
+.checkout-stepper li span,.order-milestones li span{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--color-divider);color:var(--color-text);font-weight:700;flex-shrink:0}
+.checkout-stepper li.is-active,.order-milestones li.is-done{border-color:var(--color-action);background:var(--color-action-tint);color:var(--color-text);font-weight:600}
+.checkout-stepper li.is-active span,.order-milestones li.is-done span{background:var(--color-action);color:#fff}
+.payment-recovery-box{border-left:4px solid var(--color-action)}
+@media(max-width:767px){
+  .checkout-stepper{grid-template-columns:1fr 1fr}
+  .order-milestones{grid-template-columns:1fr}
+}
+
+/* My Devices & Warranty cards */
+.device-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.device-card{display:flex;flex-direction:column;gap:14px}
+.device-card-head{display:grid;grid-template-columns:80px 1fr;gap:14px;align-items:center}
+.device-card-head img{width:80px;height:96px;object-fit:contain}
+.device-warranty-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;border-radius:var(--radius-field);background:var(--color-canvas)}
+.device-ticket-list{padding:10px 12px;border-radius:var(--radius-field);border:1px solid var(--color-divider)}
+@media(max-width:767px){
+  .device-grid{grid-template-columns:1fr}
+  .device-warranty-meta{grid-template-columns:1fr}
+}
+

@@ -64,7 +64,14 @@ public class SecurityConfig {
       if (isAdmin) {
         response.sendRedirect(request.getContextPath() + "/admin");
       } else {
-        customerSuccess.onAuthenticationSuccess(request, response, authentication);
+        String safe =
+            iuh.fit.www_phone_ver1.controller.auth.AuthController.safeRedirect(
+                request.getParameter("redirect"));
+        if (safe != null) {
+          response.sendRedirect(request.getContextPath() + safe);
+        } else {
+          customerSuccess.onAuthenticationSuccess(request, response, authentication);
+        }
       }
     };
   }

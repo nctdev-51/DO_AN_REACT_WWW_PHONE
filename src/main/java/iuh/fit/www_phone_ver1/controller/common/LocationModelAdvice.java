@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.*;
 @ControllerAdvice(
     assignableTypes = {
       iuh.fit.www_phone_ver1.controller.account.AccountController.class,
-      iuh.fit.www_phone_ver1.controller.store.CheckoutController.class
+      iuh.fit.www_phone_ver1.controller.store.CheckoutController.class,
+      iuh.fit.www_phone_ver1.controller.store.ProductController.class
     })
 public class LocationModelAdvice {
   private final AddressDirectory directory;
