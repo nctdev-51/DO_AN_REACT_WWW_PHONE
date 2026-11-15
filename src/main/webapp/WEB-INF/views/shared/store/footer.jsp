@@ -68,6 +68,33 @@
     </c:otherwise>
   </c:choose>
 </nav>
+
+<%-- ============================================================ --%>
+<%-- Module AI (Tài) — Chatbot Widget (FAB)                      --%>
+<%-- ============================================================ --%>
+<button class="chatbot-fab" id="chatbot-fab-btn" type="button"
+        aria-label="Mở chat tư vấn AI" aria-expanded="false" title="💬 Tư vấn AI">
+  <span class="chatbot-fab-icon" aria-hidden="true">💬</span>
+</button>
+
+<div class="chatbot-panel" id="chatbot-panel" hidden role="dialog" aria-label="Chat tư vấn AI PTV Mobile">
+  <div class="chatbot-header">
+    <span>🤖 PTV Tư vấn AI</span>
+    <button class="chatbot-close" id="chatbot-close-btn" type="button" aria-label="Đóng cửa sổ chat">×</button>
+  </div>
+  <div class="chatbot-messages" id="chatbot-messages" aria-live="polite" aria-relevant="additions">
+    <div class="chatbot-bubble-bot">
+      Xin chào! Tôi là trợ lý PTV Mobile. Bạn đang tìm kiếm điện thoại như thế nào? 📱
+    </div>
+  </div>
+  <div class="chatbot-input-row">
+    <input type="text" class="form-control" id="chatbot-input"
+           placeholder="Hỏi về điện thoại, tầm giá..." autocomplete="off" maxlength="500">
+    <button class="chatbot-send" id="chatbot-send-btn" type="button">Gửi</button>
+  </div>
+</div>
+<%-- /Module AI --%>
+
 <script src="${pageContext.request.contextPath}/vendor/bootstrap/bootstrap.bundle.min.js" defer>
 </script>
 <script src="${pageContext.request.contextPath}/js/store.js" defer>
@@ -76,5 +103,8 @@
 <script src="${pageContext.request.contextPath}/js/motion.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/retail.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/addresses.js" defer></script>
+<%-- Module AI Scripts (Tài) --%>
+<script src="${pageContext.request.contextPath}/js/ai-description.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/chatbot.js" defer></script>
 </body>
 </html>

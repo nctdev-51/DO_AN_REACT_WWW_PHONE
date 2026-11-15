@@ -79,6 +79,8 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http, AuthenticationSuccessHandler customSuccessHandler) throws Exception {
+    // Disable CSRF for /api/ai/** REST endpoints (stateless JSON API — Tài)
+    http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/ai/**"));
     http.authorizeHttpRequests(
             auth ->
                 auth.requestMatchers("/admin/**")
@@ -89,6 +91,8 @@ public class SecurityConfig {
                     .requestMatchers(
                         org.springframework.http.HttpMethod.POST, "/products/*/reviews")
                     .authenticated()
+                    .requestMatchers("/api/ai/**")
+                    .permitAll()
                     .anyRequest()
                     .permitAll())
         .formLogin(

@@ -156,6 +156,31 @@
   </article>
 </section>
 
+<%-- ============================================================ --%>
+<%-- Module AI (Tài) — Mô tả thông minh & Điểm nổi bật          --%>
+<%-- ============================================================ --%>
+<section class="detail-sections">
+  <div class="ai-description-panel panel" id="ai-desc-panel" data-product-id="${product.id}">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+      <h2 class="mb-0">
+        <span class="ai-badge">🤖 AI</span> Mô tả thông minh
+      </h2>
+      <button class="btn btn-outline-dark btn-sm btn-refresh-ai" id="btn-refresh-ai" type="button">
+        🔄 Tạo lại mô tả
+      </button>
+    </div>
+    <div id="ai-description-text" aria-live="polite">
+      <div class="ai-skeleton" aria-hidden="true"></div>
+      <div class="ai-skeleton ai-skeleton--medium" aria-hidden="true"></div>
+      <div class="ai-skeleton ai-skeleton--short" aria-hidden="true"></div>
+    </div>
+    <div id="ai-key-features-wrap" class="mt-3" hidden>
+      <strong class="d-block mb-2">✨ Điểm nổi bật</strong>
+      <ul class="ai-key-features" id="ai-key-features" aria-label="Điểm nổi bật của sản phẩm"></ul>
+    </div>
+  </div>
+</section>
+
 <section class="panel" id="reviews">
   <h2>Đánh giá từ khách đã mua</h2>
   <c:if test="${not empty reviews}">

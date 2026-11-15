@@ -1,0 +1,249 @@
+/**
+ * chatbot.js — Module AI (Tài)
+ * Widget chatbot tư vấn nổi (FAB) cho PTV Mobile.
+ */
+(function () {
+    'use strict';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const fabBtn      = document.getElementById('chatbot-fab-btn');
+        const chatPanel   = document.getElementById('chatbot-panel');
+        const closeBtn    = document.getElementById('chatbot-close-btn');
+        const messagesEl  = document.getElementById('chatbot-messages');
+        const inputEl     = document.getElementById('chatbot-input');
+        const sendBtn     = document.getElementById('chatbot-send-btn');
+
+        if (!fabBtn || !chatPanel || !messagesEl || !inputEl || !sendBtn) return;
+
+        // ── Context path ──────────────────────────────────────────
+        const ctx = document.querySelector('meta[name="ctx"]')?.content
+            || (document.querySelector('[data-context]')?.dataset.context)
+            || '';
+
+        // ── Session ID ────────────────────────────────────────────
+        let sessionId = sessionStorage.getItem('ptvChatSessionId');
+        if (!sessionId) {
+            sessionId = typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+            sessionStorage.setItem('ptvChatSessionId', sessionId);
+        }
+
+        // ── Toggle Panel ──────────────────────────────────────────
+        fabBtn.addEventListener('click', function () {
+            const isHidden = chatPanel.hidden;
+            chatPanel.hidden = !isHidden;
+            fabBtn.setAttribute('aria-expanded', String(isHidden));
+            if (isHidden) {
+                setTimeout(function () { inputEl.focus(); }, 100);
+                scrollMessages();
+            }
+        });
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () {
+                chatPanel.hidden = true;
+                fabBtn.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        // ── Send Message ──────────────────────────────────────────
+        function sendMessage() {
+            const text = inputEl.value.trim();
+            if (!text || sendBtn.disabled) return;
+
+            appendBubble(text, 'user');
+            inputEl.value = '';
+            inputEl.disabled = true;
+            sendBtn.disabled = true;
+
+            const typingEl = showTyping();
+
+            fetch(ctx + '/api/ai/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ message: text, sessionId: sessionId })
+            })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(function (data) {
+                    removeTyping(typingEl);
+                    appendBubble(data.reply || 'Xin lỗi, không có phản hồi.', 'bot');
+
+                    // Render danh sách thẻ sản phẩm gợi ý (kèm nút "Xem chi tiết")
+                    if (data.productCards && data.productCards.length > 0) {
+                        appendRichProductCards(data.productCards);
+                    } else if (data.suggestedProducts && data.suggestedProducts.length > 0) {
+                        appendLegacyProductSuggestions(data.suggestedProducts);
+                    }
+                })
+                .catch(function (err) {
+                    console.warn('[Chatbot] Error:', err);
+                    removeTyping(typingEl);
+                    appendBubble(
+                        'Xin lỗi, đã xảy ra lỗi kết nối. Vui lòng thử lại sau. 🙏',
+                        'bot'
+                    );
+                })
+                .finally(function () {
+                    inputEl.disabled = false;
+                    sendBtn.disabled = false;
+                    inputEl.focus();
+                });
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        inputEl.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // ── Markdown & Table Formatter ────────────────────────────
+        function formatMessageHtml(raw) {
+            if (!raw) return '';
+            // 1. Escape HTML an toàn
+            let s = raw
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            // 2. Chuyển đổi định dạng bold **chữ đậm**
+            s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            // 3. Xử lý trường hợp AI vô tình xuất bảng markdown (|...|)
+            const lines = s.split(/\r?\n/);
+            const cleaned = [];
+            for (let line of lines) {
+                const tr = line.trim();
+                // Bỏ dòng gạch ngang ngăn cách bảng (|---|---|)
+                if (/^\|[-|\s:]+\|$/.test(tr)) {
+                    continue;
+                }
+                // Nếu là dòng bảng (| col1 | col2 | ...)
+                if (tr.startsWith('|') && tr.endsWith('|')) {
+                    const cols = tr.split('|').map(c => c.trim()).filter(c => c.length > 0);
+                    if (cols.length >= 2) {
+                        // Bỏ qua dòng tiêu đề bảng (ID, Mẫu, Tên, Giá,...)
+                        const c0 = cols[0].toLowerCase();
+                        const c1 = cols[1].toLowerCase();
+                        if (c0 === 'id' || c1.includes('mẫu') || c1.includes('tên') || c1.includes('sản phẩm')) {
+                            continue;
+                        }
+                        line = '📱 <strong>' + cols.slice(0, 3).join('</strong> — ') + (cols.length > 3 ? (' (' + cols.slice(3).join(', ') + ')') : '');
+                    }
+                }
+                cleaned.push(line);
+            }
+            s = cleaned.join('\n');
+
+            // 4. Chuyển đổi xuống dòng
+            s = s.replace(/\n\n+/g, '<br><br>').replace(/\n/g, '<br>');
+
+            return s;
+        }
+
+        // ── Helper: Append Bubble ─────────────────────────────────
+        function appendBubble(text, who) {
+            const div = document.createElement('div');
+            div.className = who === 'user' ? 'chatbot-bubble-user' : 'chatbot-bubble-bot';
+
+            if (who === 'bot') {
+                div.innerHTML = formatMessageHtml(text);
+            } else {
+                div.textContent = text;
+            }
+
+            messagesEl.appendChild(div);
+            scrollMessages();
+        }
+
+        // ── Helper: Rich Product Suggestion Cards ──────────────────
+        function appendRichProductCards(cards) {
+            const wrap = document.createElement('div');
+            wrap.className = 'chatbot-suggestion-row';
+
+            const label = document.createElement('div');
+            label.className = 'chatbot-suggestion-title';
+            label.innerHTML = '<span>📌</span> <strong>Gợi ý xem chi tiết sản phẩm:</strong>';
+            wrap.appendChild(label);
+
+            cards.slice(0, 3).forEach(function (p) {
+                const a = document.createElement('a');
+                a.className = 'chatbot-suggestion-card';
+                a.href = ctx + '/products/' + p.id;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.title = 'Xem chi tiết ' + p.name;
+                a.innerHTML =
+                    '<div class="chatbot-card-icon">📱</div>' +
+                    '<div class="chatbot-card-info">' +
+                        '<div class="chatbot-card-name">' + p.name + '</div>' +
+                        '<div class="chatbot-card-meta">' +
+                            '<span class="chatbot-card-price">' + p.price + '</span>' +
+                            '<span class="chatbot-card-btn">Xem chi tiết ➔</span>' +
+                        '</div>' +
+                    '</div>';
+                wrap.appendChild(a);
+            });
+
+            messagesEl.appendChild(wrap);
+            scrollMessages();
+        }
+
+        // ── Helper: Legacy Product Suggestions ─────────────────────
+        function appendLegacyProductSuggestions(ids) {
+            const wrap = document.createElement('div');
+            wrap.className = 'chatbot-suggestion-row';
+
+            const label = document.createElement('div');
+            label.className = 'chatbot-suggestion-title';
+            label.innerHTML = '<span>📌</span> <strong>Gợi ý xem chi tiết:</strong>';
+            wrap.appendChild(label);
+
+            ids.slice(0, 3).forEach(function (id) {
+                const a = document.createElement('a');
+                a.className = 'chatbot-suggestion-card';
+                a.href = ctx + '/products/' + id;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.innerHTML =
+                    '<div class="chatbot-card-icon">📱</div>' +
+                    '<div class="chatbot-card-info">' +
+                        '<div class="chatbot-card-name">Sản phẩm #' + id + '</div>' +
+                        '<div class="chatbot-card-meta">' +
+                            '<span class="chatbot-card-btn">Xem chi tiết ➔</span>' +
+                        '</div>' +
+                    '</div>';
+                wrap.appendChild(a);
+            });
+
+            messagesEl.appendChild(wrap);
+            scrollMessages();
+        }
+
+        // ── Helper: Typing indicator ──────────────────────────────
+        function showTyping() {
+            const div = document.createElement('div');
+            div.className = 'chatbot-typing';
+            div.innerHTML = '<span></span><span></span><span></span>';
+            messagesEl.appendChild(div);
+            scrollMessages();
+            return div;
+        }
+
+        function removeTyping(el) {
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+        }
+
+        function scrollMessages() {
+            setTimeout(function () {
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }, 30);
+        }
+    });
+})();

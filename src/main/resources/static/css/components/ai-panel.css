@@ -1,0 +1,133 @@
+/* ============================================================
+   ai-panel.css — Module AI (Tài)
+   Panel mô tả AI thông minh trên trang chi tiết sản phẩm
+   ============================================================ */
+
+/* ── AI Description Panel ─────────────────────────────────── */
+.ai-description-panel {
+    border-left: 4px solid var(--brand, #c34d2d);
+    background: linear-gradient(135deg, #fff9f7 0%, #ffffff 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-description-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(195, 77, 45, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* ── AI Badge ──────────────────────────────────────────────── */
+.ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, var(--brand, #c34d2d), #e06540);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    vertical-align: middle;
+    margin-right: 8px;
+    box-shadow: 0 2px 6px rgba(195, 77, 45, 0.3);
+}
+
+/* ── Skeleton Loading ──────────────────────────────────────── */
+.ai-skeleton {
+    height: 1rem;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: ai-shimmer 1.5s infinite;
+    margin-bottom: 0.5rem;
+    width: 100%;
+}
+
+.ai-skeleton--short {
+    width: 60%;
+}
+
+.ai-skeleton--medium {
+    width: 80%;
+}
+
+@keyframes ai-shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* ── AI Description Text ───────────────────────────────────── */
+#ai-description-text p,
+.ai-description-text {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--ink, #1c3032);
+    margin: 0;
+}
+
+/* ── Key Features List ─────────────────────────────────────── */
+.ai-key-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ai-key-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.93rem;
+    color: var(--ink, #1c3032);
+    background: rgba(195, 77, 45, 0.04);
+    padding: 8px 12px;
+    border-radius: var(--radius, 12px);
+    border: 1px solid rgba(195, 77, 45, 0.1);
+    line-height: 1.4;
+}
+
+/* ── Refresh Button ────────────────────────────────────────── */
+.btn-refresh-ai,
+#btn-refresh-ai {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-refresh-ai:hover,
+#btn-refresh-ai:hover {
+    border-color: var(--brand, #c34d2d);
+    color: var(--brand, #c34d2d);
+}
+
+/* ── AI Error State ────────────────────────────────────────── */
+.ai-error-state {
+    color: #6c757d;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Compare AI Panel ──────────────────────────────────────── */
+.ai-compare-panel {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: var(--radius, 12px);
+    border: 1px solid rgba(195, 77, 45, 0.15);
+    font-size: 0.93rem;
+    line-height: 1.6;
+    color: var(--ink, #1c3032);
+}

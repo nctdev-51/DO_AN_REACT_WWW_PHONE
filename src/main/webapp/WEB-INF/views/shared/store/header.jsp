@@ -16,6 +16,10 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/showcase.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/motion.css"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/retail.css">
+    <%-- Module AI (Tài) --%>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/ai-panel.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/chatbot.css">
+    <meta name="ctx" content="${pageContext.request.contextPath}">
   </head>
   <body class="storefront">
     <a class="skip-link" href="#main-content">Đến nội dung chính</a>
