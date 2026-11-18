@@ -8,7 +8,7 @@
     position: fixed;
     bottom: 90px;
     right: 20px;
-    z-index: 1050;
+    z-index: 1021;
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -45,9 +45,9 @@
     position: fixed;
     bottom: 162px;
     right: 20px;
-    z-index: 1049;
+    z-index: 1020;
     width: 360px;
-    max-height: 520px;
+    max-height: min(520px, calc(100dvh - 176px));
     display: flex;
     flex-direction: column;
     background: #ffffff;
@@ -309,18 +309,45 @@
     cursor: not-allowed;
 }
 
-/* ── Responsive: Mobile ────────────────────────────────────── */
-@media (max-width: 480px) {
+/* ── Responsive: Sticky bar & Mobile ──────────────────────── */
+@media (min-width: 768px) {
+    body.storefront:has(.sticky-purchase) .chatbot-fab {
+        bottom: 104px;
+    }
+
+    body.storefront:has(.sticky-purchase) .chatbot-panel {
+        bottom: 172px;
+        max-height: min(480px, calc(100dvh - 188px));
+    }
+}
+
+@media (max-width: 767px) {
+    .chatbot-fab {
+        width: 48px;
+        height: 48px;
+        font-size: 1.3rem;
+        bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+        right: 12px;
+    }
+
+    body.storefront:has(.sticky-purchase) .chatbot-fab {
+        bottom: calc(152px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .chatbot-fab[aria-expanded="true"] {
+        display: none;
+    }
+
     .chatbot-panel {
         width: calc(100vw - 24px);
         right: 12px;
         left: 12px;
-        bottom: 80px;
-        max-height: 60vh;
+        bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+        max-height: min(62dvh, calc(100dvh - 150px));
     }
 
-    .chatbot-fab {
-        bottom: 70px;
-        right: 12px;
+    body.storefront:has(.sticky-purchase) .chatbot-panel {
+        bottom: calc(152px + env(safe-area-inset-bottom, 0px));
+        max-height: min(55dvh, calc(100dvh - 220px));
     }
 }

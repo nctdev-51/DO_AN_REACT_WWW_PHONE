@@ -42,7 +42,22 @@
   width:165px;
   background:#f4f6f0;
   font-weight:550;
-  color:#5c6e65
+  color:#5c6e65;
+  position:sticky;
+  left:0;
+  z-index:2
+}
+.comparison-table thead th:first-child{
+  z-index:3
+}
+@media(max-width:640px){
+  .comparison-table tr>:first-child{
+    width:118px;
+    padding:12px 10px
+  }
+  .comparison-suggestions{
+    grid-template-columns:1fr
+  }
 }
 .comparison-table thead th{
   text-align:center;

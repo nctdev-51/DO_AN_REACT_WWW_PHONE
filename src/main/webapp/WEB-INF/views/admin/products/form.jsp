@@ -3,7 +3,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <jsp:include page="/WEB-INF/views/shared/admin/header.jsp" />
 <a href="${pageContext.request.contextPath}/admin/products">← Danh sách sản phẩm</a>
-<section class="panel mt-3">
+<section class="panel form-panel mt-3">
   <h2>${empty productId ? 'Thêm sản phẩm' : 'Sửa sản phẩm'}</h2>
   <form:form action="${pageContext.request.contextPath}/admin/products/save" method="post" modelAttribute="productForm" enctype="multipart/form-data">
     <form:errors path="*" element="div" cssClass="alert alert-danger"/>

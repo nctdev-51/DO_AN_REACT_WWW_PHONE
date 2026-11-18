@@ -159,7 +159,7 @@
 <%-- ============================================================ --%>
 <%-- Module AI (Tài) — Mô tả thông minh & Điểm nổi bật          --%>
 <%-- ============================================================ --%>
-<section class="detail-sections">
+<section class="mb-4">
   <div class="ai-description-panel panel" id="ai-desc-panel" data-product-id="${product.id}">
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
       <h2 class="mb-0">

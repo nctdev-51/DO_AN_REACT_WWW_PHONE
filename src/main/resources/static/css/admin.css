@@ -219,6 +219,12 @@
 .admin-main .form-panel{
   max-width:900px
 }
+.admin-inline-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(175px,1fr));
+  gap:16px;
+  margin-bottom:20px
+}
 .admin-main .panel>form:not(.form-grid){
   max-width:100%
 }
@@ -277,7 +283,10 @@
     display:flex;
     overflow-x:auto;
     gap:5px;
-    padding-bottom:5px
+    padding-bottom:6px;
+    scrollbar-width:thin;
+    -webkit-overflow-scrolling:touch;
+    mask-image:linear-gradient(to right,black calc(100% - 24px),transparent 100%)
   }
   .admin-sidebar nav a{
     white-space:nowrap;
@@ -298,8 +307,8 @@
   }
   .admin-sidebar>form .btn{
     margin-top:0!important;
-    min-height:30px;
-    padding:4px 12px
+    min-height:40px;
+    padding:8px 14px
   }
   .admin-main{
     margin:0;

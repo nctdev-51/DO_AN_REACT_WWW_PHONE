@@ -66,6 +66,11 @@
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(to top right, transparent calc(50% - 0.5px), rgba(134, 134, 139, .45) calc(50% - 0.5px), rgba(134, 134, 139, .45) calc(50% + 0.5px), transparent calc(50% + 0.5px));
 }
+@media (max-height: 780px) and (min-width: 768px) {
+  .product-gallery { top: calc(var(--header-offset) - 16px); }
+  .product-gallery .gallery-main img { height: clamp(230px, 38vh, 360px); }
+  .spin-stage { height: clamp(240px, 42vh, 410px); }
+}
 @media (max-width: 767px) {
   .product-gallery { position: static; padding: var(--space-10); }
   .product-gallery .gallery-main img { height: var(--size-gallery-image-mobile); }

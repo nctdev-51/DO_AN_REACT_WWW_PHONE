@@ -1,7 +1,7 @@
 /* Reference palette and semantic roles shared by every PTV Mobile screen. */
 :root {
   --font-family-primary: "SF Pro Text";
-  --font-family-stack: "SF Pro Text", "Myriad Set Pro", "SF Pro Icons", "Apple Legacy Chevron", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-family-stack: "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-md: 17px;
@@ -102,4 +102,16 @@
   --radius: var(--radius-card);
   --bs-body-color: var(--color-text);
   --bs-border-color: var(--color-divider);
+}
+
+@media (min-width: 1500px) {
+  :root {
+    --layout-content-width: 1360px;
+  }
+}
+
+@media (max-width: 1199px) {
+  :root {
+    --header-offset: 164px;
+  }
 }

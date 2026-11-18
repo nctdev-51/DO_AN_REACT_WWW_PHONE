@@ -153,7 +153,7 @@ h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: a
 .chart-empty { background: var(--color-canvas); }
 .stat-grid article { border-top: 0; }
 .stat-grid article:nth-child(2) { border-top: 0; }
-.stat-grid article strong { font-size: var(--font-size-3xl); font-weight: var(--font-weight-semibold); }
+.stat-grid article strong { font-size: clamp(1.2rem, 1.8vw, var(--font-size-3xl)); font-weight: var(--font-weight-semibold); overflow-wrap: anywhere; }
 .table { --bs-table-color: var(--color-text); --bs-table-border-color: var(--color-divider); }
 .table th { color: var(--color-text-muted); background: var(--color-canvas); }
 @media (max-width: 991px) {

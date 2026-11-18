@@ -429,6 +429,14 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.classList.add('btn-brand');
       });
     });
+    wizard.addEventListener('submit', event => {
+      const budgetInput = wizard.querySelector('#budget');
+      if (budgetInput && !budgetInput.checkValidity()) {
+        event.preventDefault();
+        showStep('1');
+        budgetInput.reportValidity();
+      }
+    });
   }
 
   // 8. Checkout Inline Address Modal
