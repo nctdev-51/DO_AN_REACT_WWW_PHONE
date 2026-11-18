@@ -6,7 +6,6 @@ import org.springframework.scheduling.annotation.*;
 import org.springframework.stereotype.Component;
 
 @Component
-@EnableScheduling
 @ConditionalOnProperty(
     name = "app.payments.expiry-enabled",
     havingValue = "true",

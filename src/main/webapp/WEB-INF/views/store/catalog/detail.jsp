@@ -159,15 +159,18 @@
 <%-- ============================================================ --%>
 <%-- Module AI (Tài) — Mô tả thông minh & Điểm nổi bật          --%>
 <%-- ============================================================ --%>
-<section class="detail-sections">
+<section class="mb-4">
   <div class="ai-description-panel panel" id="ai-desc-panel" data-product-id="${product.id}">
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
       <h2 class="mb-0">
         <span class="ai-badge">🤖 AI</span> Mô tả thông minh
       </h2>
-      <button class="btn btn-outline-dark btn-sm btn-refresh-ai" id="btn-refresh-ai" type="button">
-        🔄 Tạo lại mô tả
-      </button>
+      <c:if test="${pageContext.request.isUserInRole('ADMIN')}">
+        <button class="btn btn-outline-dark btn-sm btn-refresh-ai" id="btn-refresh-ai" type="button"
+                data-csrf-header="${_csrf.headerName}" data-csrf-token="${_csrf.token}">
+          🔄 Tạo lại mô tả
+        </button>
+      </c:if>
     </div>
     <div id="ai-description-text" aria-live="polite">
       <div class="ai-skeleton" aria-hidden="true"></div>
@@ -258,14 +261,31 @@
   </section>
 </c:if>
 
-<div class="section-heading">
-  <h2>Có thể bạn cũng thích</h2>
-</div>
-<div class="product-grid">
-  <c:forEach var="related" items="${relatedProducts}">
-    <ui:productCard product="${related}"/>
-  </c:forEach>
-</div>
+<%-- Module Recommendation & Vector DB (Vĩ) --%>
+<section class="similar-products-section collection-section" id="similar-products" data-product-id="${product.id}">
+  <div class="section-heading">
+    <div>
+      <span class="eyebrow">GỢI Ý THÔNG MINH</span>
+      <h2>Có thể bạn thích</h2>
+      <span class="similar-section-sub">Đề xuất dựa trên cấu hình và phân khúc tương đồng</span>
+    </div>
+  </div>
+  <div class="swiper similar-swiper" aria-label="Sản phẩm gợi ý tương đồng">
+    <div class="swiper-wrapper" id="similar-products-wrapper">
+      <div class="swiper-slide"><div class="skeleton-card" aria-hidden="true"></div></div>
+      <div class="swiper-slide"><div class="skeleton-card" aria-hidden="true"></div></div>
+      <div class="swiper-slide"><div class="skeleton-card" aria-hidden="true"></div></div>
+      <div class="swiper-slide"><div class="skeleton-card" aria-hidden="true"></div></div>
+    </div>
+    <div class="swiper-button-prev" aria-label="Sản phẩm trước"></div>
+    <div class="swiper-button-next" aria-label="Sản phẩm tiếp theo"></div>
+  </div>
+  <div class="product-grid" id="similar-fallback-grid" hidden>
+    <c:forEach var="related" items="${relatedProducts}">
+      <ui:productCard product="${related}"/>
+    </c:forEach>
+  </div>
+</section>
 
 <c:if test="${not empty recentProducts}">
   <section class="collection-section">

@@ -4,9 +4,11 @@ import iuh.fit.www_phone_ver1.dto.ai.ChatResponseDTO;
 import iuh.fit.www_phone_ver1.entity.Product;
 import iuh.fit.www_phone_ver1.repository.ProductRepository;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,6 +32,13 @@ public class ChatbotService {
 
     private static final Logger log = LoggerFactory.getLogger(ChatbotService.class);
     private static final Pattern SUGGEST_PATTERN = Pattern.compile("\\[SUGGEST:(\\d+)\\]");
+    private static final int MAX_CACHED_SESSIONS = 200;
+    private static final long SESSION_TTL_MS = 30 * 60 * 1000L;
+
+    private static final class SessionEntry {
+        final List<Message> messages = new ArrayList<>();
+        volatile long lastAccessedAt = System.currentTimeMillis();
+    }
 
     @Autowired(required = false)
     private ChatModel chatModel;
@@ -40,8 +49,15 @@ public class ChatbotService {
     @Value("${spring.ai.openai.api-key:}")
     private String apiKey;
 
-    // Session history: sessionId -> list of messages
-    private final ConcurrentHashMap<String, List<Message>> sessionHistory = new ConcurrentHashMap<>();
+    // Bounded LRU session cache so bot memory cannot grow unbounded across anonymous visitors
+    private final Map<String, SessionEntry> sessionHistory =
+            Collections.synchronizedMap(
+                    new LinkedHashMap<>(MAX_CACHED_SESSIONS + 1, 0.75f, true) {
+                        @Override
+                        protected boolean removeEldestEntry(Map.Entry<String, SessionEntry> eldest) {
+                            return size() > MAX_CACHED_SESSIONS;
+                        }
+                    });
 
     private boolean isAiEnabled() {
         return chatModel != null
@@ -66,14 +82,11 @@ public class ChatbotService {
             return fallbackChat(userMessage);
         }
         try {
-            // Lấy hoặc khởi tạo lịch sử hội thoại
-            List<Message> history = sessionHistory.computeIfAbsent(
-                    sessionId != null ? sessionId : "default",
-                    k -> new ArrayList<>()
-            );
+            // Lấy hoặc khởi tạo lịch sử hội thoại có giới hạn TTL
+            List<Message> history = getOrCreateHistory(sessionId != null ? sessionId : "default");
 
-            // Build system prompt với danh sách sản phẩm
-            String productContext = buildProductContext();
+            // Build system prompt với danh sách sản phẩm ưu tiên theo từ khóa câu hỏi
+            String productContext = buildProductContext(userMessage);
             PromptTemplate systemTemplate = new PromptTemplate(
                     new ClassPathResource("prompts/chatbot-system.st"));
             String systemText = systemTemplate.render(Map.of("productContext", productContext));
@@ -88,7 +101,16 @@ public class ChatbotService {
 
             // Gọi AI
             Prompt prompt = new Prompt(messages);
-            String replyRaw = chatModel.call(prompt).getResult().getOutput().getText();
+            var response = chatModel.call(prompt);
+            String replyRaw =
+                    (response != null
+                                    && response.getResult() != null
+                                    && response.getResult().getOutput() != null)
+                            ? response.getResult().getOutput().getText()
+                            : null;
+            if (replyRaw == null || replyRaw.isBlank()) {
+                return fallbackChat(userMessage);
+            }
 
             // 1. Parse suggested product IDs từ [SUGGEST:id]
             List<Long> suggestedIds = extractSuggestedIds(replyRaw);
@@ -120,16 +142,24 @@ public class ChatbotService {
 
     // ── private helpers ────────────────────────────────────────────────────────
 
-    private String buildProductContext() {
+    private List<Message> getOrCreateHistory(String sessionKey) {
+        long now = System.currentTimeMillis();
+        synchronized (sessionHistory) {
+            sessionHistory.entrySet().removeIf(entry -> (now - entry.getValue().lastAccessedAt) > SESSION_TTL_MS);
+            SessionEntry entry = sessionHistory.computeIfAbsent(sessionKey, k -> new SessionEntry());
+            entry.lastAccessedAt = now;
+            return entry.messages;
+        }
+    }
+
+    private String buildProductContext(String userMessage) {
         try {
-            List<Product> products = productRepository.findByStatus(1, PageRequest.of(0, 25)).getContent();
-            if (products.isEmpty()) {
-                products = productRepository.findAll(PageRequest.of(0, 25)).getContent();
-            }
-            if (products.isEmpty()) {
+            List<Product> active = productRepository.findByStatus(1, PageRequest.of(0, 60)).getContent();
+            if (active.isEmpty()) {
                 return "- Hiện chưa có dữ liệu sản phẩm trong kho.";
             }
-            return products.stream()
+            List<Product> ordered = prioritizeContextProducts(active, userMessage, 25);
+            return ordered.stream()
                     .map(p -> String.format("- ID: %d | Tên: %s | Hãng: %s | Giá: %s VNĐ | Chip: %s | Camera: %s | Pin: %s",
                             p.getId() != null ? p.getId() : 0L,
                             p.getName() != null && !p.getName().isBlank() ? p.getName() : "Đang cập nhật",
@@ -143,6 +173,48 @@ public class ChatbotService {
             log.warn("Failed to build product context: {}", e.getMessage());
             return "- Thông tin sản phẩm tạm thời chưa tải được.";
         }
+    }
+
+    private List<Product> prioritizeContextProducts(List<Product> products, String userMessage, int limit) {
+        if (products.size() <= limit || userMessage == null || userMessage.isBlank()) {
+            return products.size() <= limit ? products : products.subList(0, limit);
+        }
+        String[] tokens = userMessage.toLowerCase(Locale.ROOT).trim().split("[^\\p{L}\\p{Nd}]+");
+        List<Product> matched = new ArrayList<>();
+        List<Product> rest = new ArrayList<>();
+        for (Product p : products) {
+            String haystack =
+                    ((p.getName() == null ? "" : p.getName())
+                            + " "
+                            + (p.getBrand() == null ? "" : p.getBrand())
+                            + " "
+                            + (p.getUsageTags() == null ? "" : p.getUsageTags())
+                            + " "
+                            + (p.getKind() == null ? "" : p.getKind()))
+                            .toLowerCase(Locale.ROOT);
+            boolean hit = false;
+            for (String token : tokens) {
+                if (token.length() >= 2 && haystack.contains(token)) {
+                    hit = true;
+                    break;
+                }
+            }
+            if (hit) {
+                matched.add(p);
+            } else {
+                rest.add(p);
+            }
+        }
+        List<Product> result = new ArrayList<>(limit);
+        for (Product p : matched) {
+            if (result.size() >= limit) break;
+            result.add(p);
+        }
+        for (Product p : rest) {
+            if (result.size() >= limit) break;
+            result.add(p);
+        }
+        return result;
     }
 
     private List<Long> extractSuggestedIds(String text) {
@@ -169,10 +241,7 @@ public class ChatbotService {
             return result;
         }
         try {
-            List<Product> all = productRepository.findByStatus(1, PageRequest.of(0, 30)).getContent();
-            if (all.isEmpty()) {
-                all = productRepository.findAll(PageRequest.of(0, 30)).getContent();
-            }
+            List<Product> all = productRepository.findByStatus(1, PageRequest.of(0, 50)).getContent();
             String lower = text.toLowerCase();
             for (Product p : all) {
                 if (p.getName() != null && !p.getName().isBlank()) {
@@ -199,15 +268,17 @@ public class ChatbotService {
         }
         for (Long id : ids) {
             try {
-                productRepository.findById(id).ifPresent(p -> {
-                    String priceStr = p.getPrice() != null ? String.format("%,d VNĐ", p.getPrice().longValue()) : "Liên hệ";
-                    cards.add(new ChatResponseDTO.ProductCardDTO(
-                            p.getId(),
-                            p.getName() != null ? p.getName() : ("Sản phẩm #" + p.getId()),
-                            priceStr,
-                            p.getBrand() != null ? p.getBrand() : "Chính hãng"
-                    ));
-                });
+                productRepository.findById(id)
+                        .filter(p -> Integer.valueOf(1).equals(p.getStatus()))
+                        .ifPresent(p -> {
+                            String priceStr = p.getPrice() != null ? String.format("%,d VNĐ", p.getPrice().longValue()) : "Liên hệ";
+                            cards.add(new ChatResponseDTO.ProductCardDTO(
+                                    p.getId(),
+                                    p.getName() != null ? p.getName() : ("Sản phẩm #" + p.getId()),
+                                    priceStr,
+                                    p.getBrand() != null ? p.getBrand() : "Chính hãng"
+                            ));
+                        });
             } catch (Exception ignored) {
             }
         }

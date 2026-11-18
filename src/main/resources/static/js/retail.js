@@ -112,7 +112,14 @@ document.addEventListener('DOMContentLoaded', () => {
             link.tabIndex = -1;
             link.setAttribute('aria-selected', 'false');
             const image = document.createElement('img');
-            image.src = `${base}${item.image}`;
+            const rawImage = item.image || '';
+            image.src = rawImage
+              ? (rawImage.startsWith('http') || rawImage.startsWith('/') ? `${base}${rawImage}` : `${base}/${rawImage}`)
+              : '';
+            image.hidden = !rawImage;
+            image.addEventListener('error', () => {
+              image.hidden = true;
+            });
             image.alt = '';
             const text = document.createElement('span');
             text.textContent = item.name;
@@ -422,6 +429,14 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.classList.add('btn-brand');
       });
     });
+    wizard.addEventListener('submit', event => {
+      const budgetInput = wizard.querySelector('#budget');
+      if (budgetInput && !budgetInput.checkValidity()) {
+        event.preventDefault();
+        showStep('1');
+        budgetInput.reportValidity();
+      }
+    });
   }
 
   // 8. Checkout Inline Address Modal
@@ -475,6 +490,9 @@ document.addEventListener('DOMContentLoaded', () => {
           window.bootstrap.Modal.getInstance(modalEl)?.hide();
         }
         addressModalForm.reset();
+        addressModalForm.querySelector('[data-address-picker]')?.dispatchEvent(
+          new CustomEvent('ptv:set-address', {detail: {provinceCode: '', wardCode: ''}})
+        );
       } catch {
         if (errBox) {
           errBox.textContent = 'Lỗi kết nối khi lưu địa chỉ.';

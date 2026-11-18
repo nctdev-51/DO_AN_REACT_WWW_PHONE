@@ -27,10 +27,24 @@
             showSkeleton();
             if (featuresWrap) featuresWrap.hidden = true;
 
-            const url = ctx + '/api/ai/description/' + productId
-                + (refresh ? '?refresh=true' : '');
+            const url = refresh
+                ? ctx + '/api/ai/description/' + productId + '/refresh'
+                : ctx + '/api/ai/description/' + productId;
 
-            fetch(url, { credentials: 'same-origin' })
+            const headers = { Accept: 'application/json' };
+            if (refresh && refreshBtn) {
+                const csrfHeader = refreshBtn.dataset.csrfHeader;
+                const csrfToken = refreshBtn.dataset.csrfToken;
+                if (csrfHeader && csrfToken) {
+                    headers[csrfHeader] = csrfToken;
+                }
+            }
+
+            fetch(url, {
+                method: refresh ? 'POST' : 'GET',
+                headers: headers,
+                credentials: 'same-origin'
+            })
                 .then(function (res) {
                     if (!res.ok) throw new Error('HTTP ' + res.status);
                     return res.json();

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import reactor.core.publisher.Flux;
@@ -33,6 +34,7 @@ public class OpenAiCompatibleChatModel implements ChatModel {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAiCompatibleChatModel.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RestClient restClient;
 
     @Value("${spring.ai.openai.api-key:}")
     private String apiKey;
@@ -42,6 +44,19 @@ public class OpenAiCompatibleChatModel implements ChatModel {
 
     @Value("${spring.ai.openai.chat.options.model:}")
     private String customModel;
+
+    @Value("${spring.ai.openai.chat.options.temperature:0.7}")
+    private double temperature = 0.7;
+
+    @Value("${spring.ai.openai.chat.options.max-tokens:500}")
+    private int maxTokens = 500;
+
+    public OpenAiCompatibleChatModel() {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(3000);
+        requestFactory.setReadTimeout(15000);
+        this.restClient = RestClient.builder().requestFactory(requestFactory).build();
+    }
 
     @Override
     public ChatResponse call(Prompt prompt) {
@@ -75,13 +90,11 @@ public class OpenAiCompatibleChatModel implements ChatModel {
             Map<String, Object> requestPayload = new HashMap<>();
             requestPayload.put("model", model);
             requestPayload.put("messages", messages);
-            requestPayload.put("temperature", 0.7);
-            requestPayload.put("max_tokens", 500);
-
-            RestClient restClient = RestClient.builder().baseUrl(baseUrl).build();
+            requestPayload.put("temperature", temperature);
+            requestPayload.put("max_tokens", maxTokens > 0 ? maxTokens : 500);
 
             String responseBody = restClient.post()
-                    .uri("/chat/completions")
+                    .uri(baseUrl + "/chat/completions")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey.trim())
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(requestPayload)
@@ -102,19 +115,27 @@ public class OpenAiCompatibleChatModel implements ChatModel {
         }
     }
 
-    private String resolveBaseUrl(boolean isGroq) {
+    String resolveBaseUrl(boolean isGroq) {
         if (customBaseUrl != null && !customBaseUrl.isBlank()) {
             String clean = customBaseUrl.endsWith("/")
                     ? customBaseUrl.substring(0, customBaseUrl.length() - 1)
                     : customBaseUrl;
-            return clean.endsWith("/v1") ? clean : clean + "/v1";
+            boolean pointsToGroq = clean.contains("api.groq.com");
+            boolean pointsToOpenAi = clean.contains("api.openai.com");
+            if ((isGroq && !pointsToOpenAi) || (!isGroq && !pointsToGroq)) {
+                return clean.endsWith("/v1") ? clean : clean + "/v1";
+            }
         }
         return isGroq ? "https://api.groq.com/openai/v1" : "https://api.openai.com/v1";
     }
 
-    private String resolveModel(boolean isGroq) {
-        if (customModel != null && !customModel.isBlank() && !customModel.equals("gpt-4o-mini")) {
-            return customModel;
+    String resolveModel(boolean isGroq) {
+        if (customModel != null && !customModel.isBlank()) {
+            boolean groqSpecific = customModel.startsWith("openai/gpt-oss") || customModel.startsWith("llama-");
+            boolean openAiSpecific = customModel.startsWith("gpt-");
+            if ((isGroq && !openAiSpecific) || (!isGroq && !groqSpecific)) {
+                return customModel;
+            }
         }
         return isGroq ? "openai/gpt-oss-20b" : "gpt-4o-mini";
     }

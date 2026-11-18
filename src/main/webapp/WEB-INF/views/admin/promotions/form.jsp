@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <jsp:include page="/WEB-INF/views/shared/admin/header.jsp" />
-<section class="panel">
+<section class="panel form-panel">
   <h2>
     ${promotionId == null ? 'Thêm mã giảm giá' : 'Sửa mã giảm giá'}
   </h2>

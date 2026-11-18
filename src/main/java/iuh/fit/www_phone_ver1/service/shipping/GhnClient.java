@@ -15,7 +15,7 @@ public class GhnClient {
   private final String token;
   private final long shopId;
   private final URI base;
-  private final HttpClient client;
+  private volatile HttpClient client;
 
   @org.springframework.beans.factory.annotation.Autowired
   public GhnClient(
@@ -32,10 +32,25 @@ public class GhnClient {
             production
                 ? "https://online-gateway.ghn.vn/shiip/public-api/"
                 : "https://dev-online-gateway.ghn.vn/shiip/public-api/"),
-        HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(5))
-            .followRedirects(HttpClient.Redirect.NEVER)
-            .build());
+        null);
+  }
+
+  private HttpClient httpClient() {
+    HttpClient current = client;
+    if (current == null) {
+      synchronized (this) {
+        current = client;
+        if (current == null) {
+          current =
+              HttpClient.newBuilder()
+                  .connectTimeout(Duration.ofSeconds(5))
+                  .followRedirects(HttpClient.Redirect.NEVER)
+                  .build();
+          client = current;
+        }
+      }
+    }
+    return current;
   }
 
   GhnClient(
@@ -152,7 +167,7 @@ public class GhnClient {
                     new JsonMapper().writeValueAsString(payload),
                     java.nio.charset.StandardCharsets.UTF_8));
       var response =
-          client.send(
+          httpClient().send(
               builder.build(),
               HttpResponse.BodyHandlers.ofString(java.nio.charset.StandardCharsets.UTF_8));
       if (response.statusCode() != 200)

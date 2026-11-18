@@ -77,12 +77,16 @@ public class CheckoutController {
       result =
           pricing.preview(
               cart.getTotalAmount(), form.getPromotionCode(), userId, cart.getItemList());
+    } catch (IllegalArgumentException ex) {
+      model.addAttribute("errorMsg", ex.getMessage());
+      result = pricing.preview(cart.getTotalAmount(), null, userId, cart.getItemList());
+    }
+    try {
       pointsDiscount =
           loyalty.preview(
               userId, form.getRedeemPoints(), result.getSubtotal().subtract(result.getDiscount()));
     } catch (IllegalArgumentException ex) {
       model.addAttribute("errorMsg", ex.getMessage());
-      result = pricing.preview(cart.getTotalAmount(), null, userId, cart.getItemList());
     }
     model.addAttribute("quote", result);
     model.addAttribute("pointsDiscount", pointsDiscount);

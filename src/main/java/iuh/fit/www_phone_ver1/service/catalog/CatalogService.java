@@ -9,12 +9,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class CatalogService {
+  public record ProductCatalogChangedEvent(Long productId, boolean deleted) {}
+
   private final ProductRepository products;
   private final CategoryRepository categories;
   private final ProductVariantRepository variants;
@@ -25,6 +29,33 @@ public class CatalogService {
   private final ProductMediaRepository media;
   private final ConsultationRepository consultations;
   private final CampaignBannerRepository banners;
+  private final ApplicationEventPublisher events;
+
+  @Autowired
+  public CatalogService(
+      ProductRepository products,
+      CategoryRepository categories,
+      ProductVariantRepository variants,
+      OrderDetailRepository details,
+      ReviewRepository reviews,
+      ProductImageStorageService images,
+      WishlistRepository wishlist,
+      ProductMediaRepository media,
+      ConsultationRepository consultations,
+      CampaignBannerRepository banners,
+      ApplicationEventPublisher events) {
+    this.products = products;
+    this.categories = categories;
+    this.variants = variants;
+    this.details = details;
+    this.reviews = reviews;
+    this.images = images;
+    this.wishlist = wishlist;
+    this.media = media;
+    this.consultations = consultations;
+    this.banners = banners;
+    this.events = events;
+  }
 
   public CatalogService(
       ProductRepository products,
@@ -37,16 +68,18 @@ public class CatalogService {
       ProductMediaRepository media,
       ConsultationRepository consultations,
       CampaignBannerRepository banners) {
-    this.products = products;
-    this.categories = categories;
-    this.variants = variants;
-    this.details = details;
-    this.reviews = reviews;
-    this.images = images;
-    this.wishlist = wishlist;
-    this.media = media;
-    this.consultations = consultations;
-    this.banners = banners;
+    this(
+        products,
+        categories,
+        variants,
+        details,
+        reviews,
+        images,
+        wishlist,
+        media,
+        consultations,
+        banners,
+        null);
   }
 
   public Product product(Long id) {
@@ -83,6 +116,7 @@ public class CatalogService {
       throw error;
     }
     if (!Objects.equals(previous, nextImage)) images.delete(previous);
+    publishProductChanged(product.getId(), !Integer.valueOf(1).equals(product.getStatus()));
   }
 
   @Transactional
@@ -92,6 +126,7 @@ public class CatalogService {
         || consultations.countByProduct_Id(id) > 0
         || banners.countByProduct_Id(id) > 0) {
       product.setStatus(0);
+      publishProductChanged(id, true);
       return false;
     }
     reviews.deleteByProduct_Id(id);
@@ -105,6 +140,7 @@ public class CatalogService {
     products.flush();
     images.delete(product.getImage());
     for (String path : mediaPaths) images.delete(path);
+    publishProductChanged(id, true);
     return true;
   }
 
@@ -145,6 +181,7 @@ public class CatalogService {
     variant.setProduct(product);
     variants.saveAndFlush(variant);
     updateMinimumPrice(product);
+    publishProductChanged(productId, !Integer.valueOf(1).equals(product.getStatus()));
   }
 
   @Transactional
@@ -157,6 +194,13 @@ public class CatalogService {
     variant.setActive(false);
     variants.flush();
     updateMinimumPrice(variant.getProduct());
+    publishProductChanged(productId, !Integer.valueOf(1).equals(variant.getProduct().getStatus()));
+  }
+
+  private void publishProductChanged(Long productId, boolean deleted) {
+    if (events != null && productId != null) {
+      events.publishEvent(new ProductCatalogChangedEvent(productId, deleted));
+    }
   }
 
   private void updateMinimumPrice(Product product) {

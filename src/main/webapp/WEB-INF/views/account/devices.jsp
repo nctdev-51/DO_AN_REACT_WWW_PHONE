@@ -41,10 +41,10 @@
               <span class="small muted d-block">Bảo hành chính hãng (${d.warrantyMonths} tháng)</span>
               <c:choose>
                 <c:when test="${d.warrantyActive}">
-                  <span class="status-badge">Còn bảo hành · ${d.warrantyRemainingDays} ngày (đến <c:out value="${d.warrantyExpiresAt}"/>)</span>
+                  <span class="status-badge">Còn bảo hành · ${d.warrantyDaysRemaining} ngày (đến <c:out value="${d.warrantyExpiresLabel}"/>)</span>
                 </c:when>
                 <c:otherwise>
-                  <span class="status-badge">Đã hết hạn bảo hành (<c:out value="${d.warrantyExpiresAt}"/>)</span>
+                  <span class="status-badge">Đã hết hạn bảo hành (<c:out value="${d.warrantyExpiresLabel}"/>)</span>
                 </c:otherwise>
               </c:choose>
             </div>
@@ -54,10 +54,10 @@
             </div>
           </div>
 
-          <c:if test="${not empty d.tickets}">
+          <c:if test="${not empty d.supportHistory}">
             <div class="device-ticket-list">
               <strong class="small d-block mb-1">Yêu cầu hỗ trợ liên quan:</strong>
-              <c:forEach var="t" items="${d.tickets}">
+              <c:forEach var="t" items="${d.supportHistory}">
                 <div class="small muted">#${t.id} · <c:out value="${t.typeLabel}"/> — <strong><c:out value="${t.statusLabel}"/></strong></div>
               </c:forEach>
             </div>

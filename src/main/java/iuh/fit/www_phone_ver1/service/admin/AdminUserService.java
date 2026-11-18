@@ -2,6 +2,10 @@ package iuh.fit.www_phone_ver1.service.admin;
 
 import iuh.fit.www_phone_ver1.entity.*;
 import iuh.fit.www_phone_ver1.repository.*;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +17,31 @@ public class AdminUserService {
   private final ReviewRepository reviews;
   private final AccountTokenRepository tokens;
   private final WishlistRepository wishlist;
+  private final ConsultationRepository consultations;
+  private final LoyaltyRepository loyalty;
+  private final SessionRegistry sessionRegistry;
+
+  @org.springframework.beans.factory.annotation.Autowired
+  public AdminUserService(
+      OrderRepository orders,
+      UserRepository users,
+      AddressRepository addresses,
+      ReviewRepository reviews,
+      AccountTokenRepository tokens,
+      WishlistRepository wishlist,
+      ConsultationRepository consultations,
+      LoyaltyRepository loyalty,
+      ObjectProvider<SessionRegistry> sessionRegistryProvider) {
+    this.orders = orders;
+    this.users = users;
+    this.addresses = addresses;
+    this.reviews = reviews;
+    this.tokens = tokens;
+    this.wishlist = wishlist;
+    this.consultations = consultations;
+    this.loyalty = loyalty;
+    this.sessionRegistry = sessionRegistryProvider.getIfAvailable();
+  }
 
   public AdminUserService(
       OrderRepository orders,
@@ -21,12 +50,27 @@ public class AdminUserService {
       ReviewRepository reviews,
       AccountTokenRepository tokens,
       WishlistRepository wishlist) {
+    this(orders, users, addresses, reviews, tokens, wishlist, null, null);
+  }
+
+  public AdminUserService(
+      OrderRepository orders,
+      UserRepository users,
+      AddressRepository addresses,
+      ReviewRepository reviews,
+      AccountTokenRepository tokens,
+      WishlistRepository wishlist,
+      ConsultationRepository consultations,
+      LoyaltyRepository loyalty) {
     this.orders = orders;
     this.users = users;
     this.addresses = addresses;
     this.reviews = reviews;
     this.tokens = tokens;
     this.wishlist = wishlist;
+    this.consultations = consultations;
+    this.loyalty = loyalty;
+    this.sessionRegistry = null;
   }
 
   @Transactional
@@ -51,6 +95,24 @@ public class AdminUserService {
     user.setAddress(address == null ? null : address.trim());
     user.setStatus(status);
     users.save(user);
+    if (status == 0) {
+      expireActiveSessions(user.getEmail());
+    }
+  }
+
+  private void expireActiveSessions(String email) {
+    if (sessionRegistry == null || email == null) {
+      return;
+    }
+    for (Object principal : sessionRegistry.getAllPrincipals()) {
+      String username =
+          principal instanceof UserDetails ud ? ud.getUsername() : principal.toString();
+      if (email.equalsIgnoreCase(username)) {
+        for (SessionInformation info : sessionRegistry.getAllSessions(principal, false)) {
+          info.expireNow();
+        }
+      }
+    }
   }
 
   @Transactional
@@ -67,6 +129,12 @@ public class AdminUserService {
     reviews.deleteByUser_Id(id);
     tokens.deleteByUser_Id(id);
     wishlist.deleteByUser_Id(id);
+    if (consultations != null) {
+      consultations.deleteByUser_Id(id);
+    }
+    if (loyalty != null) {
+      loyalty.deleteByUser_Id(id);
+    }
     users.delete(user);
   }
 }
