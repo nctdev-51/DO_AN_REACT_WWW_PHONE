@@ -39,7 +39,7 @@ services:
       - ETCD_SNAPSHOT_COUNT=50000
     volumes:
       - etcd-data:/etcd
-    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    command: etcd -advertise-client-urls=http://etcd:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
     healthcheck:
       test: ["CMD", "etcdctl", "endpoint", "health"]
       interval: 30s
@@ -47,10 +47,8 @@ services:
       retries: 3
 
   minio:
-    image: pgsty/silo:latest
+    image: pgsty/silo:latest@sha256:c20d112390b9a9ce8c11b8af95ad35bcaa62f4759663c09c936cd8d2b511f329
     environment:
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
@@ -99,6 +97,8 @@ services:
       mariadb:
         condition: service_healthy
       mongodb:
+        condition: service_healthy
+      milvus:
         condition: service_healthy
     ports:
       - "8080:8080"
