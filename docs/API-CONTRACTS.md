@@ -18,3 +18,10 @@ Mỗi endpoint JSON mới phải có contract ở đây trước khi module fron
 - API mới cần mô tả status code, request JSON, response JSON, validation và fallback trước khi merge frontend.
 - Không thay đổi field đã public. Nếu buộc phải thay đổi, thêm field mới hoặc version endpoint.
 - Không đưa secret, raw payment payload, địa chỉ đầy đủ hoặc PII không cần thiết vào response.
+
+## Recommendation (TV3)
+
+| Endpoint | Owner | Response | Ghi chú |
+| --- | --- | --- | --- |
+| `GET /api/recommendations/{productId}?limit=6` | TV3 | `{productId, source, recommendations: [{id, name, brand, kind, price, originalPrice, image, chipset, inStock}]}` | `limit` giới hạn `1..12`. Trả `404` nếu sản phẩm không tồn tại/ngừng bán. `source` là `milvus` hoặc `fallback` (MariaDB khi Milvus unavailable). |
+| `POST /api/recommendations/reindex` | TV3 | `{totalProducts, indexed, failed, milvusAvailable}` | Yêu cầu `ROLE_ADMIN` + CSRF; nạp lại embedding toàn bộ sản phẩm active vào MongoDB và Milvus. |

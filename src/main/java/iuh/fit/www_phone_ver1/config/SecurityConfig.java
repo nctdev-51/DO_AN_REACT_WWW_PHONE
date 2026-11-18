@@ -91,6 +91,12 @@ public class SecurityConfig {
                     .requestMatchers(
                         org.springframework.http.HttpMethod.POST, "/products/*/reviews")
                     .authenticated()
+                    .requestMatchers(
+                        org.springframework.http.HttpMethod.POST, "/api/recommendations/reindex")
+                    .hasRole("ADMIN")
+                    .requestMatchers(
+                        org.springframework.http.HttpMethod.GET, "/api/recommendations/**")
+                    .permitAll()
                     .requestMatchers("/api/ai/**")
                     .permitAll()
                     .anyRequest()
