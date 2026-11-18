@@ -22,6 +22,7 @@
           <p class="eyebrow">QUẢN TRỊ CỬA HÀNG</p>
           <nav>
             <a class="${currentPage == 'dashboard' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin">Tổng quan</a>
+            <a class="${currentPage == 'analytics' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/analytics">Theo dõi & thống kê</a>
             <a class="${currentPage == 'products' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/products">Sản phẩm & tồn kho</a>
             <a class="${currentPage == 'categories' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/categories">Danh mục</a>
             <a class="${currentPage == 'orders' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/orders">Đơn hàng</a>

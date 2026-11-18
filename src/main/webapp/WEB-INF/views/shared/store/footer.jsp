@@ -103,6 +103,7 @@
 <script src="${pageContext.request.contextPath}/js/motion.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/retail.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/addresses.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/tracking.js" defer></script>
 <%-- Module AI Scripts (Tài) --%>
 <script src="${pageContext.request.contextPath}/js/ai-description.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/chatbot.js" defer></script>

@@ -72,7 +72,7 @@
       <p id="variant-stock" class="stock-text">Còn ${product.stock} sản phẩm</p>
       <div class="d-flex gap-3">
         <input id="buy-quantity" class="form-control quantity-input" type="number" name="quantity" value="1" min="1" max="99" aria-label="Số lượng">
-        <button id="buy-button" class="btn btn-brand flex-grow-1" ${product.stock == 0 ? 'disabled' : ''}>Thêm vào giỏ hàng</button>
+        <button id="buy-button" data-product-id="${product.id}" class="btn btn-brand flex-grow-1" ${product.stock == 0 ? 'disabled' : ''}>Thêm vào giỏ hàng</button>
       </div>
       <button class="btn btn-outline-dark w-100 mt-3" name="buyNow" value="true" data-buy-now>Mua ngay phiên bản này</button>
     </form>

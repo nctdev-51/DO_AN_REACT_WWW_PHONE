@@ -1,4 +1,18 @@
 services:
+  mongodb:
+    image: mongo:8
+    environment:
+      MONGO_INITDB_DATABASE: ptv_mobile
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
   mariadb:
     image: mariadb:11.8
     environment:
@@ -24,8 +38,11 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+      mongodb:
+        condition: service_healthy
     ports:
       - "8080:8080"
 
 volumes:
   mariadb-data:
+  mongodb-data:
