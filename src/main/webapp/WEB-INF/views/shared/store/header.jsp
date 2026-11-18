@@ -19,6 +19,9 @@
     <%-- Module AI (Tài) --%>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/ai-panel.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/chatbot.css">
+    <%-- Module Recommendation & Vector DB (Vĩ) --%>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/swiper/swiper-bundle.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/recommendation.css">
     <meta name="ctx" content="${pageContext.request.contextPath}">
   </head>
   <body class="storefront">
