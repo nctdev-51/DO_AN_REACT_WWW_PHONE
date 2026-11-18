@@ -18,7 +18,7 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-      <spring-ai.version>2.0.0-M1</spring-ai.version>
+      <spring-ai.version>1.0.0-M6</spring-ai.version>
     </properties>
     <dependencies>
         <dependency>
@@ -104,12 +104,14 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Spring AI OpenAI (Module AI - Tài) -->
-      <!-- Spring AI OpenAI (Module AI - Tài) -->
-      <dependency>
-        <groupId>org.springframework.ai</groupId>
-        <artifactId>spring-ai-starter-model-openai</artifactId>
-      </dependency>
+        <!-- Spring AI Core (Module AI - Tài) -->
+        <!-- Chỉ dùng spring-ai-core (interfaces ChatModel, Prompt, Message...)
+             KHÔNG dùng starter để tránh auto-config xung đột với Spring Boot 4.x.
+             Project tự implement ChatModel qua OpenAiCompatibleChatModel.java -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-core</artifactId>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
