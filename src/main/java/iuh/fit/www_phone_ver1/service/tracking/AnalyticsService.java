@@ -4,7 +4,6 @@ import iuh.fit.www_phone_ver1.entity.mongo.UserEvent;
 import iuh.fit.www_phone_ver1.repository.mongo.UserEventRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.domain.Sort;
@@ -113,9 +112,7 @@ public class AnalyticsService {
                 Criteria.where("eventType")
                     .is("SEARCH")
                     .and("keyword")
-                    .ne(null)
-                    .and("keyword")
-                    .ne("")
+                    .nin(null, "")
                     .and("createdAt")
                     .gte(from)
                     .lte(to)),
