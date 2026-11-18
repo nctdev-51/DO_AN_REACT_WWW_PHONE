@@ -79,8 +79,8 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http, AuthenticationSuccessHandler customSuccessHandler) throws Exception {
-    // Disable CSRF for /api/ai/** REST endpoints (stateless JSON API — Tài)
-    http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/ai/**"));
+    // Disable CSRF for stateless JSON REST endpoints.
+    http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/ai/**", "/api/tracking"));
     http.authorizeHttpRequests(
             auth ->
                 auth.requestMatchers("/admin/**")
