@@ -120,15 +120,28 @@ class PriorityTwoFrontendTests {
     String retailCss = Files.readString(Path.of("src/main/resources/static/css/retail.css"));
     String themeCss = Files.readString(Path.of("src/main/resources/static/css/theme.css"));
 
+    String recCss =
+        Files.readString(Path.of("src/main/resources/static/css/components/recommendation.css"));
     assertFalse(cardTag.contains("img-hover"));
     assertFalse(cardTag.contains("has-hover-image"));
     assertFalse(retailCss.contains(".img-hover"));
     assertFalse(themeCss.contains("scale(1.025)"));
     assertTrue(storeCss.contains(".product-card-image img + img"));
     assertTrue(storeCss.contains("overflow:hidden"));
+    assertTrue(storeCss.contains("display:flex;\n  align-items:center;\n  justify-content:center")
+        || storeCss.contains("display:flex;\r\n  align-items:center;\r\n  justify-content:center"));
+    assertTrue(storeCss.contains("width:auto;\n  height:auto;\n  max-width:100%;\n  max-height:100%")
+        || storeCss.contains("width:auto;\r\n  height:auto;\r\n  max-width:100%;\r\n  max-height:100%"));
+    assertTrue(themeCss.contains("padding: 34px 20px 14px"));
+    assertTrue(recCss.contains("max-height: 100%"));
     assertTrue(storeCss.contains(".qty-stepper{"));
     assertFalse(storeCss.contains("top:115px"));
     assertTrue(storeCss.contains(".product-left-extras{"));
+
+    for (Product prod : products.findByStatus(1)) {
+      Path imgPath = Path.of("src/main/resources/static" + prod.getImage());
+      assertTrue(Files.exists(imgPath), "Missing product image: " + prod.getImage());
+    }
 
     assertFalse(galleryJsp.contains("Hình ảnh"));
     assertTrue(galleryJsp.contains("data-gallery-tabs"));
