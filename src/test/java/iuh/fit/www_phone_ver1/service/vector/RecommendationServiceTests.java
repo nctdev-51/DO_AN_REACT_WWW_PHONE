@@ -230,7 +230,7 @@ class RecommendationServiceTests {
     when(products.findById(1L)).thenReturn(Optional.of(anchorPhone));
     when(vectorStore.isAvailable()).thenReturn(true);
     when(embeddingRepo.findById("1")).thenReturn(Optional.of(staleDoc));
-    when(vectorStore.searchSimilar(openAiVec, 8)).thenReturn(List.of(2L));
+    when(vectorStore.searchSimilar(openAiVec, 24)).thenReturn(List.of(2L));
     when(products.findAllById(List.of(2L))).thenReturn(List.of(similarFlagship));
     when(products.findByStatus(1)).thenReturn(List.of(anchorPhone, similarFlagship, sameBrandMid));
 
@@ -269,6 +269,50 @@ class RecommendationServiceTests {
     verify(embeddingRepo, never()).save(any());
     verify(vectorStore, never()).upsertEmbedding(any(), any(float[].class));
     verify(vectorStore, never()).searchSimilar(any(float[].class), anyInt());
+  }
+
+  @Test
+  void recommendPrioritizesSameKindFallbackAheadOfCrossKindMilvusHits() {
+    when(products.findById(1L)).thenReturn(Optional.of(anchorPhone));
+    when(vectorStore.isAvailable()).thenReturn(true);
+    when(embeddingRepo.findById("1")).thenReturn(Optional.empty());
+    // Milvus returns 1 same-kind (id=2) plus cross-kind accessory (id=4)
+    when(vectorStore.searchSimilar(any(float[].class), anyInt())).thenReturn(List.of(2L, 4L));
+    when(products.findAllById(List.of(2L, 4L))).thenReturn(List.of(similarFlagship, phoneCase));
+    when(products.findByStatus(1))
+        .thenReturn(List.of(anchorPhone, similarFlagship, sameBrandMid, phoneCase));
+
+    RecommendationResponseDTO res = recommendationService.recommend(1L, 2).orElseThrow();
+
+    assertEquals(2, res.recommendations().size());
+    assertEquals(2L, res.recommendations().get(0).id());
+    assertEquals(3L, res.recommendations().get(1).id());
+    assertTrue(res.recommendations().stream().allMatch(p -> "PHONE".equals(p.kind())));
+  }
+
+  @Test
+  void reindexAllPrunesStaleEmbeddingsAndDeletesFromMilvus() {
+    ProductEmbeddingDocument stale =
+        new ProductEmbeddingDocument(
+            "999",
+            List.of(0.1f),
+            "stale",
+            EmbeddingService.PROVIDER_LOCAL,
+            LocalDateTime.now());
+    when(products.findByStatus(1)).thenReturn(List.of(anchorPhone));
+    when(vectorStore.isConfigured()).thenReturn(true);
+    when(vectorStore.isAvailable()).thenReturn(true);
+    when(embeddingRepo.findById("1")).thenReturn(Optional.empty());
+    when(vectorStore.upsertEmbedding(eq(1L), any(float[].class))).thenReturn(true);
+    when(embeddingRepo.findAll()).thenReturn(List.of(stale));
+
+    RecommendationService.ReindexSummary summary = recommendationService.reindexAll();
+
+    assertEquals(1, summary.totalProducts());
+    assertEquals(1, summary.indexed());
+    assertEquals(0, summary.failed());
+    verify(embeddingRepo).deleteAllById(List.of("999"));
+    verify(vectorStore).deleteEmbeddings(List.of(999L));
   }
 
   private static double dot(float[] a, float[] b) {

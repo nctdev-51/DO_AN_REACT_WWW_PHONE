@@ -10,4 +10,6 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
   List<Consultation> findByUser_EmailOrderByIdDesc(String email);
 
   long countByUser_EmailAndStatusIn(String email, Collection<String> statuses);
+
+  void deleteByUser_Id(Long userId);
 }

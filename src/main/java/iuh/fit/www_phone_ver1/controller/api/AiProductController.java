@@ -116,8 +116,8 @@ public class AiProductController {
             ));
         }
 
-        String rawSession = body.get("sessionId");
-        String sessionId = (rawSession != null && !rawSession.isBlank()) ? rawSession.trim() : "default";
+        HttpSession httpSession = request != null ? request.getSession(true) : null;
+        String sessionId = httpSession != null ? httpSession.getId() : clientKey(request);
         ChatResponseDTO response = chatbotService.chat(trimmed, sessionId);
         return ResponseEntity.ok(response);
     }

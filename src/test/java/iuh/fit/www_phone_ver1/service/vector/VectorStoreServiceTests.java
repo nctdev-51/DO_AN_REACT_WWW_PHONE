@@ -8,8 +8,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.grpc.MutationResult;
 import io.milvus.param.R;
 import io.milvus.param.RpcStatus;
+import io.milvus.param.dml.DeleteParam;
 import io.milvus.param.dml.SearchParam;
 import java.time.Clock;
 import java.time.Instant;
@@ -99,5 +101,26 @@ class VectorStoreServiceTests {
     assertTrue(hits.isEmpty());
     assertTrue(service.isInCooldown());
     assertFalse(service.isAvailable());
+  }
+
+  @Test
+  void deleteEmbeddingsCallsMilvusDeleteWhenAvailable() {
+    MilvusServiceClient client = mock(MilvusServiceClient.class);
+    when(client.hasCollection(any())).thenReturn(R.success(Boolean.TRUE));
+    when(client.loadCollection(any())).thenReturn(R.success(new RpcStatus(RpcStatus.SUCCESS_MSG)));
+    when(client.delete(any(DeleteParam.class)))
+        .thenReturn(R.success(MutationResult.newBuilder().build()));
+
+    VectorStoreService service =
+        new VectorStoreService(
+            client,
+            "product_embeddings",
+            1536,
+            30_000L,
+            Clock.fixed(Instant.ofEpochMilli(3_000_000L), ZoneOffset.UTC));
+
+    assertTrue(service.isConfigured());
+    assertTrue(service.deleteEmbeddings(List.of(10L, 12L)));
+    verify(client, times(1)).delete(any(DeleteParam.class));
   }
 }

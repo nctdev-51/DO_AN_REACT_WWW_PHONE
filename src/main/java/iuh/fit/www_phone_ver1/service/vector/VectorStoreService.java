@@ -13,6 +13,7 @@ import io.milvus.param.collection.CreateCollectionParam;
 import io.milvus.param.collection.FieldType;
 import io.milvus.param.collection.HasCollectionParam;
 import io.milvus.param.collection.LoadCollectionParam;
+import io.milvus.param.dml.DeleteParam;
 import io.milvus.param.dml.InsertParam;
 import io.milvus.param.dml.SearchParam;
 import io.milvus.param.dml.UpsertParam;
@@ -22,8 +23,11 @@ import iuh.fit.www_phone_ver1.service.ai.EmbeddingService;
 import jakarta.annotation.PostConstruct;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -159,6 +163,10 @@ public class VectorStoreService {
     }
   }
 
+  public boolean isConfigured() {
+    return milvus != null;
+  }
+
   public boolean isAvailable() {
     if (milvus == null || isInCooldown()) {
       return false;
@@ -241,6 +249,45 @@ public class VectorStoreService {
     } catch (Exception ex) {
       markUnavailable("search error: " + ex.getMessage());
       return List.of();
+    }
+  }
+
+  public boolean deleteEmbedding(Long productId) {
+    return productId != null && deleteEmbeddings(List.of(productId));
+  }
+
+  public boolean deleteEmbeddings(Collection<Long> productIds) {
+    if (productIds == null || productIds.isEmpty()) {
+      return true;
+    }
+    List<Long> validIds = productIds.stream().filter(Objects::nonNull).distinct().toList();
+    if (validIds.isEmpty()) {
+      return true;
+    }
+    if (!isAvailable()) {
+      return false;
+    }
+    String idListExpr =
+        validIds.stream().map(String::valueOf).collect(Collectors.joining(",", "[", "]"));
+    try {
+      R<MutationResult> res =
+          milvus.delete(
+              DeleteParam.newBuilder()
+                  .withCollectionName(collectionName)
+                  .withExpr(FIELD_ID + " in " + idListExpr)
+                  .build());
+      if (res == null || res.getStatus() != R.Status.Success.getCode()) {
+        markUnavailable(
+            "delete failed for "
+                + validIds.size()
+                + " ids: "
+                + (res == null ? "null response" : res.getMessage()));
+        return false;
+      }
+      return true;
+    } catch (Exception ex) {
+      markUnavailable("delete error: " + ex.getMessage());
+      return false;
     }
   }
 }

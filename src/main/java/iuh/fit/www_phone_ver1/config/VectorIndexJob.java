@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,7 @@ public class VectorIndexJob {
     this.indexOnStartup = indexOnStartup;
   }
 
+  @Async
   @EventListener(ApplicationReadyEvent.class)
   public void warmUpOnStartup() {
     if (!indexOnStartup) {
@@ -35,9 +37,10 @@ public class VectorIndexJob {
     try {
       RecommendationService.ReindexSummary summary = recommendationService.reindexAll();
       log.info(
-          "Startup vector warmup finished: {}/{} products indexed",
+          "Startup vector warmup finished: {}/{} products indexed (milvusAvailable={})",
           summary.indexed(),
-          summary.totalProducts());
+          summary.totalProducts(),
+          summary.milvusAvailable());
     } catch (Exception ex) {
       log.warn("Startup vector warmup skipped: {}", ex.getMessage());
     }

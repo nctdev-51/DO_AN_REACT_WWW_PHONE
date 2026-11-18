@@ -13,6 +13,28 @@ public class AdminUserService {
   private final ReviewRepository reviews;
   private final AccountTokenRepository tokens;
   private final WishlistRepository wishlist;
+  private final ConsultationRepository consultations;
+  private final LoyaltyRepository loyalty;
+
+  @org.springframework.beans.factory.annotation.Autowired
+  public AdminUserService(
+      OrderRepository orders,
+      UserRepository users,
+      AddressRepository addresses,
+      ReviewRepository reviews,
+      AccountTokenRepository tokens,
+      WishlistRepository wishlist,
+      ConsultationRepository consultations,
+      LoyaltyRepository loyalty) {
+    this.orders = orders;
+    this.users = users;
+    this.addresses = addresses;
+    this.reviews = reviews;
+    this.tokens = tokens;
+    this.wishlist = wishlist;
+    this.consultations = consultations;
+    this.loyalty = loyalty;
+  }
 
   public AdminUserService(
       OrderRepository orders,
@@ -21,12 +43,7 @@ public class AdminUserService {
       ReviewRepository reviews,
       AccountTokenRepository tokens,
       WishlistRepository wishlist) {
-    this.orders = orders;
-    this.users = users;
-    this.addresses = addresses;
-    this.reviews = reviews;
-    this.tokens = tokens;
-    this.wishlist = wishlist;
+    this(orders, users, addresses, reviews, tokens, wishlist, null, null);
   }
 
   @Transactional
@@ -67,6 +84,12 @@ public class AdminUserService {
     reviews.deleteByUser_Id(id);
     tokens.deleteByUser_Id(id);
     wishlist.deleteByUser_Id(id);
+    if (consultations != null) {
+      consultations.deleteByUser_Id(id);
+    }
+    if (loyalty != null) {
+      loyalty.deleteByUser_Id(id);
+    }
     users.delete(user);
   }
 }
