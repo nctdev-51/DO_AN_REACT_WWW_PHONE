@@ -315,6 +315,41 @@ class RecommendationServiceTests {
     verify(vectorStore).deleteEmbeddings(List.of(999L));
   }
 
+  @Test
+  void recommendClampsLimitReturnsEmptyForInactiveAndHandlesMongoErrors() {
+    Product inactive =
+        product(
+            99L,
+            "Old Model",
+            "Brand",
+            "PHONE",
+            anchorPhone.getCategory(),
+            "1000000",
+            null,
+            null,
+            null,
+            null,
+            1);
+    inactive.setStatus(0);
+    when(products.findById(99L)).thenReturn(Optional.of(inactive));
+    assertTrue(recommendationService.recommend(99L, 6).isEmpty());
+    assertTrue(recommendationService.recommend(null, 6).isEmpty());
+
+    when(products.findById(1L)).thenReturn(Optional.of(anchorPhone));
+    when(vectorStore.isAvailable()).thenReturn(true);
+    when(embeddingRepo.findById("1")).thenThrow(new RuntimeException("Mongo timeout"));
+    when(vectorStore.searchSimilar(any(float[].class), anyInt())).thenReturn(List.of(2L));
+    when(products.findAllById(List.of(2L))).thenReturn(List.of(similarFlagship));
+    when(products.findByStatus(1)).thenReturn(List.of(anchorPhone, similarFlagship, sameBrandMid));
+
+    RecommendationResponseDTO zeroLimit = recommendationService.recommend(1L, 0).orElseThrow();
+    assertEquals(1, zeroLimit.recommendations().size());
+
+    RecommendationResponseDTO overLimit = recommendationService.recommend(1L, 50).orElseThrow();
+    assertTrue(overLimit.recommendations().size() <= 12);
+    verify(embeddingRepo, org.mockito.Mockito.atLeastOnce()).save(any());
+  }
+
   private static double dot(float[] a, float[] b) {
     double sum = 0.0;
     for (int i = 0; i < a.length; i++) {

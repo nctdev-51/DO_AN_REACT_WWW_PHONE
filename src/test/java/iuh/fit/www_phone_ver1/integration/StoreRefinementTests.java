@@ -333,7 +333,7 @@ class StoreRefinementTests {
 
   @Test
   void bannerScheduleIsStartInclusiveEndExclusiveAndHidesStoppedProducts() throws Exception {
-    var now = LocalDateTime.now();
+    var now = LocalDateTime.now().withNano(0);
     var f = banner();
     f.setStartsAt(now);
     f.setEndsAt(now.plusHours(1));

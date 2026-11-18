@@ -8,11 +8,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.grpc.CollectionSchema;
+import io.milvus.grpc.DescribeCollectionResponse;
+import io.milvus.grpc.FieldSchema;
+import io.milvus.grpc.KeyValuePair;
 import io.milvus.grpc.MutationResult;
 import io.milvus.param.R;
 import io.milvus.param.RpcStatus;
+import io.milvus.param.collection.CreateCollectionParam;
 import io.milvus.param.dml.DeleteParam;
 import io.milvus.param.dml.SearchParam;
+import io.milvus.param.dml.UpsertParam;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -122,5 +128,67 @@ class VectorStoreServiceTests {
     assertTrue(service.isConfigured());
     assertTrue(service.deleteEmbeddings(List.of(10L, 12L)));
     verify(client, times(1)).delete(any(DeleteParam.class));
+  }
+
+  @Test
+  void createsCollectionAndIndexWhenMissingAndCooldownsOnUpsertFailure() {
+    MilvusServiceClient client = mock(MilvusServiceClient.class);
+    when(client.hasCollection(any())).thenReturn(R.success(Boolean.FALSE));
+    when(client.createCollection(any(CreateCollectionParam.class)))
+        .thenReturn(R.success(new RpcStatus(RpcStatus.SUCCESS_MSG)));
+    when(client.createIndex(any())).thenReturn(R.success(new RpcStatus(RpcStatus.SUCCESS_MSG)));
+    when(client.loadCollection(any())).thenReturn(R.success(new RpcStatus(RpcStatus.SUCCESS_MSG)));
+    when(client.upsert(any(UpsertParam.class)))
+        .thenReturn(R.failed(new RuntimeException("Upsert rejected")));
+
+    VectorStoreService service =
+        new VectorStoreService(
+            client,
+            "product_embeddings",
+            1536,
+            30_000L,
+            Clock.fixed(Instant.ofEpochMilli(4_000_000L), ZoneOffset.UTC));
+
+    assertTrue(service.isAvailable());
+    verify(client, times(1)).createCollection(any(CreateCollectionParam.class));
+    verify(client, times(1)).createIndex(any());
+
+    assertFalse(service.upsertEmbedding(1L, new float[1536]));
+    assertTrue(service.isInCooldown());
+    assertFalse(service.isAvailable());
+  }
+
+  @Test
+  void rejectsExistingCollectionWithDimensionMismatch() {
+    MilvusServiceClient client = mock(MilvusServiceClient.class);
+    when(client.hasCollection(any())).thenReturn(R.success(Boolean.TRUE));
+    DescribeCollectionResponse mismatchDesc =
+        DescribeCollectionResponse.newBuilder()
+            .setSchema(
+                CollectionSchema.newBuilder()
+                    .addFields(
+                        FieldSchema.newBuilder()
+                            .setName("embedding")
+                            .setDataType(io.milvus.grpc.DataType.FloatVector)
+                            .addTypeParams(
+                                KeyValuePair.newBuilder()
+                                    .setKey("dim")
+                                    .setValue("768")
+                                    .build())
+                            .build())
+                    .build())
+            .build();
+    when(client.describeCollection(any())).thenReturn(R.success(mismatchDesc));
+
+    VectorStoreService service =
+        new VectorStoreService(
+            client,
+            "product_embeddings",
+            1536,
+            30_000L,
+            Clock.fixed(Instant.ofEpochMilli(5_000_000L), ZoneOffset.UTC));
+
+    assertFalse(service.isAvailable());
+    assertTrue(service.isInCooldown());
   }
 }

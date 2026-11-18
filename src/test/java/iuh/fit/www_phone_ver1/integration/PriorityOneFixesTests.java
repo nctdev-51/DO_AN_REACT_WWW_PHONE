@@ -83,7 +83,7 @@ class PriorityOneFixesTests {
     mvc.perform(
             post("/api/ai/description/{id}/refresh", activeProduct.getId())
                 .with(csrf()))
-        .andExpect(status().is3xxRedirection());
+        .andExpect(status().isUnauthorized());
 
     mvc.perform(
             post("/api/ai/description/{id}/refresh", activeProduct.getId())

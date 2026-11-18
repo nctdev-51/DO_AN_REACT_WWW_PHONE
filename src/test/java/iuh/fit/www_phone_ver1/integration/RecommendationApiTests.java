@@ -60,6 +60,13 @@ class RecommendationApiTests {
   }
 
   @Test
+  void recommendationsEndpointRejectsMalformedIdWithJsonBadRequest() throws Exception {
+    mvc.perform(get("/api/recommendations/not-a-number"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error").isString());
+  }
+
+  @Test
   void recommendationsEndpointReturnsValidJsonWithFallback() throws Exception {
     mvc.perform(get("/api/recommendations/{id}", sampleProduct.getId()).param("limit", "6"))
         .andExpect(status().isOk())
@@ -67,6 +74,10 @@ class RecommendationApiTests {
         .andExpect(jsonPath("$.source", is("fallback")))
         .andExpect(jsonPath("$.recommendations.length()", greaterThan(0)))
         .andExpect(jsonPath("$.recommendations.length()", lessThanOrEqualTo(6)))
+        .andExpect(jsonPath("$.recommendations[0].name").isString())
+        .andExpect(jsonPath("$.recommendations[0].brand").isString())
+        .andExpect(jsonPath("$.recommendations[0].kind").isString())
+        .andExpect(jsonPath("$.recommendations[0].inStock").isBoolean())
         .andExpect(
             jsonPath(
                 "$.recommendations[*].id",
@@ -82,7 +93,19 @@ class RecommendationApiTests {
   @Test
   void reindexEndpointRequiresAdminAndReturnsSummary() throws Exception {
     mvc.perform(post("/api/recommendations/reindex").with(csrf()))
-        .andExpect(status().is3xxRedirection());
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.error").isString());
+
+    mvc.perform(
+            post("/api/recommendations/reindex")
+                .with(user("customer").roles("USER"))
+                .with(csrf()))
+        .andExpect(status().isForbidden());
+
+    mvc.perform(
+            post("/api/recommendations/reindex")
+                .with(user("admin").roles("ADMIN")))
+        .andExpect(status().isForbidden());
 
     mvc.perform(
             post("/api/recommendations/reindex")
