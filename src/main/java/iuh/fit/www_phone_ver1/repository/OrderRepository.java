@@ -15,6 +15,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
+  long countByOrderDateBetween(LocalDateTime from, LocalDateTime to);
+
   long countByPromotion_IdAndStatusNot(Long promotionId, String status);
 
   boolean existsByPromotion_IdAndUser_IdAndStatusNot(Long promotionId, Long userId, String status);
