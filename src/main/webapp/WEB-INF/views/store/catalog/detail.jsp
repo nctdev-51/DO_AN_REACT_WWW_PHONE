@@ -165,9 +165,12 @@
       <h2 class="mb-0">
         <span class="ai-badge">🤖 AI</span> Mô tả thông minh
       </h2>
-      <button class="btn btn-outline-dark btn-sm btn-refresh-ai" id="btn-refresh-ai" type="button">
-        🔄 Tạo lại mô tả
-      </button>
+      <c:if test="${pageContext.request.isUserInRole('ADMIN')}">
+        <button class="btn btn-outline-dark btn-sm btn-refresh-ai" id="btn-refresh-ai" type="button"
+                data-csrf-header="${_csrf.headerName}" data-csrf-token="${_csrf.token}">
+          🔄 Tạo lại mô tả
+        </button>
+      </c:if>
     </div>
     <div id="ai-description-text" aria-live="polite">
       <div class="ai-skeleton" aria-hidden="true"></div>

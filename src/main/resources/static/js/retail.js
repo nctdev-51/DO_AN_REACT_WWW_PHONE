@@ -112,7 +112,14 @@ document.addEventListener('DOMContentLoaded', () => {
             link.tabIndex = -1;
             link.setAttribute('aria-selected', 'false');
             const image = document.createElement('img');
-            image.src = `${base}${item.image}`;
+            const rawImage = item.image || '';
+            image.src = rawImage
+              ? (rawImage.startsWith('http') || rawImage.startsWith('/') ? `${base}${rawImage}` : `${base}/${rawImage}`)
+              : '';
+            image.hidden = !rawImage;
+            image.addEventListener('error', () => {
+              image.hidden = true;
+            });
             image.alt = '';
             const text = document.createElement('span');
             text.textContent = item.name;

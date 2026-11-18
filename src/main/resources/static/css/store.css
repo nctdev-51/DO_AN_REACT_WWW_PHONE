@@ -252,7 +252,7 @@ textarea.form-control{
   border-bottom:1px solid var(--line);
   position:sticky;
   top:0;
-  z-index:100
+  z-index:1030
 }
 .header-inner{
   min-height:88px;
@@ -300,7 +300,8 @@ textarea.form-control{
   background:#f3f5f2;
   border:1px solid #e0e5df;
   border-radius:7px;
-  overflow:hidden
+  position:relative;
+  overflow:visible
 }
 .header-search:focus-within{
   border-color:var(--ink)

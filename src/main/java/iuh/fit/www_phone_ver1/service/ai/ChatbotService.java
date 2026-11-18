@@ -124,9 +124,6 @@ public class ChatbotService {
         try {
             List<Product> products = productRepository.findByStatus(1, PageRequest.of(0, 25)).getContent();
             if (products.isEmpty()) {
-                products = productRepository.findAll(PageRequest.of(0, 25)).getContent();
-            }
-            if (products.isEmpty()) {
                 return "- Hiện chưa có dữ liệu sản phẩm trong kho.";
             }
             return products.stream()
@@ -169,10 +166,7 @@ public class ChatbotService {
             return result;
         }
         try {
-            List<Product> all = productRepository.findByStatus(1, PageRequest.of(0, 30)).getContent();
-            if (all.isEmpty()) {
-                all = productRepository.findAll(PageRequest.of(0, 30)).getContent();
-            }
+            List<Product> all = productRepository.findByStatus(1, PageRequest.of(0, 50)).getContent();
             String lower = text.toLowerCase();
             for (Product p : all) {
                 if (p.getName() != null && !p.getName().isBlank()) {
@@ -199,15 +193,17 @@ public class ChatbotService {
         }
         for (Long id : ids) {
             try {
-                productRepository.findById(id).ifPresent(p -> {
-                    String priceStr = p.getPrice() != null ? String.format("%,d VNĐ", p.getPrice().longValue()) : "Liên hệ";
-                    cards.add(new ChatResponseDTO.ProductCardDTO(
-                            p.getId(),
-                            p.getName() != null ? p.getName() : ("Sản phẩm #" + p.getId()),
-                            priceStr,
-                            p.getBrand() != null ? p.getBrand() : "Chính hãng"
-                    ));
-                });
+                productRepository.findById(id)
+                        .filter(p -> Integer.valueOf(1).equals(p.getStatus()))
+                        .ifPresent(p -> {
+                            String priceStr = p.getPrice() != null ? String.format("%,d VNĐ", p.getPrice().longValue()) : "Liên hệ";
+                            cards.add(new ChatResponseDTO.ProductCardDTO(
+                                    p.getId(),
+                                    p.getName() != null ? p.getName() : ("Sản phẩm #" + p.getId()),
+                                    priceStr,
+                                    p.getBrand() != null ? p.getBrand() : "Chính hãng"
+                            ));
+                        });
             } catch (Exception ignored) {
             }
         }
