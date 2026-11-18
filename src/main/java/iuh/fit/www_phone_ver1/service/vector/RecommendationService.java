@@ -130,7 +130,7 @@ public class RecommendationService {
 
     for (Product product : activeProducts) {
       try {
-        float[] vec = resolveOrIndexEmbedding(product, milvusReady);
+        float[] vec = resolveOrIndexEmbedding(product, false);
         if (vec.length == embeddingService.getDimension()) {
           if (!milvusReady || vectorStore.upsertEmbedding(product.getId(), vec)) {
             indexed++;
