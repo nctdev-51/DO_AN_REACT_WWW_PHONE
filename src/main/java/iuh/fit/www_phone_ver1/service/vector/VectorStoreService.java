@@ -20,17 +20,20 @@ import io.milvus.param.index.CreateIndexParam;
 import io.milvus.response.SearchResultsWrapper;
 import iuh.fit.www_phone_ver1.service.ai.EmbeddingService;
 import jakarta.annotation.PostConstruct;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * Manages the Milvus product_embeddings collection with graceful degradation so the storefront
- * stays healthy even when Milvus is offline.
+ * Manages the Milvus product_embeddings collection with graceful degradation and a failure cooldown
+ * circuit breaker so the storefront never stalls when Milvus is offline.
  */
 @Service
 public class VectorStoreService {
@@ -43,32 +46,55 @@ public class VectorStoreService {
   private final MilvusServiceClient milvus;
   private final String collectionName;
   private final int dimension;
+  private final long retryCooldownMs;
+  private final Clock clock;
+  private final AtomicLong lastFailureAt = new AtomicLong(0);
   private volatile boolean collectionReady = false;
 
+  @Autowired
   public VectorStoreService(
       ObjectProvider<MilvusServiceClient> milvusProvider,
       @Value("${app.milvus.collection:product_embeddings}") String collectionName,
-      @Value("${app.milvus.dimension:1536}") int dimension) {
-    this.milvus = milvusProvider.getIfAvailable();
+      @Value("${app.milvus.dimension:1536}") int dimension,
+      @Value("${app.milvus.retry-cooldown-ms:30000}") long retryCooldownMs) {
+    this(milvusProvider.getIfAvailable(), collectionName, dimension, retryCooldownMs, Clock.systemUTC());
+  }
+
+  public VectorStoreService(
+      ObjectProvider<MilvusServiceClient> milvusProvider,
+      String collectionName,
+      int dimension) {
+    this(milvusProvider.getIfAvailable(), collectionName, dimension, 30_000L, Clock.systemUTC());
+  }
+
+  VectorStoreService(
+      MilvusServiceClient milvus,
+      String collectionName,
+      int dimension,
+      long retryCooldownMs,
+      Clock clock) {
+    this.milvus = milvus;
     this.collectionName = collectionName;
     this.dimension = dimension;
+    this.retryCooldownMs = Math.max(0, retryCooldownMs);
+    this.clock = clock;
   }
 
   @PostConstruct
   public void ensureCollection() {
-    if (milvus == null || collectionReady) {
+    if (milvus == null || collectionReady || isInCooldown()) {
       return;
     }
     synchronized (this) {
-      if (collectionReady) {
+      if (collectionReady || isInCooldown()) {
         return;
       }
       try {
         R<Boolean> hasRes =
             milvus.hasCollection(
                 HasCollectionParam.newBuilder().withCollectionName(collectionName).build());
-        if (hasRes.getStatus() != R.Status.Success.getCode()) {
-          log.warn("Milvus hasCollection check failed: {}", hasRes.getMessage());
+        if (hasRes == null || hasRes.getStatus() != R.Status.Success.getCode()) {
+          markUnavailable("hasCollection failed: " + (hasRes == null ? "null response" : hasRes.getMessage()));
           return;
         }
         if (Boolean.FALSE.equals(hasRes.getData())) {
@@ -77,14 +103,15 @@ public class VectorStoreService {
         R<RpcStatus> loadRes =
             milvus.loadCollection(
                 LoadCollectionParam.newBuilder().withCollectionName(collectionName).build());
-        if (loadRes.getStatus() != R.Status.Success.getCode()) {
-          log.warn("Milvus loadCollection failed: {}", loadRes.getMessage());
+        if (loadRes == null || loadRes.getStatus() != R.Status.Success.getCode()) {
+          markUnavailable("loadCollection failed: " + (loadRes == null ? "null response" : loadRes.getMessage()));
           return;
         }
         collectionReady = true;
+        lastFailureAt.set(0);
         log.info("Milvus collection '{}' ready (dim={})", collectionName, dimension);
       } catch (Exception ex) {
-        log.warn("Milvus unavailable during initialization, fallback active: {}", ex.getMessage());
+        markUnavailable("initialization failed: " + ex.getMessage());
       }
     }
   }
@@ -133,13 +160,24 @@ public class VectorStoreService {
   }
 
   public boolean isAvailable() {
-    if (milvus == null) {
+    if (milvus == null || isInCooldown()) {
       return false;
     }
     if (!collectionReady) {
       ensureCollection();
     }
     return collectionReady;
+  }
+
+  boolean isInCooldown() {
+    long failedAt = lastFailureAt.get();
+    return failedAt > 0 && retryCooldownMs > 0 && (clock.millis() - failedAt) < retryCooldownMs;
+  }
+
+  private void markUnavailable(String reason) {
+    collectionReady = false;
+    lastFailureAt.set(clock.millis());
+    log.warn("Milvus unavailable ({}), cooldown {} ms", reason, retryCooldownMs);
   }
 
   public boolean upsertEmbedding(Long productId, float[] vector) {
@@ -158,14 +196,17 @@ public class VectorStoreService {
                   .withCollectionName(collectionName)
                   .withFields(fields)
                   .build());
-      if (res.getStatus() != R.Status.Success.getCode()) {
-        log.warn("Milvus upsert failed for product {}: {}", productId, res.getMessage());
+      if (res == null || res.getStatus() != R.Status.Success.getCode()) {
+        markUnavailable(
+            "upsert failed for product "
+                + productId
+                + ": "
+                + (res == null ? "null response" : res.getMessage()));
         return false;
       }
       return true;
     } catch (Exception ex) {
-      collectionReady = false;
-      log.warn("Milvus upsert error for product {}: {}", productId, ex.getMessage());
+      markUnavailable("upsert error for product " + productId + ": " + ex.getMessage());
       return false;
     }
   }
@@ -186,8 +227,8 @@ public class VectorStoreService {
                   .withParams("{\"nprobe\":16}")
                   .withConsistencyLevel(ConsistencyLevelEnum.BOUNDED)
                   .build());
-      if (res.getStatus() != R.Status.Success.getCode() || res.getData() == null) {
-        log.warn("Milvus search failed: {}", res.getMessage());
+      if (res == null || res.getStatus() != R.Status.Success.getCode() || res.getData() == null) {
+        markUnavailable("search failed: " + (res == null ? "null response" : res.getMessage()));
         return List.of();
       }
       SearchResultsWrapper wrapper = new SearchResultsWrapper(res.getData().getResults());
@@ -198,8 +239,7 @@ public class VectorStoreService {
       }
       return ids;
     } catch (Exception ex) {
-      collectionReady = false;
-      log.warn("Milvus search error, using fallback: {}", ex.getMessage());
+      markUnavailable("search error: " + ex.getMessage());
       return List.of();
     }
   }

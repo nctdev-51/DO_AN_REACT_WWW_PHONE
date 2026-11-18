@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -51,6 +52,17 @@ public class EmbeddingService {
     return dimension > 0 ? dimension : 1536;
   }
 
+  public String activeProvider() {
+    return isOpenAiEmbeddingEnabled() ? PROVIDER_OPENAI : PROVIDER_LOCAL;
+  }
+
+  public String activeModelIdentifier() {
+    if (isOpenAiEmbeddingEnabled()) {
+      return model != null && !model.isBlank() ? model.trim() : "text-embedding-3-small";
+    }
+    return "local-semantic-v1";
+  }
+
   public String toText(Product product) {
     if (product == null) {
       return "";
@@ -72,7 +84,15 @@ public class EmbeddingService {
   public String contentHash(Product product) {
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] hashed = digest.digest(toText(product).getBytes(StandardCharsets.UTF_8));
+      String spaceScopedInput =
+          activeProvider()
+              + "|"
+              + activeModelIdentifier()
+              + "|"
+              + getDimension()
+              + "|"
+              + toText(product);
+      byte[] hashed = digest.digest(spaceScopedInput.getBytes(StandardCharsets.UTF_8));
       return HexFormat.of().formatHex(hashed);
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("SHA-256 unavailable", e);
@@ -114,8 +134,12 @@ public class EmbeddingService {
         && !trimmed.startsWith("demo");
   }
 
-  private float[] callOpenAiEmbeddings(String input) throws Exception {
-    RestClient restClient = RestClient.builder().baseUrl(baseUrl).build();
+  protected float[] callOpenAiEmbeddings(String input) throws Exception {
+    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+    requestFactory.setConnectTimeout(3000);
+    requestFactory.setReadTimeout(8000);
+    RestClient restClient =
+        RestClient.builder().baseUrl(baseUrl).requestFactory(requestFactory).build();
     Map<String, Object> body = Map.of("model", model, "input", input);
     String response =
         restClient

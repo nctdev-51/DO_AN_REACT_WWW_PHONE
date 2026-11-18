@@ -204,6 +204,73 @@ class RecommendationServiceTests {
     verify(vectorStore).upsertEmbedding(eq(2L), any(float[].class));
   }
 
+  @Test
+  void recommendInvalidatesStaleProviderCacheAndAvoidsMixingVectorSpaces() {
+    EmbeddingService mockEmbedding = mock(EmbeddingService.class);
+    when(mockEmbedding.getDimension()).thenReturn(1536);
+    when(mockEmbedding.activeProvider()).thenReturn(EmbeddingService.PROVIDER_OPENAI);
+    when(mockEmbedding.contentHash(anchorPhone)).thenReturn("openai-hash-1");
+
+    // Stale local-fallback document still sitting in MongoDB
+    ProductEmbeddingDocument staleDoc =
+        new ProductEmbeddingDocument(
+            "1",
+            EmbeddingService.toFloatList(embeddingService.embed(anchorPhone)),
+            "old-local-hash",
+            EmbeddingService.PROVIDER_LOCAL,
+            LocalDateTime.now());
+
+    float[] openAiVec = new float[1536];
+    openAiVec[0] = 1.0f;
+    when(mockEmbedding.embedWithMetadata(anchorPhone))
+        .thenReturn(
+            new EmbeddingService.EmbeddingResult(
+                openAiVec, "openai-hash-1", EmbeddingService.PROVIDER_OPENAI));
+
+    when(products.findById(1L)).thenReturn(Optional.of(anchorPhone));
+    when(vectorStore.isAvailable()).thenReturn(true);
+    when(embeddingRepo.findById("1")).thenReturn(Optional.of(staleDoc));
+    when(vectorStore.searchSimilar(openAiVec, 8)).thenReturn(List.of(2L));
+    when(products.findAllById(List.of(2L))).thenReturn(List.of(similarFlagship));
+    when(products.findByStatus(1)).thenReturn(List.of(anchorPhone, similarFlagship, sameBrandMid));
+
+    RecommendationService openAiService =
+        new RecommendationService(vectorStore, mockEmbedding, products, embeddingRepo);
+    RecommendationResponseDTO res = openAiService.recommend(1L, 2).orElseThrow();
+
+    assertEquals(RecommendationService.SOURCE_MILVUS, res.source());
+    verify(embeddingRepo).save(any(ProductEmbeddingDocument.class));
+    verify(vectorStore).upsertEmbedding(1L, openAiVec);
+  }
+
+  @Test
+  void recommendSkipsMilvusWhenOpenAiTransientlyFallsBackToLocalVector() {
+    EmbeddingService mockEmbedding = mock(EmbeddingService.class);
+    when(mockEmbedding.getDimension()).thenReturn(1536);
+    when(mockEmbedding.activeProvider()).thenReturn(EmbeddingService.PROVIDER_OPENAI);
+    when(mockEmbedding.contentHash(anchorPhone)).thenReturn("openai-hash-1");
+    when(mockEmbedding.embedWithMetadata(anchorPhone))
+        .thenReturn(
+            new EmbeddingService.EmbeddingResult(
+                embeddingService.embed(anchorPhone),
+                "openai-hash-1",
+                EmbeddingService.PROVIDER_LOCAL));
+
+    when(products.findById(1L)).thenReturn(Optional.of(anchorPhone));
+    when(vectorStore.isAvailable()).thenReturn(true);
+    when(embeddingRepo.findById("1")).thenReturn(Optional.empty());
+    when(products.findByStatus(1)).thenReturn(List.of(anchorPhone, similarFlagship, sameBrandMid));
+
+    RecommendationService openAiService =
+        new RecommendationService(vectorStore, mockEmbedding, products, embeddingRepo);
+    RecommendationResponseDTO res = openAiService.recommend(1L, 2).orElseThrow();
+
+    assertEquals(RecommendationService.SOURCE_FALLBACK, res.source());
+    verify(embeddingRepo, never()).save(any());
+    verify(vectorStore, never()).upsertEmbedding(any(), any(float[].class));
+    verify(vectorStore, never()).searchSimilar(any(float[].class), anyInt());
+  }
+
   private static double dot(float[] a, float[] b) {
     double sum = 0.0;
     for (int i = 0; i < a.length; i++) {

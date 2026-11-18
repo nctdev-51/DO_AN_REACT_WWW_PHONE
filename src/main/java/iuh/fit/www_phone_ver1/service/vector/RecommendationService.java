@@ -71,8 +71,9 @@ public class RecommendationService {
 
     boolean usedMilvus = false;
     if (vectorStore.isAvailable()) {
-      float[] queryVec = resolveOrIndexEmbedding(anchor, true);
-      List<Long> candidateIds = vectorStore.searchSimilar(queryVec, safeLimit + 6);
+      Optional<float[]> queryVecOpt = resolveOrIndexEmbedding(anchor, true);
+      List<Long> candidateIds =
+          queryVecOpt.map(vec -> vectorStore.searchSimilar(vec, safeLimit + 6)).orElse(List.of());
       if (!candidateIds.isEmpty()) {
         Map<Long, Product> byId = new LinkedHashMap<>();
         for (Product p : products.findAllById(candidateIds)) {
@@ -130,9 +131,9 @@ public class RecommendationService {
 
     for (Product product : activeProducts) {
       try {
-        float[] vec = resolveOrIndexEmbedding(product, false);
-        if (vec.length == embeddingService.getDimension()) {
-          if (!milvusReady || vectorStore.upsertEmbedding(product.getId(), vec)) {
+        Optional<float[]> vecOpt = resolveOrIndexEmbedding(product, false);
+        if (vecOpt.isPresent() && vecOpt.get().length == embeddingService.getDimension()) {
+          if (!milvusReady || vectorStore.upsertEmbedding(product.getId(), vecOpt.get())) {
             indexed++;
           } else {
             failed++;
@@ -155,21 +156,23 @@ public class RecommendationService {
     return new ReindexSummary(activeProducts.size(), indexed, failed, milvusReady);
   }
 
-  private float[] resolveOrIndexEmbedding(Product product, boolean syncToMilvus) {
+  private Optional<float[]> resolveOrIndexEmbedding(Product product, boolean syncToMilvus) {
     String expectedHash = embeddingService.contentHash(product);
+    String activeProvider = embeddingService.activeProvider();
     String key = String.valueOf(product.getId());
     try {
       Optional<ProductEmbeddingDocument> cached = embeddingRepo.findById(key);
       if (cached.isPresent()) {
         ProductEmbeddingDocument doc = cached.get();
         if (expectedHash.equals(doc.getContentHash())
+            && activeProvider.equals(doc.getProvider())
             && doc.getVector() != null
             && doc.getVector().size() == embeddingService.getDimension()) {
           float[] vec = EmbeddingService.toFloatArray(doc.getVector());
           if (syncToMilvus) {
             vectorStore.upsertEmbedding(product.getId(), vec);
           }
-          return vec;
+          return Optional.of(vec);
         }
       }
     } catch (Exception ex) {
@@ -177,6 +180,14 @@ public class RecommendationService {
     }
 
     EmbeddingService.EmbeddingResult generated = embeddingService.embedWithMetadata(product);
+    if (!activeProvider.equals(generated.provider())) {
+      log.warn(
+          "Skipping cache/Milvus write for product {}: expected provider '{}' but generated '{}' due to transient fallback",
+          product.getId(),
+          activeProvider,
+          generated.provider());
+      return Optional.empty();
+    }
     try {
       ProductEmbeddingDocument doc =
           new ProductEmbeddingDocument(
@@ -193,7 +204,7 @@ public class RecommendationService {
     if (syncToMilvus) {
       vectorStore.upsertEmbedding(product.getId(), generated.vector());
     }
-    return generated.vector();
+    return Optional.of(generated.vector());
   }
 
   private void appendFallbackProducts(
