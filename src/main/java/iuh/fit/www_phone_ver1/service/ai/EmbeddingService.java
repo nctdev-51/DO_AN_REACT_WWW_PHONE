@@ -33,6 +33,8 @@ public class EmbeddingService {
   public static final String PROVIDER_LOCAL = "local-fallback";
 
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private volatile RestClient cachedRestClient;
+  private volatile String cachedBaseUrl;
 
   @Value("${app.ai.embedding.base-url:https://api.openai.com/v1}")
   private String baseUrl;
@@ -78,6 +80,7 @@ public class EmbeddingService {
         "pin:" + safe(product.getBattery()),
         "hdh:" + safe(product.getOperatingSystem()),
         "nhucau:" + safe(product.getUsageTags()),
+        "mota:" + safeSummary(product.getDescription(), 180),
         "gia:" + (product.getPrice() == null ? "0" : product.getPrice().toPlainString()));
   }
 
@@ -127,19 +130,32 @@ public class EmbeddingService {
       return false;
     }
     String trimmed = apiKey.trim();
-    return !trimmed.isEmpty()
-        && trimmed.startsWith("sk-")
-        && !trimmed.startsWith("gsk_")
-        && !trimmed.equalsIgnoreCase("placeholder")
-        && !trimmed.startsWith("demo");
+    if (trimmed.isEmpty()
+        || trimmed.startsWith("gsk_")
+        || trimmed.equalsIgnoreCase("placeholder")
+        || trimmed.startsWith("demo")) {
+      return false;
+    }
+    boolean isCustomEndpoint =
+        baseUrl != null && !baseUrl.isBlank() && !baseUrl.contains("api.openai.com");
+    return isCustomEndpoint || trimmed.startsWith("sk-");
+  }
+
+  private RestClient embeddingRestClient() {
+    String targetUrl = (baseUrl == null || baseUrl.isBlank()) ? "https://api.openai.com/v1" : baseUrl;
+    if (cachedRestClient == null || !targetUrl.equals(cachedBaseUrl)) {
+      SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+      requestFactory.setConnectTimeout(3000);
+      requestFactory.setReadTimeout(8000);
+      cachedRestClient =
+          RestClient.builder().baseUrl(targetUrl).requestFactory(requestFactory).build();
+      cachedBaseUrl = targetUrl;
+    }
+    return cachedRestClient;
   }
 
   protected float[] callOpenAiEmbeddings(String input) throws Exception {
-    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-    requestFactory.setConnectTimeout(3000);
-    requestFactory.setReadTimeout(8000);
-    RestClient restClient =
-        RestClient.builder().baseUrl(baseUrl).requestFactory(requestFactory).build();
+    RestClient restClient = embeddingRestClient();
     Map<String, Object> body = Map.of("model", model, "input", input);
     String response =
         restClient
@@ -271,5 +287,10 @@ public class EmbeddingService {
 
   private static String safe(String value) {
     return value == null ? "" : value.trim();
+  }
+
+  private static String safeSummary(String value, int maxLen) {
+    String clean = safe(value).replaceAll("\\s+", " ");
+    return clean.length() <= maxLen ? clean : clean.substring(0, maxLen);
   }
 }

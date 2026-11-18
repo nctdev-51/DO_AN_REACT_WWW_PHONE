@@ -3,6 +3,7 @@ package iuh.fit.www_phone_ver1.service.vector;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.grpc.DataType;
+import io.milvus.grpc.DescribeCollectionResponse;
 import io.milvus.grpc.MutationResult;
 import io.milvus.grpc.SearchResults;
 import io.milvus.param.IndexType;
@@ -10,6 +11,7 @@ import io.milvus.param.MetricType;
 import io.milvus.param.R;
 import io.milvus.param.RpcStatus;
 import io.milvus.param.collection.CreateCollectionParam;
+import io.milvus.param.collection.DescribeCollectionParam;
 import io.milvus.param.collection.FieldType;
 import io.milvus.param.collection.HasCollectionParam;
 import io.milvus.param.collection.LoadCollectionParam;
@@ -18,6 +20,7 @@ import io.milvus.param.dml.InsertParam;
 import io.milvus.param.dml.SearchParam;
 import io.milvus.param.dml.UpsertParam;
 import io.milvus.param.index.CreateIndexParam;
+import io.milvus.response.DescCollResponseWrapper;
 import io.milvus.response.SearchResultsWrapper;
 import iuh.fit.www_phone_ver1.service.ai.EmbeddingService;
 import jakarta.annotation.PostConstruct;
@@ -103,6 +106,8 @@ public class VectorStoreService {
         }
         if (Boolean.FALSE.equals(hasRes.getData())) {
           createCollectionAndIndex();
+        } else if (!verifyExistingCollectionDimension()) {
+          return;
         }
         R<RpcStatus> loadRes =
             milvus.loadCollection(
@@ -118,6 +123,32 @@ public class VectorStoreService {
         markUnavailable("initialization failed: " + ex.getMessage());
       }
     }
+  }
+
+  private boolean verifyExistingCollectionDimension() {
+    R<DescribeCollectionResponse> descRes =
+        milvus.describeCollection(
+            DescribeCollectionParam.newBuilder().withCollectionName(collectionName).build());
+    if (descRes == null) {
+      return true;
+    }
+    if (descRes.getStatus() != R.Status.Success.getCode() || descRes.getData() == null) {
+      markUnavailable("describeCollection failed: " + descRes.getMessage());
+      return false;
+    }
+    DescCollResponseWrapper wrapper = new DescCollResponseWrapper(descRes.getData());
+    FieldType vectorField = wrapper.getVectorField();
+    if (vectorField != null && vectorField.getDimension() != dimension) {
+      markUnavailable(
+          "collection '"
+              + collectionName
+              + "' dimension "
+              + vectorField.getDimension()
+              + " != configured "
+              + dimension);
+      return false;
+    }
+    return true;
   }
 
   private void createCollectionAndIndex() {

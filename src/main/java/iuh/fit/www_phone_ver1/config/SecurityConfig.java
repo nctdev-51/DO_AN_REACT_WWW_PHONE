@@ -116,6 +116,24 @@ public class SecurityConfig {
                     .failureUrl("/login?error")
                     .permitAll())
         .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout").permitAll())
+        .exceptionHandling(
+            ex -> {
+              var loginEntryPoint =
+                  new org.springframework.security.web.authentication
+                      .LoginUrlAuthenticationEntryPoint("/login");
+              ex.authenticationEntryPoint(
+                  (request, response, authException) -> {
+                    String ctx = request.getContextPath() == null ? "" : request.getContextPath();
+                    String uri = request.getRequestURI();
+                    if (uri != null && uri.startsWith(ctx + "/api/")) {
+                      response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                      response.setContentType("application/json;charset=UTF-8");
+                      response.getWriter().write("{\"error\":\"Yêu cầu đăng nhập.\"}");
+                      return;
+                    }
+                    loginEntryPoint.commence(request, response, authException);
+                  });
+            })
         .sessionManagement(
             sessions ->
                 sessions

@@ -490,6 +490,9 @@ document.addEventListener('DOMContentLoaded', () => {
           window.bootstrap.Modal.getInstance(modalEl)?.hide();
         }
         addressModalForm.reset();
+        addressModalForm.querySelector('[data-address-picker]')?.dispatchEvent(
+          new CustomEvent('ptv:set-address', {detail: {provinceCode: '', wardCode: ''}})
+        );
       } catch {
         if (errBox) {
           errBox.textContent = 'Lỗi kết nối khi lưu địa chỉ.';

@@ -17,6 +17,7 @@
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         credentials: 'same-origin',
+        keepalive: true,
         body: JSON.stringify({
           eventType: eventType,
           pageUrl: window.location.pathname,
