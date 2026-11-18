@@ -35,10 +35,14 @@
                 <c:out value="${item.variantLabel}"/>
               </p>
               <ui:money value="${item.unitPrice}"/>
-              <form action="${pageContext.request.contextPath}/cart/update" method="post" class="d-flex gap-2 mt-2">
+              <form action="${pageContext.request.contextPath}/cart/update" method="post" class="d-flex align-items-center gap-2 mt-2">
                 <ui:csrf/>
                 <input type="hidden" name="variantId" value="${item.variantId}">
-                <input class="form-control quantity-input" type="number" name="quantity" value="${item.quantity}" min="0" max="99" aria-label="Số lượng">
+                <div class="qty-stepper qty-stepper--sm" data-qty-stepper>
+                  <button type="button" class="qty-stepper-btn" data-qty-dec aria-label="Giảm số lượng">−</button>
+                  <input class="qty-stepper-input" type="number" name="quantity" value="${item.quantity}" min="0" max="99" inputmode="numeric" aria-label="Số lượng">
+                  <button type="button" class="qty-stepper-btn" data-qty-inc aria-label="Tăng số lượng">+</button>
+                </div>
                 <button class="btn btn-light">Cập nhật</button>
               </form>
             </div>

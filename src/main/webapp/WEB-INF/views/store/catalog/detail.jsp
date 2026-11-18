@@ -42,24 +42,7 @@
       </p>
     </div>
 
-    <c:if test="${not empty applicablePromotions}">
-      <div class="panel promo-offer-box mt-3">
-        <strong class="d-block mb-2">Ưu đãi &amp; mã giảm giá áp dụng</strong>
-        <c:forEach var="promo" items="${applicablePromotions}">
-          <div class="promo-offer-row">
-            <div>
-              <span class="coupon-code"><c:out value="${promo.code}"/></span>
-              <span class="small d-block"><c:out value="${promo.description}"/> · <span class="muted">HSD: <c:out value="${promo.endsAtLabel}"/></span></span>
-            </div>
-            <button type="button" class="btn btn-light btn-sm" data-copy-code="<c:out value='${promo.code}'/>">Sao chép mã</button>
-          </div>
-          <span class="small muted d-block mb-1" data-copy-status></span>
-        </c:forEach>
-        <small class="muted d-block">Mỗi đơn áp dụng 1 mã giảm giá tại bước Thanh toán.</small>
-      </div>
-    </c:if>
-
-    <form id="product-purchase" class="panel mt-4" action="${pageContext.request.contextPath}/cart/add" method="post">
+    <form id="product-purchase" class="panel mt-3" action="${pageContext.request.contextPath}/cart/add" method="post">
       <ui:csrf/>
       <label for="variant-select">Chọn phiên bản</label>
       <select id="variant-select" name="variantId" class="form-select mb-3" required>
@@ -70,8 +53,12 @@
         </c:forEach>
       </select>
       <p id="variant-stock" class="stock-text">Còn ${product.stock} sản phẩm</p>
-      <div class="d-flex gap-3">
-        <input id="buy-quantity" class="form-control quantity-input" type="number" name="quantity" value="1" min="1" max="99" aria-label="Số lượng">
+      <div class="purchase-row">
+        <div class="qty-stepper" data-qty-stepper>
+          <button type="button" class="qty-stepper-btn" data-qty-dec aria-label="Giảm số lượng">−</button>
+          <input id="buy-quantity" class="qty-stepper-input" type="number" name="quantity" value="1" min="1" max="99" inputmode="numeric" aria-label="Số lượng">
+          <button type="button" class="qty-stepper-btn" data-qty-inc aria-label="Tăng số lượng">+</button>
+        </div>
         <button id="buy-button" data-product-id="${product.id}" class="btn btn-brand flex-grow-1" ${product.stock == 0 ? 'disabled' : ''}>Thêm vào giỏ hàng</button>
       </div>
       <button class="btn btn-outline-dark w-100 mt-3" name="buyNow" value="true" data-buy-now>Mua ngay phiên bản này</button>
@@ -98,7 +85,33 @@
       </c:otherwise>
     </c:choose>
 
-    <div class="panel delivery-estimator mt-3" data-delivery-estimator data-endpoint="${pageContext.request.contextPath}/products/${product.id}/delivery-estimate">
+    <div class="panel policy-card mt-3">
+      <div class="policy-grid">
+        <span>Thanh toán COD / VNPay</span>
+        <span>Đổi trả trong ${storePolicy.returnWindowDays} ngày</span>
+        <span>Bảo hành ${product.warrantyMonths} tháng</span>
+      </div>
+    </div>
+  </div>
+  <div class="product-left-extras">
+    <c:if test="${not empty applicablePromotions}">
+      <div class="panel promo-offer-box">
+        <strong class="d-block mb-2">Ưu đãi &amp; mã giảm giá áp dụng</strong>
+        <c:forEach var="promo" items="${applicablePromotions}">
+          <div class="promo-offer-row">
+            <div>
+              <span class="coupon-code"><c:out value="${promo.code}"/></span>
+              <span class="small d-block"><c:out value="${promo.description}"/> · <span class="muted">HSD: <c:out value="${promo.endsAtLabel}"/></span></span>
+            </div>
+            <button type="button" class="btn btn-light btn-sm" data-copy-code="<c:out value='${promo.code}'/>">Sao chép mã</button>
+          </div>
+          <span class="small muted d-block mb-1" data-copy-status></span>
+        </c:forEach>
+        <small class="muted d-block">Mỗi đơn áp dụng 1 mã giảm giá tại bước Thanh toán.</small>
+      </div>
+    </c:if>
+
+    <div class="panel delivery-estimator" data-delivery-estimator data-endpoint="${pageContext.request.contextPath}/products/${product.id}/delivery-estimate">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <strong>Ước tính giao hàng theo khu vực</strong>
         <a class="small" href="${pageContext.request.contextPath}/policies/shipping">Chính sách giao hàng</a>
@@ -115,12 +128,6 @@
       <p class="small mt-2 mb-0" data-delivery-output aria-live="polite">
         Giao tiêu chuẩn dự kiến ${experience.deliveryMinDays}–${experience.deliveryMaxDays} ngày. Miễn phí vận chuyển cho đơn từ <ui:money value="${storePolicy.freeShippingThreshold}"/>.
       </p>
-    </div>
-
-    <div class="policy-grid">
-      <span>COD hoặc VNPay bảo mật</span>
-      <span>Đổi trả theo chính sách ${storePolicy.returnWindowDays} ngày</span>
-      <span>Bảo hành ${product.warrantyMonths} tháng</span>
     </div>
   </div>
 </section>

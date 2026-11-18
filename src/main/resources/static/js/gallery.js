@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const spinStage = find('spin-stage');
   const spinImage = find('spin-image');
   const slider = find('spin-range');
+  const tabsBar = find('gallery-tabs');
+  const stage = find('gallery-stage');
   const photoTab = find('gallery-photos');
   const spinTab = find('gallery-spin');
   const playButton = find('spin-play');
@@ -38,11 +40,17 @@ document.addEventListener('DOMContentLoaded', () => {
     frame = (next + gallery.frames.length) % gallery.frames.length;
     spinImage.src = path(gallery.frames[frame]); slider.value = frame;
   }
+  let spinMode = false;
   function showMode(spin) {
     stop();
-    find('photo-panel').hidden = spin; find('spin-panel').hidden = !spin;
-    photoTab.setAttribute('aria-pressed', String(!spin)); spinTab.setAttribute('aria-pressed', String(spin));
-    if (!spin) {spinStage.querySelector('iframe')?.remove(); return;}
+    spinMode = Boolean(spin);
+    find('photo-panel').hidden = spinMode; find('spin-panel').hidden = !spinMode;
+    photoTab?.setAttribute('aria-pressed', String(!spinMode));
+    if (spinTab) {
+      spinTab.setAttribute('aria-pressed', String(spinMode));
+      spinTab.textContent = spinMode ? '← Quay lại ảnh' : 'Xem 360°';
+    }
+    if (!spinMode) {spinStage.querySelector('iframe')?.remove(); return;}
     if (gallery.frames.length) {
       if (!framesPreloaded) gallery.frames.forEach(url => {const preload = new Image(); preload.src = path(url);});
       framesPreloaded = true; return;
@@ -65,7 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (event.key === 'ArrowLeft') {event.preventDefault(); showPhoto(index - 1);}
     if (event.key === 'ArrowRight') {event.preventDefault(); showPhoto(index + 1);}
   });
-  photoTab.addEventListener('click', () => showMode(false)); spinTab.addEventListener('click', () => showMode(true));
+  photoTab?.addEventListener('click', () => showMode(false));
+  spinTab?.addEventListener('click', () => showMode(photoTab ? true : !spinMode));
   slider.addEventListener('input', () => {stop(); showFrame(Number(slider.value));});
   spinStage.addEventListener('keydown', event => {
     if (gallery.frames.length && ['ArrowLeft', 'ArrowRight'].includes(event.key)) {
@@ -100,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadedColor = color;
     const current = ++generation;
     request?.abort(); request = new AbortController(); stop(); framesPreloaded = false;
-    showMode(false); spinTab.hidden = true;
+    showMode(false); spinTab.hidden = true; if (tabsBar) tabsBar.hidden = true;
     spinStage.querySelector('iframe')?.remove();
     find('gallery-thumbs').replaceChildren();
     // Clear the previous color immediately, including the zoom image.
@@ -113,7 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       if (current !== generation) return;
       gallery = data;
-      find('gallery-notice').textContent = data.photos.some(photo => photo.colorSpecific) ? 'Chọn ảnh thu nhỏ để xem thêm góc nhìn. Bấm ảnh lớn để phóng to.' : 'Chưa có ảnh riêng cho màu này. Các ảnh bên trên dùng để giới thiệu sản phẩm.';
+      const arrows = root.querySelectorAll('[data-gallery-prev], [data-gallery-next]');
+      arrows.forEach(btn => { btn.disabled = data.photos.length <= 1; });
+      if (stage) stage.classList.toggle('is-single', data.photos.length <= 1);
+      find('gallery-notice').textContent = data.photos.length > 1
+        ? (data.photos.some(photo => photo.colorSpecific) ? 'Chọn ảnh thu nhỏ để xem thêm góc nhìn. Bấm ảnh lớn để phóng to.' : 'Bấm ảnh lớn để phóng to hoặc dùng mũi tên để xem thêm góc nhìn.')
+        : 'Bấm ảnh lớn để phóng to.';
       data.photos.forEach((photo, n) => {
         const button = document.createElement('button'); button.type = 'button'; button.setAttribute('aria-label', `Ảnh ${n + 1}: ${photo.caption}`);
         const thumbnail = document.createElement('img'); thumbnail.src = path(photo.url); thumbnail.alt = ''; thumbnail.loading = 'lazy';
@@ -121,7 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       showPhoto(0);
       const hasFrames = data.frames.length >= 12;
-      spinTab.hidden = !hasFrames && !data.modelUrl;
+      const hasSpin = hasFrames || Boolean(data.modelUrl);
+      spinTab.hidden = !hasSpin;
+      if (tabsBar) tabsBar.hidden = !hasSpin;
       spinImage.hidden = !hasFrames; find('spin-controls').hidden = !hasFrames;
       find('model-credit').replaceChildren();
       if (hasFrames) {
@@ -209,11 +225,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     group.append(track);
     choices.append(group);
-    groups.push([key, group, selectedText]);
+    groups.push([key, label, group, selectedText]);
   }
   function refresh() {
     const active = select.selectedOptions[0];
-    groups.forEach(([key, group, selectedText]) => {
+    groups.forEach(([key, label, group, selectedText]) => {
       if (active) selectedText.textContent = active.dataset[key] || '';
       group.querySelectorAll('button').forEach(button => {
         const val = button.dataset.value;
