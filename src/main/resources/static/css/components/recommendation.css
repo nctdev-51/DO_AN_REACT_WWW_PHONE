@@ -19,6 +19,35 @@
   padding: 0.35rem 0.25rem 0.75rem;
 }
 
+.similar-swiper:not(.swiper-initialized) .swiper-wrapper {
+  display: flex;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.similar-swiper:not(.swiper-initialized) .swiper-slide {
+  width: 78%;
+  flex: 0 0 auto;
+}
+
+@media (min-width: 576px) {
+  .similar-swiper:not(.swiper-initialized) .swiper-slide {
+    width: calc((100% - 16px) / 2);
+  }
+}
+
+@media (min-width: 768px) {
+  .similar-swiper:not(.swiper-initialized) .swiper-slide {
+    width: calc((100% - 32px) / 3);
+  }
+}
+
+@media (min-width: 1024px) {
+  .similar-swiper:not(.swiper-initialized) .swiper-slide {
+    width: calc((100% - 48px) / 4);
+  }
+}
+
 .similar-swiper .swiper-slide {
   height: auto;
   display: flex;
@@ -152,10 +181,15 @@
 }
 
 /* ── Swiper Navigation Buttons ─────────────────────────────── */
+.similar-swiper {
+  --swiper-navigation-size: 14px;
+}
+
 .similar-swiper .swiper-button-prev,
 .similar-swiper .swiper-button-next {
   width: 38px;
   height: 38px;
+  margin-top: -19px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid var(--color-divider, #d2d2d7);
@@ -171,4 +205,24 @@
 
 .similar-swiper .swiper-button-disabled {
   opacity: 0.35;
+}
+
+@media (max-width: 575.98px) {
+  .similar-swiper .swiper-button-prev,
+  .similar-swiper .swiper-button-next {
+    display: none;
+  }
+}
+
+.mini-card-badge-sale {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 2px 8px;
+  border-radius: 980px;
+  background: var(--color-error, #b42318);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
 }

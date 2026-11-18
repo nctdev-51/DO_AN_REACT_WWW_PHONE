@@ -5,6 +5,8 @@
 (function () {
   'use strict';
 
+  const PLACEHOLDER_IMG = '/images/products/placeholder.svg';
+
   function formatPrice(value) {
     if (value == null || Number.isNaN(Number(value))) {
       return '';
@@ -16,13 +18,24 @@
     }).format(Number(value));
   }
 
+  function resolveImageUrl(rawImg, ctx) {
+    const chosen = (typeof rawImg === 'string' && rawImg.trim().length > 0)
+      ? rawImg.trim()
+      : PLACEHOLDER_IMG;
+    if (/^https?:\/\//i.test(chosen)) {
+      return chosen;
+    }
+    const normalized = chosen.startsWith('/') ? chosen : '/' + chosen;
+    return ctx + normalized;
+  }
+
   function buildCardSlide(item, ctx) {
     const slide = document.createElement('div');
     slide.className = 'swiper-slide';
 
     const link = document.createElement('a');
     link.className = 'mini-product-card';
-    link.href = ctx + '/products/' + item.id;
+    link.href = ctx + '/products/' + encodeURIComponent(String(item.id));
     link.setAttribute('data-product-link', '');
     link.setAttribute('data-product-id', String(item.id));
     link.addEventListener('click', function () {
@@ -33,11 +46,28 @@
 
     const media = document.createElement('div');
     media.className = 'mini-card-media';
+
+    if (item.originalPrice && item.price && Number(item.originalPrice) > Number(item.price)) {
+      const pct = Math.round((1 - Number(item.price) / Number(item.originalPrice)) * 100);
+      if (pct > 0) {
+        const saleBadge = document.createElement('span');
+        saleBadge.className = 'mini-card-badge-sale';
+        saleBadge.textContent = '\u2212' + pct + '%';
+        media.appendChild(saleBadge);
+      }
+    }
+
     const img = document.createElement('img');
-    const rawImg = item.image || '/images/products/placeholder.png';
-    img.src = rawImg.startsWith('http') ? rawImg : ctx + rawImg;
+    img.src = resolveImageUrl(item.image, ctx);
     img.alt = item.name || '';
     img.loading = 'lazy';
+    img.addEventListener('error', function () {
+      if (img.dataset.fallbackApplied === 'true') {
+        return;
+      }
+      img.dataset.fallbackApplied = 'true';
+      img.src = ctx + PLACEHOLDER_IMG;
+    });
     media.appendChild(img);
 
     const info = document.createElement('div');
@@ -129,7 +159,10 @@
       }
 
       const data = await res.json();
-      const items = Array.isArray(data.recommendations) ? data.recommendations : [];
+      const rawItems = Array.isArray(data.recommendations) ? data.recommendations : [];
+      const items = rawItems.filter(function (item) {
+        return item && item.id != null;
+      });
       if (items.length === 0) {
         showFallback(section, swiperContainer, fallbackGrid);
         return;
@@ -141,14 +174,14 @@
       });
       section.dataset.recommendationSource = data.source || 'fallback';
 
-      if (typeof window.Swiper === 'function') {
-        new window.Swiper('.similar-swiper', {
+      if (typeof window.Swiper === 'function' && swiperContainer) {
+        new window.Swiper(swiperContainer, {
           slidesPerView: 1.25,
           spaceBetween: 16,
           watchOverflow: true,
           navigation: {
-            nextEl: '.similar-swiper .swiper-button-next',
-            prevEl: '.similar-swiper .swiper-button-prev'
+            nextEl: swiperContainer.querySelector('.swiper-button-next'),
+            prevEl: swiperContainer.querySelector('.swiper-button-prev')
           },
           breakpoints: {
             576: { slidesPerView: 2 },
@@ -156,6 +189,8 @@
             1024: { slidesPerView: 4 }
           }
         });
+      } else {
+        showFallback(section, swiperContainer, fallbackGrid);
       }
     } catch (err) {
       console.warn('Could not load recommendations:', err);

@@ -108,7 +108,9 @@
 <script src="${pageContext.request.contextPath}/js/ai-description.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/chatbot.js" defer></script>
 <%-- Module Recommendation Scripts (Vĩ) --%>
-<script src="${pageContext.request.contextPath}/vendor/swiper/swiper-bundle.min.js" defer></script>
-<script src="${pageContext.request.contextPath}/js/recommendation.js" defer></script>
+<c:if test="${includeRecommendationCarousel}">
+  <script src="${pageContext.request.contextPath}/vendor/swiper/swiper-bundle.min.js" defer></script>
+  <script src="${pageContext.request.contextPath}/js/recommendation.js" defer></script>
+</c:if>
 </body>
 </html>

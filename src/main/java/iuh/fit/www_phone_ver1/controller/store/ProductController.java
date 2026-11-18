@@ -197,18 +197,22 @@ public class ProductController {
               model.addAttribute(
                   "installment6Monthly",
                   effectivePrice.divide(BigDecimal.valueOf(6), 0, RoundingMode.HALF_UP));
+              String productSku = product.getSku();
               var accessories =
-                  products.findByStatus(1).stream()
-                      .filter(
-                          p ->
-                              "ACCESSORY".equals(p.getKind())
-                                  && p.getCompatibleSkus() != null
-                                  && Arrays.stream(p.getCompatibleSkus().split(","))
-                                      .map(String::trim)
-                                      .anyMatch(product.getSku()::equals))
-                      .limit(4)
-                      .toList();
+                  productSku == null || productSku.isBlank()
+                      ? List.<Product>of()
+                      : products.findByStatus(1).stream()
+                          .filter(
+                              p ->
+                                  "ACCESSORY".equals(p.getKind())
+                                      && p.getCompatibleSkus() != null
+                                      && Arrays.stream(p.getCompatibleSkus().split(","))
+                                          .map(String::trim)
+                                          .anyMatch(productSku::equals))
+                          .limit(4)
+                          .toList();
               model.addAttribute("accessories", accessories);
+              model.addAttribute("includeRecommendationCarousel", true);
               var feedback = reviews.findByProduct_IdOrderByCreatedAtDesc(id);
               model.addAttribute("reviews", feedback);
               model.addAttribute(
