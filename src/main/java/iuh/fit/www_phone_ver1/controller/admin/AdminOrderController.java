@@ -58,4 +58,19 @@ public class AdminOrderController {
     }
     return "redirect:/admin/orders";
   }
+
+  @PostMapping("/{id}/items/{detailId}")
+  public String updateDetailQty(
+      @PathVariable Long id,
+      @PathVariable Long detailId,
+      @RequestParam int quantity,
+      RedirectAttributes flash) {
+    try {
+      admin.updateOrderDetailQuantity(id, detailId, quantity);
+      flash.addFlashAttribute("successMsg", "Đã cập nhật số lượng dòng đơn hàng.");
+    } catch (IllegalArgumentException e) {
+      flash.addFlashAttribute("errorMsg", e.getMessage());
+    }
+    return "redirect:/admin/orders/" + id;
+  }
 }

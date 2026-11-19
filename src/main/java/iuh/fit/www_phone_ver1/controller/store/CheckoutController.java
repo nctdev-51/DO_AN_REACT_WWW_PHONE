@@ -262,6 +262,11 @@ public class CheckoutController {
         quote(model, cart, form, principal.getName());
         model.addAttribute("errorMsg", error.getMessage());
         return "store/checkout/index";
+      } catch (org.springframework.orm.ObjectOptimisticLockingFailureException error) {
+        quote(model, cart, form, principal.getName());
+        model.addAttribute("errorMsg",
+            "Tồn kho vừa thay đổi, vui lòng kiểm tra lại giỏ hàng và đặt lại.");
+        return "store/checkout/index";
       }
     }
   }

@@ -26,6 +26,7 @@ public class OrderService {
   private final LoyaltyService loyalty;
   private final AddressDirectory directory;
   private final iuh.fit.www_phone_ver1.service.catalog.StoreExperienceService experience;
+  private final OrderDetailRepository orderDetails;
 
   public OrderService(
       OrderRepository orders,
@@ -36,7 +37,8 @@ public class OrderService {
       OrderHistoryService history,
       LoyaltyService loyalty,
       AddressDirectory directory,
-      iuh.fit.www_phone_ver1.service.catalog.StoreExperienceService experience) {
+      iuh.fit.www_phone_ver1.service.catalog.StoreExperienceService experience,
+      OrderDetailRepository orderDetails) {
     this.orders = orders;
     this.variants = variants;
     this.users = users;
@@ -46,6 +48,7 @@ public class OrderService {
     this.loyalty = loyalty;
     this.directory = directory;
     this.experience = experience;
+    this.orderDetails = orderDetails;
   }
 
   @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
@@ -288,6 +291,44 @@ public class OrderService {
         () ->
             mail.sendOrderStatusUpdate(
                 order.getUser() == null ? null : order.getUser().getEmail(), order));
+  }
+
+  /**
+   * Admin: cập nhật số lượng một dòng trong đơn hàng đang chờ xử lý.
+   * Tự động cộng/trừ tồn kho và tính lại tổng tiền đơn hàng.
+   */
+  @Transactional
+  public void updateOrderDetailQuantity(Long orderId, Long detailId, int newQty) {
+    if (newQty < 1 || newQty > 99)
+      throw new IllegalArgumentException("Số lượng phải từ 1 đến 99.");
+    Order order = locked(orderId);
+    if (!PENDING.equals(order.getStatus()))
+      throw new IllegalArgumentException("Chỉ có thể sửa đơn đang chờ xử lý.");
+    OrderDetail detail = orderDetails.findForUpdate(detailId, orderId)
+        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dòng đơn hàng."));
+    int oldQty = detail.getQuantity();
+    int delta = newQty - oldQty; // dương = cần lấy thêm kho, âm = trả lại kho
+    if (delta != 0 && detail.getVariant() != null) {
+      var variant = variants.lockAll(List.of(detail.getVariant().getId())).stream().findFirst()
+          .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiên bản sản phẩm."));
+      if (delta > 0 && variant.getStock() < delta)
+        throw new IllegalArgumentException(
+            "Chỉ còn " + variant.getStock() + " sản phẩm trong kho.");
+      variant.setStock(variant.getStock() - delta);
+    }
+    detail.setQuantity(newQty);
+    // Tính lại tổng tiền đơn hàng (subtotal + shippingFee - discount - pointsDiscount)
+    BigDecimal newSubtotal = order.getOrderDetails().stream()
+        .map(d -> d.getPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    order.setSubtotal(newSubtotal);
+    BigDecimal newTotal = newSubtotal
+        .subtract(order.getDiscountAmount())
+        .subtract(order.getPointsDiscount())
+        .add(order.getShippingFee());
+    order.setTotalAmount(newTotal.max(BigDecimal.ZERO));
+    history.append(order, "Quản trị viên",
+        String.format("Cập nhật số lượng dòng #%d: %d → %d.", detailId, oldQty, newQty));
   }
 
   private void notifyAfterCommit(Runnable action) {

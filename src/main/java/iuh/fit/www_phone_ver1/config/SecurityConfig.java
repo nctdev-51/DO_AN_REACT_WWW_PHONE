@@ -137,6 +137,7 @@ public class SecurityConfig {
         .sessionManagement(
             sessions ->
                 sessions
+                    .sessionFixation().migrateSession()
                     .maximumSessions(-1)
                     .sessionRegistry(sessionRegistry())
                     .expiredUrl("/login?expired"))

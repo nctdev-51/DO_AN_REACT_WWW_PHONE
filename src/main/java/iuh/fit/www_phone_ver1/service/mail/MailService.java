@@ -6,6 +6,7 @@ import java.text.NumberFormat;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -28,6 +29,7 @@ public class MailService {
     this.outbox = Path.of(outbox);
   }
 
+  @Async
   public void sendOrderConfirmation(String email, Order order) {
     var money = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN"));
     StringBuilder body =
@@ -68,6 +70,7 @@ public class MailService {
     deliver(email, "PTV Mobile — Đã nhận đơn #" + order.getId(), body.toString());
   }
 
+  @Async
   public void sendAccountLink(String email, String link, boolean reset) {
     deliver(
         email,
@@ -83,6 +86,7 @@ public class MailService {
             + ". Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>");
   }
 
+  @Async
   public void sendPasswordChanged(String email) {
     deliver(
         email,
@@ -90,6 +94,7 @@ public class MailService {
         "<p>Mật khẩu tài khoản đã được đặt lại. Các phiên đăng nhập cũ đã được đăng xuất.</p>");
   }
 
+  @Async
   public void sendPaymentSuccess(String email, Order order) {
     if (email == null || email.isBlank() || order == null) return;
     var money = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN"));
@@ -106,6 +111,7 @@ public class MailService {
     deliver(email, "PTV Mobile — Xác nhận thanh toán đơn #" + order.getId(), body);
   }
 
+  @Async
   public void sendOrderStatusUpdate(String email, Order order) {
     if (email == null || email.isBlank() || order == null) return;
     StringBuilder body =
@@ -131,6 +137,7 @@ public class MailService {
         body.toString());
   }
 
+  @Async
   public void sendRefundUpdate(String email, Order order, iuh.fit.www_phone_ver1.entity.Refund refund) {
     if (email == null || email.isBlank() || order == null || refund == null) return;
     var money = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN"));
