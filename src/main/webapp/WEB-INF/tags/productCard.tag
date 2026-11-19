@@ -1,6 +1,9 @@
 <%@ tag pageEncoding="UTF-8" %>
 <%@ attribute name="product" required="true" type="iuh.fit.www_phone_ver1.entity.Product" %>
 <%@ attribute name="selectedVariant" required="false" type="iuh.fit.www_phone_ver1.entity.ProductVariant" %>
+<%-- Step 2 fix: explicit soldCount attribute so the tag works on any page (home, recently-viewed, etc.)
+     Falls back to page-scoped ${soldQuantities} from list.jsp for backward compatibility. --%>
+<%@ attribute name="soldCount" required="false" type="java.lang.Long" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
@@ -29,7 +32,9 @@
       <c:if test="${isNewModel}">
         <span class="card-badge card-badge-new">MỚI</span>
       </c:if>
-      <c:if test="${not empty soldQuantities and soldQuantities[product.id] >= 50}">
+      <%-- Step 2 fix: resolve soldCount from explicit attribute first, then page-scoped map (list.jsp) --%>
+      <c:set var="effectiveSold" value="${not empty soldCount ? soldCount : soldQuantities[product.id]}"/>
+      <c:if test="${effectiveSold >= 50}">
         <span class="card-badge card-badge-popular">BÁN CHẠY</span>
       </c:if>
       <c:if test="${not empty initial and initial.stock > 0 and initial.stock <= 3}">

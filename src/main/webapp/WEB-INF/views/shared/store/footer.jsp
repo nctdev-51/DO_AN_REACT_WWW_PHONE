@@ -100,6 +100,8 @@
 <script src="${pageContext.request.contextPath}/js/store.js" defer>
 </script>
 <script src="${pageContext.request.contextPath}/js/catalog-cards.js" defer></script>
+<%-- Step 3: Live search autocomplete — only active when #keyword input is present (catalog list page) --%>
+<script src="${pageContext.request.contextPath}/js/catalog-search.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/motion.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/retail.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/addresses.js" defer></script>

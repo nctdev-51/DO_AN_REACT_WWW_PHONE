@@ -83,4 +83,13 @@ public interface ProductRepository
 
   @Query("select count(p) from Product p where p.category.id = :categoryId")
   long countByCategoryId(@Param("categoryId") Long categoryId);
+
+  /**
+   * Find accessories compatible with a given product SKU.
+   * Uses LIKE to shortlist candidates; caller must do exact CSV match for precision.
+   * This avoids loading the entire product table like findByStatus(1) did.
+   */
+  @Query("select p from Product p where p.status = 1 and p.kind = 'ACCESSORY' " +
+         "and p.compatibleSkus is not null and p.compatibleSkus like %:sku%")
+  List<Product> findAccessoriesCompatibleWith(@Param("sku") String sku, Pageable pageable);
 }
