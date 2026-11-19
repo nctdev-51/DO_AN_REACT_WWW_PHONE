@@ -40,16 +40,12 @@ html:has(.sticky-purchase){scroll-padding-bottom:var(--space-19)}
 
 .campaign-banner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:var(--space-14);padding:var(--space-16);margin-block:var(--space-13);background:var(--color-card);border-radius:var(--radius-card);overflow:hidden}.campaign-banner h2{font-size:clamp(var(--font-size-4xl),4vw,var(--font-size-6xl));letter-spacing:-.04em;line-height:var(--line-height-heading);overflow-wrap:anywhere}.campaign-banner p{font-size:var(--font-size-lg);margin-block:var(--space-12)}.campaign-banner img{max-width:100%;width:100%;height:var(--size-showcase-image);object-fit:contain}.campaign-dark{background:var(--color-surface-base);color:var(--color-text-on-dark)}.campaign-dark .eyebrow{color:var(--color-text-on-dark)}.campaign-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-12)}.campaign-tile{display:flex;flex-direction:column;padding:var(--space-13);margin:0}.campaign-tile h2{font-size:var(--font-size-3xl)}.campaign-tile img{height:var(--size-gallery-image-mobile)}@media(max-width:768px){.campaign-banner{grid-template-columns:1fr;padding:var(--space-13)}.campaign-banner img{height:var(--size-showcase-image-mobile)}.campaign-tiles{grid-template-columns:1fr}}
 
-/* Product cards: badges, hover swap, and visual color dots */
+/* Product cards: badges and visual color dots */
 .product-card-image{position:relative}
 .card-badges{position:absolute;top:var(--space-8);left:var(--space-8);z-index:2;display:flex;flex-wrap:wrap;gap:var(--space-3);pointer-events:none}
 .card-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:var(--radius-sm);font-size:11px;font-weight:var(--font-weight-bold);letter-spacing:.04em;line-height:1.35}
 .card-badge-sale{background:var(--color-error);color:var(--color-surface-strong)}
 .card-badge-new{background:var(--color-text);color:var(--color-surface-strong)}
-.product-card-image.has-hover-image .img-primary{transition:opacity var(--motion-duration-normal) ease,transform var(--motion-duration-slow) var(--motion-ease-reveal)}
-.product-card-image.has-hover-image .img-hover{position:absolute;inset:0;width:100%;height:100%;padding:inherit;object-fit:contain;opacity:0;transition:opacity var(--motion-duration-normal) ease,transform var(--motion-duration-slow) var(--motion-ease-reveal)}
-.product-card:not([data-variant-picked="true"]):hover .product-card-image.has-hover-image .img-hover{opacity:1;transform:scale(1.025)}
-.product-card:not([data-variant-picked="true"]):hover .product-card-image.has-hover-image .img-primary{opacity:0}
 .card-color-dots{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:var(--space-6)}
 .color-dot-btn{width:32px;height:32px;padding:5px;border-radius:50%;border:1.5px solid transparent;background:transparent;display:grid;place-items:center;cursor:pointer;transition:transform var(--motion-duration-fast),border-color var(--motion-duration-fast)}
 .color-dot-btn:hover{transform:scale(1.12)}
@@ -156,12 +152,12 @@ html:has(.sticky-purchase){scroll-padding-bottom:var(--space-19)}
 .detail-top-bar .breadcrumb-line{margin-bottom:0}
 .price-transparency-box{margin-top:12px}
 .installment-hint{margin:8px 0 0;padding:10px 12px;border-radius:var(--radius-field);background:var(--color-canvas);border:1px solid var(--color-divider);font-size:var(--font-size-sm)}
-.promo-offer-box{padding:14px 16px;background:var(--color-canvas)}
-.promo-offer-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed var(--color-divider)}
+.promo-offer-box{padding:12px 16px;background:var(--color-canvas)}
+.promo-offer-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:5px 0;border-bottom:1px dashed var(--color-divider)}
 .promo-offer-row:last-of-type{border-bottom:0}
 .detail-secondary-actions{display:grid;grid-template-columns:1fr;gap:8px}
 @media(min-width:576px){.detail-secondary-actions{grid-template-columns:1.2fr 1fr 1fr}}
-.delivery-estimator{padding:14px 16px}
+.delivery-estimator{padding:12px 16px}
 .usage-fit-list{padding-left:18px;display:grid;gap:6px;font-size:var(--font-size-sm);color:var(--ink)}
 
 /* Sticky quick compare tray */

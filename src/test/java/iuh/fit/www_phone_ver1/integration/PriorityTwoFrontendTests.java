@@ -26,6 +26,8 @@ class PriorityTwoFrontendTests {
 
   @Autowired WebApplicationContext context;
   @Autowired ProductRepository products;
+  @Autowired iuh.fit.www_phone_ver1.repository.ProductMediaRepository productMedia;
+  @Autowired iuh.fit.www_phone_ver1.config.ProductMediaInitializer mediaInitializer;
 
   private MockMvc mvc;
 
@@ -100,5 +102,80 @@ class PriorityTwoFrontendTests {
     assertTrue(compareCss.contains("position:sticky;\n  left:0")
         || compareCss.contains("position:sticky;\r\n  left:0"));
     assertTrue(galleryCss.contains("max-height: 780px"));
+  }
+
+  @Test
+  void productCardNoHoverSwapGalleryLoadsMultiPhotoAndStepperIsCentered() throws Exception {
+    String cardTag = Files.readString(Path.of("src/main/webapp/WEB-INF/tags/productCard.tag"));
+    String galleryJsp =
+        Files.readString(Path.of("src/main/webapp/WEB-INF/views/store/catalog/gallery.jsp"));
+    String detailJsp =
+        Files.readString(Path.of("src/main/webapp/WEB-INF/views/store/catalog/detail.jsp"));
+    String cartJsp =
+        Files.readString(Path.of("src/main/webapp/WEB-INF/views/store/cart/index.jsp"));
+    String galleryJs = Files.readString(Path.of("src/main/resources/static/js/gallery.js"));
+    String galleryCss = Files.readString(Path.of("src/main/resources/static/css/gallery.css"));
+    String storeJs = Files.readString(Path.of("src/main/resources/static/js/store.js"));
+    String storeCss = Files.readString(Path.of("src/main/resources/static/css/store.css"));
+    String retailCss = Files.readString(Path.of("src/main/resources/static/css/retail.css"));
+    String themeCss = Files.readString(Path.of("src/main/resources/static/css/theme.css"));
+
+    String recCss =
+        Files.readString(Path.of("src/main/resources/static/css/components/recommendation.css"));
+    assertFalse(cardTag.contains("img-hover"));
+    assertFalse(cardTag.contains("has-hover-image"));
+    assertFalse(retailCss.contains(".img-hover"));
+    assertFalse(themeCss.contains("scale(1.025)"));
+    assertTrue(storeCss.contains(".product-card-image img + img"));
+    assertTrue(storeCss.contains("overflow:hidden"));
+    assertTrue(storeCss.contains("display:flex;\n  align-items:center;\n  justify-content:center")
+        || storeCss.contains("display:flex;\r\n  align-items:center;\r\n  justify-content:center"));
+    assertTrue(storeCss.contains("width:auto;\n  height:auto;\n  max-width:100%;\n  max-height:100%")
+        || storeCss.contains("width:auto;\r\n  height:auto;\r\n  max-width:100%;\r\n  max-height:100%"));
+    assertTrue(themeCss.contains("padding: 34px 20px 14px"));
+    assertTrue(recCss.contains("max-height: 100%"));
+    assertTrue(storeCss.contains(".qty-stepper{"));
+    assertFalse(storeCss.contains("top:115px"));
+    assertTrue(storeCss.contains(".product-left-extras{"));
+
+    for (Product prod : products.findByStatus(1)) {
+      Path imgPath = Path.of("src/main/resources/static" + prod.getImage());
+      assertTrue(Files.exists(imgPath), "Missing product image: " + prod.getImage());
+    }
+
+    assertFalse(galleryJsp.contains("Hình ảnh"));
+    assertTrue(galleryJsp.contains("data-gallery-tabs"));
+    assertTrue(galleryJsp.contains("data-gallery-thumbs"));
+    assertTrue(galleryJsp.contains("data-gallery-dialog"));
+    assertEquals(
+        galleryJsp.split("<div\\b", -1).length, galleryJsp.split("</div>", -1).length);
+    assertFalse(galleryCss.contains("position: sticky"));
+    assertFalse(galleryCss.contains(".is-single .gallery-arrow"));
+    assertTrue(galleryCss.contains("top: 50%; transform: translateY(-50%)"));
+    assertTrue(galleryJs.contains("groups.push([key, label, group, selectedText])"));
+    assertTrue(galleryJs.contains("groups.forEach(([key, label, group, selectedText])"));
+
+    assertTrue(detailJsp.contains("data-qty-stepper"));
+    assertTrue(detailJsp.contains("id=\"buy-quantity\""));
+    assertTrue(detailJsp.contains("class=\"product-left-extras\""));
+    assertTrue(cartJsp.contains("data-qty-stepper"));
+    assertTrue(storeJs.contains("[data-qty-stepper]"));
+
+    Product honor = products.findBySku("PS-HONOR-400").orElseThrow();
+    // Simulate an existing DB that only had 1 photo row, then verify initializer backfills the rest.
+    var originalHonorMedia = productMedia.findByProduct_IdOrderBySortOrderAscIdAsc(honor.getId());
+    if (originalHonorMedia.size() > 1) {
+      productMedia.deleteAll(originalHonorMedia.subList(1, originalHonorMedia.size()));
+      productMedia.flush();
+    }
+    mediaInitializer.run();
+
+    String json =
+        mvc.perform(get("/products/{id}/media", honor.getId()).param("color", "Vàng"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertTrue(json.contains("\"photos\":[") && json.split("\"url\":").length > 5);
   }
 }

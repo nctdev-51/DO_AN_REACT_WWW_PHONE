@@ -11,23 +11,10 @@
 <c:set var="initial" value="${empty selectedVariant ? product.defaultVariant : selectedVariant}"/>
 <c:set var="primaryImg" value="${empty initial ? product.image : initial.image}"/>
 <c:set var="displayPrice" value="${empty initial ? product.price : initial.price}"/>
-<c:set var="hoverImg" value=""/>
-<c:forEach var="m" items="${product.media}">
-  <c:if test="${empty hoverImg and m.kind == 'PHOTO' and m.path != primaryImg}">
-    <c:set var="hoverImg" value="${m.path}"/>
-  </c:if>
-</c:forEach>
-<c:if test="${empty hoverImg}">
-  <c:forEach var="v" items="${product.variants}">
-    <c:if test="${empty hoverImg and v.active and v.image != primaryImg}">
-      <c:set var="hoverImg" value="${v.image}"/>
-    </c:if>
-  </c:forEach>
-</c:if>
 <c:set var="isNewModel" value="${fn:contains(product.name, '17') or fn:contains(product.name, 'iPhone Air') or fn:contains(product.name, 'S25') or fn:contains(product.name, 'Fold7') or fn:contains(product.name, 'Flip7') or fn:contains(product.name, 'Find X8') or fn:contains(product.name, 'Xiaomi 15') or fn:contains(product.name, 'HONOR 400')}"/>
 <c:set var="hasDiscount" value="${not empty product.originalPrice and product.originalPrice > displayPrice}"/>
 <article class="product-card" data-selected-variant="${initial.id}" data-product-card data-product-id="${product.id}" data-product-url="${pageContext.request.contextPath}/products/${product.id}" data-original-price="${product.originalPrice}">
-  <a data-product-link class="product-card-image ${not empty hoverImg ? 'has-hover-image' : ''}" href="${pageContext.request.contextPath}/products/${product.id}?variantId=${initial.id}">
+  <a data-product-link class="product-card-image" href="${pageContext.request.contextPath}/products/${product.id}?variantId=${initial.id}">
     <div class="card-badges">
       <c:if test="${isNewModel}">
         <span class="card-badge card-badge-new">MỚI</span>
@@ -47,9 +34,6 @@
       </span>
     </div>
     <img class="img-primary" src="${pageContext.request.contextPath}${primaryImg}" alt="<c:out value='${product.name}'/>" loading="lazy">
-    <c:if test="${not empty hoverImg}">
-      <img class="img-hover" src="${pageContext.request.contextPath}${hoverImg}" alt="" loading="lazy" aria-hidden="true">
-    </c:if>
   </a>
   <div class="product-card-body">
     <span class="eyebrow">
