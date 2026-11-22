@@ -1,8 +1,25 @@
 /* Operations workspace */
 .section-heading > .btn,
 .section-heading .btn,
+.section-heading a.btn,
+.section-heading a.btn:hover,
+.section-heading a.btn:focus,
+.admin-main .btn,
+.admin-main .btn:hover,
+.admin-main .btn:focus,
+.admin-main a.btn,
+.admin-main a.btn:hover,
+.admin-main a.btn:focus,
 .admin-main .btn-brand,
-.btn-brand {
+.admin-main .btn-brand:hover,
+.admin-main .btn-brand:focus,
+.btn-brand,
+.btn-brand:hover,
+.btn-brand:focus,
+.btn-brand:active,
+a.btn-brand,
+a.btn-brand:hover,
+a.btn-brand:focus {
   color: #ffffff !important;
   text-decoration: none !important;
   opacity: 1 !important;

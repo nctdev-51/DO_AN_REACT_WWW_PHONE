@@ -117,9 +117,10 @@ html:has(.sticky-purchase){scroll-padding-bottom:var(--space-19)}
 @media print{.mobile-bottom-nav,.compare-tray{display:none}}
 
 /* Navigation 4-group dropdowns & mobile search trigger */
-.nav-link-btn{border:0;background:transparent;color:var(--ink,var(--color-text));display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 2px;font-weight:500;cursor:pointer}
+.nav-link-btn{border:0;background:transparent;color:var(--ink,var(--color-text));display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 2px;font-size:14px;font-weight:500;cursor:pointer}
 .nav-link-btn:hover{color:var(--brand,var(--color-action))}
-.nav-group-dropdown .dropdown-menu{min-width:230px;padding:.5rem}
+.nav-group-dropdown .dropdown-menu{min-width:230px;padding:.5rem;font-size:14px}
+.nav-group-dropdown .dropdown-item{font-size:13.5px}
 .mobile-bottom-btn{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:var(--font-weight-medium);color:var(--color-text-muted);padding:4px 2px;min-height:46px;cursor:pointer}
 .mobile-menu-trigger{min-height:44px;white-space:nowrap;flex-shrink:0}
 .mobile-drawer-group{padding:10px 0;border-bottom:1px solid var(--color-divider)}

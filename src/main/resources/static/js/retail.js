@@ -523,6 +523,50 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 1000);
     }
   });
+
+  // 10. Product Rail Carousel Controls (Cuon muot khi nhan nut < >)
+  document.querySelectorAll('.product-rail-wrapper, .collection-section').forEach(container => {
+    const rail = container.querySelector('.product-rail');
+    if (!rail) return;
+    const prevBtn = container.querySelector('.rail-prev');
+    const nextBtn = container.querySelector('.rail-next');
+
+    function updateNav() {
+      const maxScroll = rail.scrollWidth - rail.clientWidth;
+      if (prevBtn) {
+        const canPrev = rail.scrollLeft > 15;
+        prevBtn.disabled = !canPrev;
+        prevBtn.setAttribute('aria-disabled', String(!canPrev));
+      }
+      if (nextBtn) {
+        const canNext = rail.scrollLeft < maxScroll - 15;
+        nextBtn.disabled = !canNext;
+        nextBtn.setAttribute('aria-disabled', String(!canNext));
+      }
+    }
+
+    function scrollStep(direction) {
+      const amount = Math.max(280, rail.clientWidth * 0.75) * direction;
+      rail.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', e => {
+        e.preventDefault();
+        scrollStep(-1);
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', e => {
+        e.preventDefault();
+        scrollStep(1);
+      });
+    }
+
+    rail.addEventListener('scroll', updateNav, { passive: true });
+    window.addEventListener('resize', updateNav, { passive: true });
+    setTimeout(updateNav, 200);
+  });
 });
 
 window.addEventListener('pageshow', () => {
