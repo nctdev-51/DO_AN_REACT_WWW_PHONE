@@ -69,8 +69,16 @@
       </div>
     </div>
     <div class="field">
-      <label for="description">Mô tả sản phẩm</label>
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <label for="description" class="mb-0">Mô tả sản phẩm</label>
+        <c:if test="${not empty productId}">
+          <button type="button" id="btn-admin-ai-gen" class="btn btn-sm btn-outline-brand" style="border: 1px solid var(--brand, #c34d2d); color: var(--brand, #c34d2d); border-radius: 6px; padding: 3px 10px; font-size: 0.8rem;" data-product-id="${productId}">
+            ✨ Tạo mô tả bằng AI
+          </button>
+        </c:if>
+      </div>
       <form:textarea id="description" path="description" cssClass="form-control" rows="5"/>
+      <div id="admin-ai-status" class="small mt-1 text-muted" style="display:none;"></div>
     </div>
     <div class="field">
       <label for="image">Ảnh (PNG/JPEG, tối đa 5 MB)</label>

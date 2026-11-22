@@ -13,7 +13,7 @@
       <c:param name="from" value="${from}"/>
       <c:param name="to" value="${to}"/>
     </c:url>
-    <a class="btn btn-outline-dark btn-sm" href="${exportUrl}">Xuất CSV</a>
+    <a class="btn btn-brand btn-sm" href="${exportUrl}">Xuất CSV</a>
   </div>
   <div class="analytics-presets" role="group" aria-label="Khoảng thời gian nhanh">
     <a class="btn btn-sm ${selectedPreset == '7' ? 'btn-brand' : 'btn-outline-dark'}"

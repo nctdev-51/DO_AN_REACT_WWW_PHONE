@@ -145,7 +145,7 @@ public class EmbeddingService {
     String targetUrl = (baseUrl == null || baseUrl.isBlank()) ? "https://api.openai.com/v1" : baseUrl;
     if (cachedRestClient == null || !targetUrl.equals(cachedBaseUrl)) {
       SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-      requestFactory.setConnectTimeout(3000);
+      requestFactory.setConnectTimeout(5000);
       requestFactory.setReadTimeout(8000);
       cachedRestClient =
           RestClient.builder().baseUrl(targetUrl).requestFactory(requestFactory).build();

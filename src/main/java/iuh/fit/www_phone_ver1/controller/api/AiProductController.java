@@ -51,11 +51,18 @@ public class AiProductController {
         if (opt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        Product product = opt.get();
-        return ResponseEntity.ok(Map.of(
-                "description", descriptionService.generateDescription(product),
-                "keyFeatures", descriptionService.generateKeyFeatures(product)
-        ));
+        try {
+            Product product = opt.get();
+            return ResponseEntity.ok(Map.of(
+                    "description", descriptionService.generateDescription(product),
+                    "keyFeatures", descriptionService.generateKeyFeatures(product)
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of(
+                    "description", "Thông tin sản phẩm đang được cập nhật. Vui lòng thử lại sau.",
+                    "keyFeatures", List.of("📱 Thông tin chi tiết đang tải...")
+            ));
+        }
     }
 
     @PostMapping("/description/{productId}/refresh")
@@ -64,12 +71,19 @@ public class AiProductController {
         if (opt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        Product product = opt.get();
-        descriptionService.clearCache(productId);
-        return ResponseEntity.ok(Map.of(
-                "description", descriptionService.regenerateDescription(product),
-                "keyFeatures", descriptionService.regenerateKeyFeatures(product)
-        ));
+        try {
+            Product product = opt.get();
+            descriptionService.clearCache(productId);
+            return ResponseEntity.ok(Map.of(
+                    "description", descriptionService.regenerateDescription(product),
+                    "keyFeatures", descriptionService.regenerateKeyFeatures(product)
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of(
+                    "description", "Không thể tạo mô tả lúc này. Vui lòng thử lại sau.",
+                    "keyFeatures", List.of("📱 Đang tải thông tin...")
+            ));
+        }
     }
 
     @GetMapping("/compare")
@@ -89,8 +103,14 @@ public class AiProductController {
                     "error", "Không tìm thấy sản phẩm đang kinh doanh. Vui lòng kiểm tra lại ID."
             ));
         }
-        String comparison = descriptionService.compareProducts(optA.get(), optB.get());
-        return ResponseEntity.ok(Map.of("comparison", comparison));
+        try {
+            String comparison = descriptionService.compareProducts(optA.get(), optB.get());
+            return ResponseEntity.ok(Map.of("comparison", comparison));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of(
+                    "comparison", "Chức năng so sánh tạm thời không khả dụng. Vui lòng thử lại sau."
+            ));
+        }
     }
 
     @PostMapping("/chat")

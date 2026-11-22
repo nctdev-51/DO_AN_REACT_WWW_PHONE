@@ -1,4 +1,13 @@
 /* Operations workspace */
+.section-heading > .btn,
+.section-heading .btn,
+.admin-main .btn-brand,
+.btn-brand {
+  color: #ffffff !important;
+  text-decoration: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
 .chart-empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; background: #f7f9f5; border-radius: 8px; }
 .chart-empty strong { font-size: .95rem; font-weight: 550; }
 .chart-empty p { font-size: .8rem; color: var(--muted); margin: 8px 0 0; }

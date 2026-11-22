@@ -2,6 +2,9 @@ package iuh.fit.www_phone_ver1.service.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import reactor.core.publisher.Flux;
 
 /**
@@ -53,7 +57,7 @@ public class OpenAiCompatibleChatModel implements ChatModel {
 
     public OpenAiCompatibleChatModel() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(3000);
+        requestFactory.setConnectTimeout(5000);
         requestFactory.setReadTimeout(15000);
         this.restClient = RestClient.builder().requestFactory(requestFactory).build();
     }
@@ -109,8 +113,26 @@ public class OpenAiCompatibleChatModel implements ChatModel {
             generations.add(new Generation(new AssistantMessage(replyText)));
             return new ChatResponse(generations);
 
+        } catch (RestClientResponseException rcEx) {
+            int status = rcEx.getStatusCode().value();
+            if (status == 429) {
+                log.warn("AI API rate limited (429 Too Many Requests) at {}", baseUrl);
+            } else {
+                log.error("AI API HTTP error {} at {}: {}", status, baseUrl, rcEx.getResponseBodyAsString());
+            }
+            throw new RuntimeException("Loi AI API (HTTP " + status + "): " + rcEx.getMessage(), rcEx);
         } catch (Exception e) {
-            log.error("Loi goi AI API ({}): {}", baseUrl, e.getMessage());
+            Throwable root = e;
+            while (root.getCause() != null) root = root.getCause();
+            if (root instanceof UnknownHostException) {
+                log.warn("AI API: Khong the phan giai ten mien (mat mang?) - {}", root.getMessage());
+            } else if (root instanceof ConnectException) {
+                log.warn("AI API: Khong the ket noi (mat mang/firewall?) - {}", root.getMessage());
+            } else if (root instanceof SocketTimeoutException) {
+                log.warn("AI API: Het thoi gian cho phan hoi (timeout) - {}", root.getMessage());
+            } else {
+                log.error("Loi goi AI API ({}): {}", baseUrl, e.getMessage());
+            }
             throw new RuntimeException("Loi AI API: " + e.getMessage(), e);
         }
     }

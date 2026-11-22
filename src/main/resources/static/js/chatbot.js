@@ -115,7 +115,7 @@
             // 2. Chuyển đổi định dạng bold **chữ đậm**
             s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-            // 3. Xử lý trường hợp AI vô tình xuất bảng markdown (|...|)
+            // 3. Xử lý triệt để trường hợp AI xuất bảng markdown (|...|)
             const lines = s.split(/\r?\n/);
             const cleaned = [];
             for (let line of lines) {
@@ -126,14 +126,15 @@
                 }
                 // Nếu là dòng bảng (| col1 | col2 | ...)
                 if (tr.startsWith('|') && tr.endsWith('|')) {
-                    const cols = tr.split('|').map(c => c.trim()).filter(c => c.length > 0);
+                    const cols = tr.split('|').map(function (c) { return c.trim(); }).filter(function (c) { return c.length > 0; });
                     if (cols.length >= 2) {
-                        // Bỏ qua dòng tiêu đề bảng (ID, Mẫu, Tên, Giá,...)
                         const c0 = cols[0].toLowerCase();
                         const c1 = cols[1].toLowerCase();
-                        if (c0 === 'id' || c1.includes('mẫu') || c1.includes('tên') || c1.includes('sản phẩm')) {
+                        // Bỏ qua dòng tiêu đề bảng bất kể AI dùng từ gì (id, mẫu, tên, sản phẩm, model, stt,...)
+                        if (c0 === 'id' || c0 === 'stt' || c0.includes('mẫu') || c0.includes('tên') || c1.includes('mẫu') || c1.includes('tên') || c1.includes('sản phẩm') || c1.includes('giá')) {
                             continue;
                         }
+                        // Format lại thành dòng đọc đẹp mắt kèm icon điện thoại
                         line = '📱 <strong>' + cols.slice(0, 3).join('</strong> — ') + (cols.length > 3 ? (' (' + cols.slice(3).join(', ') + ')') : '');
                     }
                 }

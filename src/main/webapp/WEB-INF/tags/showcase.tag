@@ -17,6 +17,6 @@
     </div>
   </div>
   <a class="showcase-visual" data-reveal href="${pageContext.request.contextPath}/products/${product.id}" aria-label="Xem chi tiết <c:out value='${product.name}'/>">
-    <img src="${pageContext.request.contextPath}${product.image}" alt="<c:out value='${product.name}'/>" ${primary ? 'fetchpriority="high"' : 'loading="lazy"'}>
+    <img src="${pageContext.request.contextPath}${product.image}" alt="<c:out value='${product.name}'/>" ${primary ? 'fetchpriority="high"' : 'loading="lazy"'} style="aspect-ratio: 4/3; object-fit: contain;">
   </a>
 </section>
