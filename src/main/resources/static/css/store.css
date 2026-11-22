@@ -234,18 +234,24 @@ textarea.form-control{
 }
 /* Header and footer */
 .announcement{
-  background:#183c3c;
-  color:#d7e4df;
-  font-size:.72rem;
-  padding:.45rem 0
+  background:#ffffff;
+  color:#475569;
+  font-size:14px;
+  padding:8px 0;
+  border-bottom:1px solid #e2e8f0
 }
 .announcement-inner{
   display:flex;
   justify-content:space-between;
-  gap:16px
+  align-items:center;
+  gap:16px;
+  font-size:14px;
+  background:#ffffff
 }
 .announcement a{
-  color:#fff
+  color:#2563eb;
+  font-size:14px;
+  font-weight:650
 }
 .store-header{
   background:#fff;
@@ -295,11 +301,11 @@ textarea.form-control{
 .header-search{
   display:flex;
   flex:1;
-  min-width:170px;
-  max-width:350px;
-  background:#f3f5f2;
-  border:1px solid #e0e5df;
-  border-radius:7px;
+  min-width:240px;
+  max-width:480px;
+  background:#f8fafc;
+  border:1.5px solid #cbd5e1;
+  border-radius:980px;
   position:relative;
   overflow:visible
 }

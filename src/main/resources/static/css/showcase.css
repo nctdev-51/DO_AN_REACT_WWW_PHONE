@@ -7,7 +7,8 @@
 .store-hero-overlay {
   position: relative;
   width: 100%;
-  min-height: 460px;
+  min-height: 640px;
+  height: clamp(600px, 68vh, 740px);
   display: flex;
   align-items: center;
   overflow: hidden;

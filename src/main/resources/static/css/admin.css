@@ -1,29 +1,142 @@
 /* Operations workspace */
-.section-heading > .btn,
-.section-heading .btn,
-.section-heading a.btn,
-.section-heading a.btn:hover,
-.section-heading a.btn:focus,
-.admin-main .btn,
-.admin-main .btn:hover,
-.admin-main .btn:focus,
-.admin-main a.btn,
-.admin-main a.btn:hover,
-.admin-main a.btn:focus,
+/* ============================================================
+   ADMIN BUTTON SYSTEM — Chuẩn xác, rõ chữ, không bị trắng trơn
+   ============================================================ */
+/* 1. Nút Brand chính (Thêm mới, Lưu, Cập nhật) */
+.section-heading > .btn-brand,
+.section-heading .btn-brand,
+.section-heading a.btn-brand,
 .admin-main .btn-brand,
-.admin-main .btn-brand:hover,
-.admin-main .btn-brand:focus,
-.btn-brand,
+.btn-brand {
+  background: var(--color-action, #0066cc) !important;
+  border: 1px solid var(--color-action, #0066cc) !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  font-weight: 500;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
 .btn-brand:hover,
 .btn-brand:focus,
 .btn-brand:active,
-a.btn-brand,
 a.btn-brand:hover,
 a.btn-brand:focus {
+  background: var(--color-action-hover, #0054ad) !important;
+  border-color: var(--color-action-hover, #0054ad) !important;
   color: #ffffff !important;
   text-decoration: none !important;
+}
+
+/* 2. Nút Light / Sửa / Phiên bản / Chi tiết (Nền sáng chữ tối rõ ràng) */
+.admin-main .btn-light,
+.admin-main a.btn-light,
+.table .btn-light,
+.table-actions .btn-light {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
   opacity: 1 !important;
   visibility: visible !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-main .btn-light:hover,
+.admin-main a.btn-light:hover,
+.table .btn-light:hover,
+.table-actions .btn-light:hover {
+  background: #e2e8f0 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+  text-decoration: none !important;
+}
+
+/* 3. Nút Outline Danger / Xóa (Viền đỏ chữ đỏ nổi bật) */
+.admin-main .btn-outline-danger,
+.admin-main button.btn-outline-danger,
+.table .btn-outline-danger,
+.table-actions .btn-outline-danger {
+  background: transparent !important;
+  border: 1px solid #dc2626 !important;
+  color: #dc2626 !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-main .btn-outline-danger:hover,
+.admin-main button.btn-outline-danger:hover,
+.table .btn-outline-danger:hover,
+.table-actions .btn-outline-danger:hover {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+}
+
+/* 4. Nút Outline Dark / Sửa (Viền xám đậm chữ xám đen rõ ràng) */
+.admin-main .btn-outline-dark,
+.admin-main a.btn-outline-dark,
+.table .btn-outline-dark,
+.table-actions .btn-outline-dark {
+  background: transparent !important;
+  border: 1px solid #64748b !important;
+  color: #1e293b !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-main .btn-outline-dark:hover,
+.admin-main a.btn-outline-dark:hover,
+.table .btn-outline-dark:hover,
+.table-actions .btn-outline-dark:hover {
+  background: #1e293b !important;
+  border-color: #1e293b !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+}
+
+/* 5. Nút Outline Primary / Info */
+.admin-main .btn-outline-primary,
+.admin-main a.btn-outline-primary,
+.table .btn-outline-primary {
+  background: transparent !important;
+  border: 1px solid var(--color-action, #0066cc) !important;
+  color: var(--color-action, #0066cc) !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.admin-main .btn-outline-primary:hover,
+.admin-main a.btn-outline-primary:hover,
+.table .btn-outline-primary:hover {
+  background: var(--color-action, #0066cc) !important;
+  border-color: var(--color-action, #0066cc) !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+}
+
+.table-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.table-actions form {
+  margin: 0;
 }
 .chart-empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; background: #f7f9f5; border-radius: 8px; }
 .chart-empty strong { font-size: .95rem; font-weight: 550; }
