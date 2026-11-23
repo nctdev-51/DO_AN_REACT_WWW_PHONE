@@ -10,6 +10,7 @@
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <c:set var="initial" value="${empty selectedVariant ? product.defaultVariant : selectedVariant}"/>
 <c:set var="primaryImg" value="${empty initial ? product.image : initial.image}"/>
+<c:set var="resolvedPrimaryImg" value="${fn:startsWith(primaryImg, 'http') ? primaryImg : pageContext.request.contextPath.concat(primaryImg)}"/>
 <c:set var="displayPrice" value="${empty initial ? product.price : initial.price}"/>
 <c:set var="isNewModel" value="${fn:contains(product.name, '17') or fn:contains(product.name, 'iPhone Air') or fn:contains(product.name, 'S25') or fn:contains(product.name, 'Fold7') or fn:contains(product.name, 'Flip7') or fn:contains(product.name, 'Find X8') or fn:contains(product.name, 'Xiaomi 15') or fn:contains(product.name, 'HONOR 400')}"/>
 <c:set var="hasDiscount" value="${not empty product.originalPrice and product.originalPrice > displayPrice}"/>
@@ -33,7 +34,7 @@
         </c:if>
       </span>
     </div>
-    <img class="img-primary" src="${pageContext.request.contextPath}${primaryImg}" alt="<c:out value='${product.name}'/>" loading="lazy">
+    <img class="img-primary" src="${resolvedPrimaryImg}" alt="<c:out value='${product.name}'/>" loading="lazy">
   </a>
   <div class="product-card-body">
     <span class="eyebrow">
@@ -49,7 +50,7 @@
     </p>
     <div class="card-variant-options" data-variant-options aria-label="Chọn phiên bản">
       <c:forEach var="variant" items="${product.variants}"><c:if test="${variant.active}">
-        <span hidden data-variant data-id="${variant.id}" data-color="<c:out value='${variant.color}'/>" data-storage="<c:out value='${variant.storage}'/>" data-ram="<c:out value='${variant.ram}'/>" data-price="${variant.price}" data-stock="${variant.stock}" data-image="${pageContext.request.contextPath}${variant.image}"></span>
+        <span hidden data-variant data-id="${variant.id}" data-color="<c:out value='${variant.color}'/>" data-storage="<c:out value='${variant.storage}'/>" data-ram="<c:out value='${variant.ram}'/>" data-price="${variant.price}" data-stock="${variant.stock}" data-image="${fn:startsWith(variant.image, 'http') ? variant.image : pageContext.request.contextPath.concat(variant.image)}"></span>
       </c:if></c:forEach>
     </div>
     <p class="muted small" data-selected-caption><c:out value="${initial.storage}"/><c:if test="${not empty initial.storage and not empty initial.color}"> · </c:if><c:out value="${initial.color}"/></p>

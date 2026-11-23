@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const photoTab = find('gallery-photos');
   const spinTab = find('gallery-spin');
   const playButton = find('spin-play');
-  const path = url => root.dataset.context + url;
+  const path = url => (url && (url.startsWith('http://') || url.startsWith('https://'))) ? url : (root.dataset.context + url);
   let gallery = {photos: [], frames: []}, index = 0, frame = 0, timer, request, loadedColor;
   let generation = 0, framesPreloaded = false;
 

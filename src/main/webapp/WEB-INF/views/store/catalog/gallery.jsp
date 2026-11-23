@@ -1,12 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <div class="product-gallery panel" data-gallery data-endpoint="${pageContext.request.contextPath}/products/${product.id}/media" data-context="${pageContext.request.contextPath}">
   <div class="gallery-tabs" data-gallery-tabs role="group" aria-label="Chế độ xem sản phẩm" hidden>
     <button type="button" data-gallery-spin aria-pressed="false" hidden>Xem 360°</button>
   </div>
   <div data-photo-panel>
     <div class="gallery-stage" data-gallery-stage data-reveal>
-      <button type="button" class="gallery-main" data-gallery-zoom aria-label="Phóng to ảnh sản phẩm"><img data-gallery-image src="${pageContext.request.contextPath}${product.image}" alt="<c:out value='${product.name}'/>" fetchpriority="high"></button>
+      <c:set var="resolvedGalleryMain" value="${fn:startsWith(product.image, 'http') ? product.image : pageContext.request.contextPath.concat(product.image)}" />
+      <button type="button" class="gallery-main" data-gallery-zoom aria-label="Phóng to ảnh sản phẩm"><img data-gallery-image src="${resolvedGalleryMain}" alt="<c:out value='${product.name}'/>" fetchpriority="high"></button>
       <button type="button" class="gallery-arrow gallery-prev" data-gallery-prev aria-label="Ảnh trước">‹</button>
       <button type="button" class="gallery-arrow gallery-next" data-gallery-next aria-label="Ảnh tiếp theo">›</button>
       <span class="gallery-counter" data-gallery-counter>1 / 1</span>

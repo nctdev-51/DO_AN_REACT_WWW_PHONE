@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/store/header.jsp" />
 <div class="detail-top-bar">
@@ -47,7 +48,8 @@
       <label for="variant-select">Chọn phiên bản</label>
       <select id="variant-select" name="variantId" class="form-select mb-3" required>
         <c:forEach var="variant" items="${variants}">
-          <option value="${variant.id}" data-price="${variant.price}" data-stock="${variant.stock}" data-color="<c:out value='${variant.color}'/>" data-storage="<c:out value='${variant.storage}'/>" data-ram="<c:out value='${variant.ram}'/>" data-image="${pageContext.request.contextPath}${variant.image}" ${variant.id == selectedVariantId ? 'selected' : ''}>
+          <c:set var="resolvedVariantImg" value="${fn:startsWith(variant.image, 'http') ? variant.image : pageContext.request.contextPath.concat(variant.image)}" />
+          <option value="${variant.id}" data-price="${variant.price}" data-stock="${variant.stock}" data-color="<c:out value='${variant.color}'/>" data-storage="<c:out value='${variant.storage}'/>" data-ram="<c:out value='${variant.ram}'/>" data-image="${resolvedVariantImg}" ${variant.id == selectedVariantId ? 'selected' : ''}>
             <c:out value="${variant.label}"/> — ${variant.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
           </option>
         </c:forEach>
@@ -312,7 +314,8 @@
 </c:if>
 
 <aside class="sticky-purchase" aria-label="Mua sản phẩm đang xem">
-  <img class="sticky-thumb" data-sticky-thumb src="${pageContext.request.contextPath}${product.image}" alt="<c:out value='${product.name}'/>">
+  <c:set var="resolvedProductImg" value="${fn:startsWith(product.image, 'http') ? product.image : pageContext.request.contextPath.concat(product.image)}" />
+  <img class="sticky-thumb" data-sticky-thumb src="${resolvedProductImg}" alt="<c:out value='${product.name}'/>">
   <div><strong><c:out value="${product.name}"/></strong><span data-sticky-variant></span></div>
   <strong data-sticky-price><ui:money value="${product.price}"/></strong>
   <button class="btn btn-brand" type="submit" form="product-purchase" name="buyNow" value="true" data-buy-now>Mua ngay</button>

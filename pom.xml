@@ -123,6 +123,13 @@
         <artifactId>milvus-sdk-java</artifactId>
         <version>2.3.4</version>
       </dependency>
+
+      <!-- Cloudinary SDK cho Java / Spring Boot -->
+      <dependency>
+        <groupId>com.cloudinary</groupId>
+        <artifactId>cloudinary-http44</artifactId>
+        <version>1.39.0</version>
+      </dependency>
     </dependencies>
 
     <dependencyManagement>

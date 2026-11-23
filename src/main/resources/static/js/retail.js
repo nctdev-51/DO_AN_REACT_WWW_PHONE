@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const image = document.createElement('img');
             const rawImage = item.image || '';
             image.src = rawImage
-              ? (rawImage.startsWith('http') || rawImage.startsWith('/') ? `${base}${rawImage}` : `${base}/${rawImage}`)
+              ? (rawImage.startsWith('http') ? rawImage : (rawImage.startsWith('/') ? `${base}${rawImage}` : `${base}/${rawImage}`))
               : '';
             image.hidden = !rawImage;
             image.addEventListener('error', () => {
@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.className = 'compare-tray-item';
         card.dataset.trayVariantId = item.variantId;
         const img = document.createElement('img');
-        img.src = `${ctx}${item.image}`;
+        img.src = item.image && item.image.startsWith('http') ? item.image : `${ctx}${item.image}`;
         img.alt = '';
         const meta = document.createElement('div');
         meta.className = 'compare-tray-meta';

@@ -2,6 +2,8 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/admin/header.jsp" />
+<c:if test="${not empty successMsg}"><div class="alert alert-success alert-dismissible fade show" role="alert"><c:out value="${successMsg}"/><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div></c:if>
+<c:if test="${not empty errorMsg}"><div class="alert alert-danger alert-dismissible fade show" role="alert"><c:out value="${errorMsg}"/><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div></c:if>
 <section class="stat-grid">
   <article class="panel">
     <span>Tổng đơn hàng</span>

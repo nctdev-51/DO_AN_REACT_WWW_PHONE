@@ -16,14 +16,17 @@ public class CampaignBannerService {
   private final CampaignBannerRepository banners;
   private final ProductRepository products;
   private final ProductImageStorageService images;
+  private final CloudinaryService cloudinaryService;
 
   public CampaignBannerService(
       CampaignBannerRepository banners,
       ProductRepository products,
-      ProductImageStorageService images) {
+      ProductImageStorageService images,
+      CloudinaryService cloudinaryService) {
     this.banners = banners;
     this.products = products;
     this.images = images;
+    this.cloudinaryService = cloudinaryService;
   }
 
   @Transactional
@@ -50,8 +53,15 @@ public class CampaignBannerService {
                     () -> new IllegalArgumentException("Sản phẩm chưa tồn tại hoặc đã ngừng bán."));
     if ("PRODUCT".equals(form.getTarget()) && product == null)
       throw new IllegalArgumentException("Chọn sản phẩm cho đích đến của banner.");
-    String previous = banner.getImage(),
-        next = upload == null || upload.isEmpty() ? previous : images.store(upload);
+    String previous = banner.getImage();
+    String next;
+    if (upload == null || upload.isEmpty()) {
+      next = previous;
+    } else if (cloudinaryService.isConfigured()) {
+      next = cloudinaryService.uploadImage(upload, "ptv_mobile/banners");
+    } else {
+      next = images.store(upload);
+    }
     cleanup(next, previous);
     BeanUtils.copyProperties(form, banner, "version", "productId");
     banner.setProduct(product);
@@ -79,11 +89,16 @@ public class CampaignBannerService {
           @Override
           public void afterCompletion(int status) {
             String path = status == STATUS_COMMITTED ? previous : next;
-            try {
-              images.delete(path);
-            } catch (IOException ex) {
-              org.slf4j.LoggerFactory.getLogger(CampaignBannerService.class)
-                  .warn("Không dọn được ảnh banner");
+            if (path == null || path.isBlank()) return;
+            if (path.contains("res.cloudinary.com")) {
+              cloudinaryService.deleteImageByUrl(path);
+            } else {
+              try {
+                images.delete(path);
+              } catch (IOException ex) {
+                org.slf4j.LoggerFactory.getLogger(CampaignBannerService.class)
+                    .warn("Không dọn được ảnh banner");
+              }
             }
           }
         });
