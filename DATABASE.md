@@ -52,3 +52,5 @@ Dữ liệu mẫu hiện có 48 sản phẩm, 180 biến thể, 4 mã ưu đãi 
 
 `campaign_banners` lưu nội dung, lịch, vị trí/thứ tự và ảnh chiến dịch; không seed banner quảng cáo giả. `products.usage_tags` lưu nhóm nhu cầu do cửa hàng phân loại; dữ liệu mẫu chỉ bổ sung khi NULL, không phục hồi tag đã chủ động xóa. `addresses` và `orders` lưu mã tỉnh/phường riêng cùng tên chuẩn; địa chỉ lịch sử không bị chuyển đổi tự động. Danh mục địa phương là JSON tĩnh trong resources, hai file database vẫn giữ nguyên.
 Đơn có snapshot môi trường/payload GHN, trạng thái hãng và thời điểm lấy dữ liệu. Payload có thông tin người nhận, chỉ dùng phía server/quản trị; không xuất công khai. Không lưu Token GHN trong database. Báo cáo trừ các `refunds.status=COMPLETED` của đơn đã giao.
+
+`chat_memory_messages` lưu tối đa 20 tin nhắn gần nhất của mỗi chatbot conversation theo `conversation_id` trong MariaDB; Flyway tạo bảng ở migration V3. `JdbcChatMemory` dùng `ChatMemory` API của Spring AI 1.0.0-M6 với `JdbcTemplate`, không giữ lịch sử trong RAM. Profile `demo` tạo bảng tương ứng trong H2. Cookie `ptv_sid` do server cấp để liên kết lịch sử chat và sự kiện; MongoDB lưu tracking event riêng.

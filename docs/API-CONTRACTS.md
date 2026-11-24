@@ -27,3 +27,10 @@ Mỗi endpoint JSON mới phải có contract ở đây trước khi module fron
 | `POST /api/recommendations/reindex` | TV3 | `{totalProducts, indexed, failed, milvusAvailable}` | Yêu cầu `ROLE_ADMIN` + CSRF (`401` nếu chưa đăng nhập, `403` nếu không đủ quyền); nạp lại embedding toàn bộ sản phẩm active và dọn vector hết hiệu lực khỏi MongoDB/Milvus. |
 | `GET /api/ai/description/{productId}` | AI | `{description, keyFeatures}` | Trả `404` nếu sản phẩm không tồn tại/ngừng bán; giới hạn 20 req/60s theo client (`429`). |
 | `POST /api/ai/description/{productId}/refresh` | AI | `{description, keyFeatures}` | Yêu cầu `ROLE_ADMIN` + CSRF (`401`/`403`) để tạo lại mô tả AI. |
+| `POST /api/ai/chat` | AI | `{reply, suggestedProducts, productCards}` | Body `{message}`; server cấp cookie HttpOnly `ptv_sid` làm conversation ID. Tin nhắn người dùng và trợ lý được lưu trong MariaDB. Trả `400` nếu tin nhắn rỗng/dài hơn 500 ký tự, `429` khi vượt giới hạn. |
+
+## Tracking
+
+| Endpoint | Owner | Request / response | Ghi chú |
+| --- | --- | --- | --- |
+| `POST /api/tracking` | TV4 | `{eventType, productId?, keyword?, pageUrl?, meta?}` → `204` | Session ID và user ID do server xác định; IP được SHA-256 trước khi lưu MongoDB. Chỉ nhận metadata allowlist, việc ghi sự kiện chạy nền. |

@@ -17,6 +17,22 @@ import org.springframework.stereotype.Repository;
 public interface OrderRepository extends JpaRepository<Order, Long> {
   long countByOrderDateBetween(LocalDateTime from, LocalDateTime to);
 
+  @Query("""
+      select d.product.id as productId, sum(d.quantity) as units
+      from OrderDetail d
+      where d.order.orderDate >= :from and d.order.orderDate < :to
+        and d.order.status <> :cancelled
+      group by d.product.id
+      """)
+  List<ProductDemand> productDemand(
+      @Param("from") LocalDateTime from, @Param("to") LocalDateTime to,
+      @Param("cancelled") String cancelled);
+
+  interface ProductDemand {
+    Long getProductId();
+    long getUnits();
+  }
+
   long countByPromotion_IdAndStatusNot(Long promotionId, String status);
 
   boolean existsByPromotion_IdAndUser_IdAndStatusNot(Long promotionId, Long userId, String status);

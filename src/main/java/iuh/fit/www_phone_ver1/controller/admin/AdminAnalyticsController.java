@@ -51,6 +51,12 @@ public class AdminAnalyticsController {
         report.dailyViews().stream()
             .map(view -> Long.toString(view.count()))
             .collect(java.util.stream.Collectors.joining(",")));
+
+    // Bổ sung phân tích dự báo tồn kho (Chức năng 5) & tương tác AI (Chức năng 6)
+    model.addAttribute("stockoutForecasts", analytics.forecastStockoutRisk().stream().limit(20).toList());
+    model.addAttribute("recentAiQuestions", analytics.recentAiChatInsights(6));
+    model.addAttribute("aiTopicStats", analytics.aiTopicDistribution(range.from(), range.to()));
+
     return "admin/analytics/dashboard";
   }
 
