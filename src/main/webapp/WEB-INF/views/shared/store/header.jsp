@@ -9,6 +9,7 @@
     <title>PTV Mobile — Điện thoại & công nghệ</title>
     <meta name="theme-color" content="#ffffff">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/nouislider/nouislider.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/store.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/catalog-filter.css">
     <c:if test="${comparison != null}"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/comparison.css"></c:if>

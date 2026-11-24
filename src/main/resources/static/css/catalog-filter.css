@@ -28,3 +28,61 @@
 .catalog-filter-accordion .accordion-button:not(.collapsed) { background: transparent; color: var(--brand); }
 .catalog-filter-accordion .accordion-body { padding: 0 0 1rem; }
 .card-badge-popular { background: #8d6c34; color: #fff; }
+
+/* noUiSlider Custom Styling - PTV Mobile (TV5) */
+.price-slider-wrapper {
+  margin: 16px 4px 18px;
+}
+.price-slider.noUi-target {
+  height: 6px;
+  border-radius: 3px;
+  border: none;
+  background: #e5e5ea;
+  box-shadow: none;
+}
+.price-slider .noUi-connect {
+  background: var(--color-action, #0066cc);
+  border-radius: 3px;
+}
+.price-slider .noUi-handle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--color-action, #0066cc);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  cursor: grab;
+  top: -8px;
+  right: -11px;
+}
+.price-slider .noUi-handle:hover {
+  transform: scale(1.08);
+  transition: transform 0.15s ease;
+}
+.price-slider .noUi-handle:active {
+  cursor: grabbing;
+  box-shadow: 0 0 0 5px var(--color-action-tint, #edf5ff);
+}
+.price-slider .noUi-handle::before,
+.price-slider .noUi-handle::after {
+  display: none;
+}
+.price-slider-values {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text, #1d1d1f);
+}
+.price-slider-values span {
+  display: inline-block;
+  background: #f5f5f7;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--color-divider, #d2d2d7);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.2px;
+}
+
