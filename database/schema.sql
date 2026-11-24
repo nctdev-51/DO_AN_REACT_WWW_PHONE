@@ -53,7 +53,7 @@ CREATE TABLE `campaign_banners` (
   `action_label` varchar(40) NOT NULL,
   `active` bit(1) NOT NULL,
   `ends_at` datetime(6) NOT NULL,
-  `image` varchar(255) DEFAULT NULL,
+  `image` varchar(500) DEFAULT NULL,
   `image_alt` varchar(160) DEFAULT NULL,
   `placement` varchar(10) NOT NULL,
   `position` int(11) NOT NULL,
@@ -244,7 +244,7 @@ CREATE TABLE `product_variants` (
 CREATE TABLE `products` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `description` text DEFAULT NULL,
-  `image` varchar(255) DEFAULT NULL,
+  `image` varchar(500) DEFAULT NULL,
   `name` varchar(200) NOT NULL,
   `price` decimal(19,0) NOT NULL,
   `status` int(11) NOT NULL,

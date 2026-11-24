@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/store/header.jsp" />
 <div class="detail-top-bar">
@@ -42,36 +43,24 @@
       </p>
     </div>
 
-    <c:if test="${not empty applicablePromotions}">
-      <div class="panel promo-offer-box mt-3">
-        <strong class="d-block mb-2">Ưu đãi &amp; mã giảm giá áp dụng</strong>
-        <c:forEach var="promo" items="${applicablePromotions}">
-          <div class="promo-offer-row">
-            <div>
-              <span class="coupon-code"><c:out value="${promo.code}"/></span>
-              <span class="small d-block"><c:out value="${promo.description}"/> · <span class="muted">HSD: <c:out value="${promo.endsAtLabel}"/></span></span>
-            </div>
-            <button type="button" class="btn btn-light btn-sm" data-copy-code="<c:out value='${promo.code}'/>">Sao chép mã</button>
-          </div>
-          <span class="small muted d-block mb-1" data-copy-status></span>
-        </c:forEach>
-        <small class="muted d-block">Mỗi đơn áp dụng 1 mã giảm giá tại bước Thanh toán.</small>
-      </div>
-    </c:if>
-
-    <form id="product-purchase" class="panel mt-4" action="${pageContext.request.contextPath}/cart/add" method="post">
+    <form id="product-purchase" class="panel mt-3" action="${pageContext.request.contextPath}/cart/add" method="post">
       <ui:csrf/>
       <label for="variant-select">Chọn phiên bản</label>
       <select id="variant-select" name="variantId" class="form-select mb-3" required>
         <c:forEach var="variant" items="${variants}">
-          <option value="${variant.id}" data-price="${variant.price}" data-stock="${variant.stock}" data-color="<c:out value='${variant.color}'/>" data-storage="<c:out value='${variant.storage}'/>" data-ram="<c:out value='${variant.ram}'/>" data-image="${pageContext.request.contextPath}${variant.image}" ${variant.id == selectedVariantId ? 'selected' : ''}>
+          <c:set var="resolvedVariantImg" value="${fn:startsWith(variant.image, 'http') ? variant.image : pageContext.request.contextPath.concat(variant.image)}" />
+          <option value="${variant.id}" data-price="${variant.price}" data-stock="${variant.stock}" data-color="<c:out value='${variant.color}'/>" data-storage="<c:out value='${variant.storage}'/>" data-ram="<c:out value='${variant.ram}'/>" data-image="${resolvedVariantImg}" ${variant.id == selectedVariantId ? 'selected' : ''}>
             <c:out value="${variant.label}"/> — ${variant.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
           </option>
         </c:forEach>
       </select>
       <p id="variant-stock" class="stock-text">Còn ${product.stock} sản phẩm</p>
-      <div class="d-flex gap-3">
-        <input id="buy-quantity" class="form-control quantity-input" type="number" name="quantity" value="1" min="1" max="99" aria-label="Số lượng">
+      <div class="purchase-row">
+        <div class="qty-stepper" data-qty-stepper>
+          <button type="button" class="qty-stepper-btn" data-qty-dec aria-label="Giảm số lượng">−</button>
+          <input id="buy-quantity" class="qty-stepper-input" type="number" name="quantity" value="1" min="1" max="99" inputmode="numeric" aria-label="Số lượng">
+          <button type="button" class="qty-stepper-btn" data-qty-inc aria-label="Tăng số lượng">+</button>
+        </div>
         <button id="buy-button" data-product-id="${product.id}" class="btn btn-brand flex-grow-1" ${product.stock == 0 ? 'disabled' : ''}>Thêm vào giỏ hàng</button>
       </div>
       <button class="btn btn-outline-dark w-100 mt-3" name="buyNow" value="true" data-buy-now>Mua ngay phiên bản này</button>
@@ -98,7 +87,33 @@
       </c:otherwise>
     </c:choose>
 
-    <div class="panel delivery-estimator mt-3" data-delivery-estimator data-endpoint="${pageContext.request.contextPath}/products/${product.id}/delivery-estimate">
+    <div class="panel policy-card mt-3">
+      <div class="policy-grid">
+        <span>Thanh toán COD / VNPay</span>
+        <span>Đổi trả trong ${storePolicy.returnWindowDays} ngày</span>
+        <span>Bảo hành ${product.warrantyMonths} tháng</span>
+      </div>
+    </div>
+  </div>
+  <div class="product-left-extras">
+    <c:if test="${not empty applicablePromotions}">
+      <div class="panel promo-offer-box">
+        <strong class="d-block mb-2">Ưu đãi &amp; mã giảm giá áp dụng</strong>
+        <c:forEach var="promo" items="${applicablePromotions}">
+          <div class="promo-offer-row">
+            <div>
+              <span class="coupon-code"><c:out value="${promo.code}"/></span>
+              <span class="small d-block"><c:out value="${promo.description}"/> · <span class="muted">HSD: <c:out value="${promo.endsAtLabel}"/></span></span>
+            </div>
+            <button type="button" class="btn btn-light btn-sm" data-copy-code="<c:out value='${promo.code}'/>">Sao chép mã</button>
+          </div>
+          <span class="small muted d-block mb-1" data-copy-status></span>
+        </c:forEach>
+        <small class="muted d-block">Mỗi đơn áp dụng 1 mã giảm giá tại bước Thanh toán.</small>
+      </div>
+    </c:if>
+
+    <div class="panel delivery-estimator" data-delivery-estimator data-endpoint="${pageContext.request.contextPath}/products/${product.id}/delivery-estimate">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <strong>Ước tính giao hàng theo khu vực</strong>
         <a class="small" href="${pageContext.request.contextPath}/policies/shipping">Chính sách giao hàng</a>
@@ -115,12 +130,6 @@
       <p class="small mt-2 mb-0" data-delivery-output aria-live="polite">
         Giao tiêu chuẩn dự kiến ${experience.deliveryMinDays}–${experience.deliveryMaxDays} ngày. Miễn phí vận chuyển cho đơn từ <ui:money value="${storePolicy.freeShippingThreshold}"/>.
       </p>
-    </div>
-
-    <div class="policy-grid">
-      <span>COD hoặc VNPay bảo mật</span>
-      <span>Đổi trả theo chính sách ${storePolicy.returnWindowDays} ngày</span>
-      <span>Bảo hành ${product.warrantyMonths} tháng</span>
     </div>
   </div>
 </section>
@@ -159,15 +168,18 @@
 <%-- ============================================================ --%>
 <%-- Module AI (Tài) — Mô tả thông minh & Điểm nổi bật          --%>
 <%-- ============================================================ --%>
-<section class="detail-sections">
+<section class="mb-4">
   <div class="ai-description-panel panel" id="ai-desc-panel" data-product-id="${product.id}">
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
       <h2 class="mb-0">
         <span class="ai-badge">🤖 AI</span> Mô tả thông minh
       </h2>
-      <button class="btn btn-outline-dark btn-sm btn-refresh-ai" id="btn-refresh-ai" type="button">
-        🔄 Tạo lại mô tả
-      </button>
+      <c:if test="${pageContext.request.isUserInRole('ADMIN')}">
+        <button class="btn btn-outline-dark btn-sm btn-refresh-ai" id="btn-refresh-ai" type="button"
+                data-csrf-header="${_csrf.headerName}" data-csrf-token="${_csrf.token}">
+          🔄 Tạo lại mô tả
+        </button>
+      </c:if>
     </div>
     <div id="ai-description-text" aria-live="polite">
       <div class="ai-skeleton" aria-hidden="true"></div>
@@ -258,14 +270,31 @@
   </section>
 </c:if>
 
-<div class="section-heading">
-  <h2>Có thể bạn cũng thích</h2>
-</div>
-<div class="product-grid">
-  <c:forEach var="related" items="${relatedProducts}">
-    <ui:productCard product="${related}"/>
-  </c:forEach>
-</div>
+<%-- Module Recommendation & Vector DB (Vĩ) --%>
+<section class="similar-products-section collection-section" id="similar-products" data-product-id="${product.id}">
+  <div class="section-heading">
+    <div>
+      <span class="eyebrow">GỢI Ý THÔNG MINH</span>
+      <h2>Có thể bạn thích</h2>
+      <span class="similar-section-sub">Đề xuất dựa trên cấu hình và phân khúc tương đồng</span>
+    </div>
+  </div>
+  <div class="swiper similar-swiper" aria-label="Sản phẩm gợi ý tương đồng">
+    <div class="swiper-wrapper" id="similar-products-wrapper">
+      <div class="swiper-slide"><div class="skeleton-card" aria-hidden="true"></div></div>
+      <div class="swiper-slide"><div class="skeleton-card" aria-hidden="true"></div></div>
+      <div class="swiper-slide"><div class="skeleton-card" aria-hidden="true"></div></div>
+      <div class="swiper-slide"><div class="skeleton-card" aria-hidden="true"></div></div>
+    </div>
+    <div class="swiper-button-prev" aria-label="Sản phẩm trước"></div>
+    <div class="swiper-button-next" aria-label="Sản phẩm tiếp theo"></div>
+  </div>
+  <div class="product-grid" id="similar-fallback-grid" hidden>
+    <c:forEach var="related" items="${relatedProducts}">
+      <ui:productCard product="${related}"/>
+    </c:forEach>
+  </div>
+</section>
 
 <c:if test="${not empty recentProducts}">
   <section class="collection-section">
@@ -285,7 +314,8 @@
 </c:if>
 
 <aside class="sticky-purchase" aria-label="Mua sản phẩm đang xem">
-  <img class="sticky-thumb" data-sticky-thumb src="${pageContext.request.contextPath}${product.image}" alt="<c:out value='${product.name}'/>">
+  <c:set var="resolvedProductImg" value="${fn:startsWith(product.image, 'http') ? product.image : pageContext.request.contextPath.concat(product.image)}" />
+  <img class="sticky-thumb" data-sticky-thumb src="${resolvedProductImg}" alt="<c:out value='${product.name}'/>">
   <div><strong><c:out value="${product.name}"/></strong><span data-sticky-variant></span></div>
   <strong data-sticky-price><ui:money value="${product.price}"/></strong>
   <button class="btn btn-brand" type="submit" form="product-purchase" name="buyNow" value="true" data-buy-now>Mua ngay</button>

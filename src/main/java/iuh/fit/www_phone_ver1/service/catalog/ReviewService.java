@@ -29,6 +29,11 @@ public class ReviewService {
         productId, email, OrderStatuses.DELIVERED);
   }
 
+  /** All reviews for a product, newest first. Used by ProductController detail view. */
+  public java.util.List<Review> findByProductId(Long productId) {
+    return reviews.findByProduct_IdOrderByCreatedAtDesc(productId);
+  }
+
   @Transactional
   public void save(String email, Long productId, int rating, String content) {
     if (!canReview(email, productId))

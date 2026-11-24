@@ -82,4 +82,15 @@ public class AdminUserController {
     }
     return "redirect:/admin/users";
   }
+
+  @PostMapping("/{id}/toggle")
+  public String toggleUser(@PathVariable Long id, Principal actor, RedirectAttributes flash) {
+    try {
+      admin.toggleUserStatus(id, actor.getName());
+      flash.addFlashAttribute("successMsg", "Đã cập nhật trạng thái tài khoản.");
+    } catch (IllegalArgumentException e) {
+      flash.addFlashAttribute("errorMsg", e.getMessage());
+    }
+    return "redirect:/admin/users";
+  }
 }

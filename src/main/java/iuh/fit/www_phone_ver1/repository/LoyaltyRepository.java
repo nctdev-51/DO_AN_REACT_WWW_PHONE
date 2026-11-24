@@ -11,4 +11,6 @@ public interface LoyaltyRepository extends JpaRepository<LoyaltyEntry, Long> {
   boolean existsByReference(String reference);
 
   List<LoyaltyEntry> findTop100ByUser_EmailOrderByIdDesc(String email);
+
+  void deleteByUser_Id(Long userId);
 }

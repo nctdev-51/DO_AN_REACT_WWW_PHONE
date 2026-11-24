@@ -11,7 +11,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class AiModuleUnitTests {
 
@@ -23,6 +34,9 @@ class AiModuleUnitTests {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private ChatMemory chatMemory;
 
     private Product samplePhone;
 
@@ -110,6 +124,10 @@ class AiModuleUnitTests {
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getReply());
         Assertions.assertTrue(response.getReply().toLowerCase().contains("giá"));
+        Mockito.verify(chatMemory)
+                .add(
+                        Mockito.eq("session-test-1"),
+                        Mockito.<List<Message>>argThat(messages -> messages.size() == 2));
     }
 
     @Test
@@ -120,5 +138,44 @@ class AiModuleUnitTests {
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getReply());
         Assertions.assertFalse(response.getReply().isBlank());
+    }
+
+    @Test
+    @DisplayName("ChatbotService: Không trả thẻ sản phẩm đã ngừng kinh doanh (status != 1)")
+    void testChatbotExcludesInactiveSuggestedProducts() {
+        ChatModel mockChatModel = Mockito.mock(ChatModel.class);
+        Product activeProduct = new Product();
+        activeProduct.setId(10L);
+        activeProduct.setName("iPhone 16");
+        activeProduct.setStatus(1);
+        activeProduct.setPrice(new BigDecimal("22990000"));
+
+        Product inactiveProduct = new Product();
+        inactiveProduct.setId(99L);
+        inactiveProduct.setName("Legacy Phone");
+        inactiveProduct.setStatus(0);
+        inactiveProduct.setPrice(new BigDecimal("5000000"));
+
+        Mockito.when(productRepository.findByStatus(Mockito.eq(1), Mockito.any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(activeProduct)));
+        Mockito.when(chatMemory.get("session-active-only", 20)).thenReturn(List.of());
+        Mockito.when(productRepository.findById(10L)).thenReturn(java.util.Optional.of(activeProduct));
+        Mockito.when(productRepository.findById(99L)).thenReturn(java.util.Optional.of(inactiveProduct));
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(new ChatResponse(List.of(new Generation(
+                        new AssistantMessage("Gợi ý cho bạn [SUGGEST:10] [SUGGEST:99]")))));
+
+        ReflectionTestUtils.setField(chatbotService, "chatModel", mockChatModel);
+        ReflectionTestUtils.setField(chatbotService, "apiKey", "gsk_test_key_valid_format");
+
+        ChatResponseDTO response = chatbotService.chat("Tư vấn máy mới", "session-active-only");
+
+        Assertions.assertEquals(1, response.getProductCards().size());
+        Assertions.assertEquals(10L, response.getProductCards().get(0).getId());
+        Mockito.verify(chatMemory).get("session-active-only", 20);
+        Mockito.verify(chatMemory)
+                .add(
+                        Mockito.eq("session-active-only"),
+                        Mockito.<List<Message>>argThat(messages -> messages.size() == 2));
     }
 }

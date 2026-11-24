@@ -2,6 +2,9 @@ package iuh.fit.www_phone_ver1.service.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +22,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import reactor.core.publisher.Flux;
 
 /**
@@ -33,6 +38,7 @@ public class OpenAiCompatibleChatModel implements ChatModel {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAiCompatibleChatModel.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RestClient restClient;
 
     @Value("${spring.ai.openai.api-key:}")
     private String apiKey;
@@ -42,6 +48,19 @@ public class OpenAiCompatibleChatModel implements ChatModel {
 
     @Value("${spring.ai.openai.chat.options.model:}")
     private String customModel;
+
+    @Value("${spring.ai.openai.chat.options.temperature:0.7}")
+    private double temperature = 0.7;
+
+    @Value("${spring.ai.openai.chat.options.max-tokens:500}")
+    private int maxTokens = 500;
+
+    public OpenAiCompatibleChatModel() {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(5000);
+        requestFactory.setReadTimeout(15000);
+        this.restClient = RestClient.builder().requestFactory(requestFactory).build();
+    }
 
     @Override
     public ChatResponse call(Prompt prompt) {
@@ -75,13 +94,11 @@ public class OpenAiCompatibleChatModel implements ChatModel {
             Map<String, Object> requestPayload = new HashMap<>();
             requestPayload.put("model", model);
             requestPayload.put("messages", messages);
-            requestPayload.put("temperature", 0.7);
-            requestPayload.put("max_tokens", 500);
-
-            RestClient restClient = RestClient.builder().baseUrl(baseUrl).build();
+            requestPayload.put("temperature", temperature);
+            requestPayload.put("max_tokens", maxTokens > 0 ? maxTokens : 500);
 
             String responseBody = restClient.post()
-                    .uri("/chat/completions")
+                    .uri(baseUrl + "/chat/completions")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey.trim())
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(requestPayload)
@@ -96,25 +113,51 @@ public class OpenAiCompatibleChatModel implements ChatModel {
             generations.add(new Generation(new AssistantMessage(replyText)));
             return new ChatResponse(generations);
 
+        } catch (RestClientResponseException rcEx) {
+            int status = rcEx.getStatusCode().value();
+            if (status == 429) {
+                log.warn("AI API rate limited (429 Too Many Requests) at {}", baseUrl);
+            } else {
+                log.error("AI API HTTP error {} at {}: {}", status, baseUrl, rcEx.getResponseBodyAsString());
+            }
+            throw new RuntimeException("Loi AI API (HTTP " + status + "): " + rcEx.getMessage(), rcEx);
         } catch (Exception e) {
-            log.error("Loi goi AI API ({}): {}", baseUrl, e.getMessage());
+            Throwable root = e;
+            while (root.getCause() != null) root = root.getCause();
+            if (root instanceof UnknownHostException) {
+                log.warn("AI API: Khong the phan giai ten mien (mat mang?) - {}", root.getMessage());
+            } else if (root instanceof ConnectException) {
+                log.warn("AI API: Khong the ket noi (mat mang/firewall?) - {}", root.getMessage());
+            } else if (root instanceof SocketTimeoutException) {
+                log.warn("AI API: Het thoi gian cho phan hoi (timeout) - {}", root.getMessage());
+            } else {
+                log.error("Loi goi AI API ({}): {}", baseUrl, e.getMessage());
+            }
             throw new RuntimeException("Loi AI API: " + e.getMessage(), e);
         }
     }
 
-    private String resolveBaseUrl(boolean isGroq) {
+    String resolveBaseUrl(boolean isGroq) {
         if (customBaseUrl != null && !customBaseUrl.isBlank()) {
             String clean = customBaseUrl.endsWith("/")
                     ? customBaseUrl.substring(0, customBaseUrl.length() - 1)
                     : customBaseUrl;
-            return clean.endsWith("/v1") ? clean : clean + "/v1";
+            boolean pointsToGroq = clean.contains("api.groq.com");
+            boolean pointsToOpenAi = clean.contains("api.openai.com");
+            if ((isGroq && !pointsToOpenAi) || (!isGroq && !pointsToGroq)) {
+                return clean.endsWith("/v1") ? clean : clean + "/v1";
+            }
         }
         return isGroq ? "https://api.groq.com/openai/v1" : "https://api.openai.com/v1";
     }
 
-    private String resolveModel(boolean isGroq) {
-        if (customModel != null && !customModel.isBlank() && !customModel.equals("gpt-4o-mini")) {
-            return customModel;
+    String resolveModel(boolean isGroq) {
+        if (customModel != null && !customModel.isBlank()) {
+            boolean groqSpecific = customModel.startsWith("openai/gpt-oss") || customModel.startsWith("llama-");
+            boolean openAiSpecific = customModel.startsWith("gpt-");
+            if ((isGroq && !openAiSpecific) || (!isGroq && !groqSpecific)) {
+                return customModel;
+            }
         }
         return isGroq ? "openai/gpt-oss-20b" : "gpt-4o-mini";
     }

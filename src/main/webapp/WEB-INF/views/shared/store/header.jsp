@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <!doctype html>
-<html lang="vi">
+<html lang="vi" data-context-path="${pageContext.request.contextPath}">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -19,6 +19,11 @@
     <%-- Module AI (Tài) --%>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/ai-panel.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/chatbot.css">
+    <%-- Module Recommendation & Vector DB (Vĩ) --%>
+    <c:if test="${includeRecommendationCarousel}">
+      <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/swiper/swiper-bundle.min.css">
+      <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/recommendation.css">
+    </c:if>
     <meta name="ctx" content="${pageContext.request.contextPath}">
   </head>
   <body class="storefront">
@@ -28,6 +33,7 @@
       <div class="container header-inner">
         <a class="brand" href="${pageContext.request.contextPath}/">PTV <span>Mobile</span>
         </a>
+        <button class="btn btn-outline-dark btn-sm d-md-none mobile-menu-trigger ms-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenuDrawer" aria-controls="mobileMenuDrawer" aria-label="Mở menu danh mục">☰ Menu</button>
         <form action="${pageContext.request.contextPath}/products" method="get" class="header-search">
           <input name="keyword" data-search-input autocomplete="off" placeholder="Tìm điện thoại, thương hiệu..." aria-label="Tìm kiếm" value="<c:out value='${keyword}'/>">
           <div class="search-suggestions" data-search-suggestions hidden></div>
@@ -122,5 +128,65 @@
         </nav>
       </div>
     </header>
+    <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileMenuDrawer" aria-labelledby="mobileMenuDrawerLabel">
+      <div class="offcanvas-header">
+        <h2 class="offcanvas-title fs-5 m-0" id="mobileMenuDrawerLabel">Danh mục PTV Mobile</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Đóng menu"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="mobile-drawer-group">
+          <h3>Sản phẩm</h3>
+          <div class="mobile-drawer-links">
+            <a href="${pageContext.request.contextPath}/products?kind=PHONE">Điện thoại</a>
+            <a href="${pageContext.request.contextPath}/products?kind=ACCESSORY">Phụ kiện chính hãng</a>
+            <a href="${pageContext.request.contextPath}/products?sort=newest">Sản phẩm mới</a>
+            <a href="${pageContext.request.contextPath}/products?sort=bestselling">Bán chạy nhất</a>
+            <a href="${pageContext.request.contextPath}/products">Tất cả sản phẩm</a>
+          </div>
+        </div>
+        <div class="mobile-drawer-group">
+          <h3>Chọn máy phù hợp</h3>
+          <div class="mobile-drawer-links">
+            <a href="${pageContext.request.contextPath}/choose">Tư vấn chọn máy (4 bước)</a>
+            <a href="${pageContext.request.contextPath}/compare">So sánh thông số</a>
+            <a href="${pageContext.request.contextPath}/recently-viewed">Đã xem gần đây</a>
+          </div>
+        </div>
+        <div class="mobile-drawer-group">
+          <h3>Ưu đãi &amp; dịch vụ</h3>
+          <div class="mobile-drawer-links">
+            <a href="${pageContext.request.contextPath}/offers">Khuyến mãi &amp; mã giảm giá</a>
+            <a href="${pageContext.request.contextPath}/account/consultations?type=INSTALLMENT">Tư vấn trả góp</a>
+            <a href="${pageContext.request.contextPath}/account/consultations?type=TRADE_IN">Thu cũ đổi mới</a>
+            <a href="${pageContext.request.contextPath}/account/points">Điểm thưởng thành viên</a>
+          </div>
+        </div>
+        <div class="mobile-drawer-group">
+          <h3>Hỗ trợ &amp; tài khoản</h3>
+          <div class="mobile-drawer-links">
+            <a href="${pageContext.request.contextPath}/orders">Tra cứu &amp; theo dõi đơn</a>
+            <a href="${pageContext.request.contextPath}/account/devices">Thiết bị của tôi &amp; bảo hành</a>
+            <a href="${pageContext.request.contextPath}/account/support">Yêu cầu đổi trả &amp; bảo hành</a>
+            <a href="${pageContext.request.contextPath}/policies/shipping">Chính sách giao hàng</a>
+            <a href="${pageContext.request.contextPath}/policies/contact">Liên hệ cửa hàng</a>
+            <c:choose>
+              <c:when test="${pageContext.request.userPrincipal != null}">
+                <a href="${pageContext.request.contextPath}/account">Thông tin tài khoản</a>
+                <c:if test="${pageContext.request.isUserInRole('ADMIN')}">
+                  <a href="${pageContext.request.contextPath}/admin">Quản trị cửa hàng</a>
+                </c:if>
+                <form action="${pageContext.request.contextPath}/logout" method="post" class="mt-2">
+                  <ui:csrf/>
+                  <button class="btn btn-outline-danger btn-sm w-100">Đăng xuất</button>
+                </form>
+              </c:when>
+              <c:otherwise>
+                <a href="${pageContext.request.contextPath}/login">Đăng nhập / Đăng ký</a>
+              </c:otherwise>
+            </c:choose>
+          </div>
+        </div>
+      </div>
+    </div>
     <main class="container store-main" id="main-content">
       <jsp:include page="/WEB-INF/views/shared/fragments/alerts.jsp" />

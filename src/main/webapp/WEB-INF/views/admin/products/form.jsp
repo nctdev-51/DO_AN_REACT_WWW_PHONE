@@ -1,9 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <jsp:include page="/WEB-INF/views/shared/admin/header.jsp" />
 <a href="${pageContext.request.contextPath}/admin/products">← Danh sách sản phẩm</a>
-<section class="panel mt-3">
+<section class="panel form-panel mt-3">
   <h2>${empty productId ? 'Thêm sản phẩm' : 'Sửa sản phẩm'}</h2>
   <form:form action="${pageContext.request.contextPath}/admin/products/save" method="post" modelAttribute="productForm" enctype="multipart/form-data">
     <form:errors path="*" element="div" cssClass="alert alert-danger"/>
@@ -69,14 +70,23 @@
       </div>
     </div>
     <div class="field">
-      <label for="description">Mô tả sản phẩm</label>
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <label for="description" class="mb-0">Mô tả sản phẩm</label>
+        <c:if test="${not empty productId}">
+          <button type="button" id="btn-admin-ai-gen" class="btn btn-sm btn-outline-brand" style="border: 1px solid var(--brand, #c34d2d); color: var(--brand, #c34d2d); border-radius: 6px; padding: 3px 10px; font-size: 0.8rem;" data-product-id="${productId}">
+            ✨ Tạo mô tả bằng AI
+          </button>
+        </c:if>
+      </div>
       <form:textarea id="description" path="description" cssClass="form-control" rows="5"/>
+      <div id="admin-ai-status" class="small mt-1 text-muted" style="display:none;"></div>
     </div>
     <div class="field">
       <label for="image">Ảnh (PNG/JPEG, tối đa 5 MB)</label>
       <input id="image" name="image" type="file" class="form-control" accept="image/png,image/jpeg">
       <c:if test="${not empty image}">
-        <img class="image-preview" src="${pageContext.request.contextPath}${image}" alt="Ảnh hiện tại">
+        <c:set var="resolvedImage" value="${fn:startsWith(image, 'http') ? image : pageContext.request.contextPath.concat(image)}" />
+        <img class="image-preview" src="${resolvedImage}" alt="Ảnh hiện tại">
       </c:if>
     </div>
     <button class="btn btn-brand">Lưu sản phẩm</button>

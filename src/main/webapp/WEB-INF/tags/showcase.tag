@@ -3,6 +3,7 @@
 <%@ attribute name="primary" required="false" type="java.lang.Boolean" %>
 <%@ attribute name="subtitle" required="true" type="java.lang.String" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <section class="showcase ${primary ? 'showcase-primary' : 'showcase-secondary'}" aria-label="<c:out value='${product.name}'/>">
   <div class="showcase-copy">
@@ -17,6 +18,7 @@
     </div>
   </div>
   <a class="showcase-visual" data-reveal href="${pageContext.request.contextPath}/products/${product.id}" aria-label="Xem chi tiết <c:out value='${product.name}'/>">
-    <img src="${pageContext.request.contextPath}${product.image}" alt="<c:out value='${product.name}'/>" ${primary ? 'fetchpriority="high"' : 'loading="lazy"'}>
+    <c:set var="resolvedShowcaseImg" value="${fn:startsWith(product.image, 'http') ? product.image : pageContext.request.contextPath.concat(product.image)}"/>
+    <img src="${resolvedShowcaseImg}" alt="<c:out value='${product.name}'/>" ${primary ? 'fetchpriority="high"' : 'loading="lazy"'} style="aspect-ratio: 4/3; object-fit: contain;">
   </a>
 </section>

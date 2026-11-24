@@ -20,15 +20,6 @@
             || (document.querySelector('[data-context]')?.dataset.context)
             || '';
 
-        // ── Session ID ────────────────────────────────────────────
-        let sessionId = sessionStorage.getItem('ptvChatSessionId');
-        if (!sessionId) {
-            sessionId = typeof crypto !== 'undefined' && crypto.randomUUID
-                ? crypto.randomUUID()
-                : 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-            sessionStorage.setItem('ptvChatSessionId', sessionId);
-        }
-
         // ── Toggle Panel ──────────────────────────────────────────
         fabBtn.addEventListener('click', function () {
             const isHidden = chatPanel.hidden;
@@ -63,7 +54,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'same-origin',
-                body: JSON.stringify({ message: text, sessionId: sessionId })
+                body: JSON.stringify({ message: text })
             })
                 .then(function (res) {
                     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -115,7 +106,7 @@
             // 2. Chuyển đổi định dạng bold **chữ đậm**
             s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-            // 3. Xử lý trường hợp AI vô tình xuất bảng markdown (|...|)
+            // 3. Xử lý triệt để trường hợp AI xuất bảng markdown (|...|)
             const lines = s.split(/\r?\n/);
             const cleaned = [];
             for (let line of lines) {
@@ -126,14 +117,15 @@
                 }
                 // Nếu là dòng bảng (| col1 | col2 | ...)
                 if (tr.startsWith('|') && tr.endsWith('|')) {
-                    const cols = tr.split('|').map(c => c.trim()).filter(c => c.length > 0);
+                    const cols = tr.split('|').map(function (c) { return c.trim(); }).filter(function (c) { return c.length > 0; });
                     if (cols.length >= 2) {
-                        // Bỏ qua dòng tiêu đề bảng (ID, Mẫu, Tên, Giá,...)
                         const c0 = cols[0].toLowerCase();
                         const c1 = cols[1].toLowerCase();
-                        if (c0 === 'id' || c1.includes('mẫu') || c1.includes('tên') || c1.includes('sản phẩm')) {
+                        // Bỏ qua dòng tiêu đề bảng bất kể AI dùng từ gì (id, mẫu, tên, sản phẩm, model, stt,...)
+                        if (c0 === 'id' || c0 === 'stt' || c0.includes('mẫu') || c0.includes('tên') || c1.includes('mẫu') || c1.includes('tên') || c1.includes('sản phẩm') || c1.includes('giá')) {
                             continue;
                         }
+                        // Format lại thành dòng đọc đẹp mắt kèm icon điện thoại
                         line = '📱 <strong>' + cols.slice(0, 3).join('</strong> — ') + (cols.length > 3 ? (' (' + cols.slice(3).join(', ') + ')') : '');
                     }
                 }
@@ -162,33 +154,77 @@
             scrollMessages();
         }
 
+        // ── Helper: Safe Product Card Builder (anti-XSS) ──────────
+        function createSuggestionCardElement(productId, titleText, priceText) {
+            const safeId = Number(productId);
+            if (!Number.isInteger(safeId) || safeId <= 0) {
+                return null;
+            }
+            const a = document.createElement('a');
+            a.className = 'chatbot-suggestion-card';
+            a.href = ctx + '/products/' + safeId;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.title = 'Xem chi tiết ' + titleText;
+
+            const icon = document.createElement('div');
+            icon.className = 'chatbot-card-icon';
+            icon.textContent = '📱';
+
+            const info = document.createElement('div');
+            info.className = 'chatbot-card-info';
+
+            const nameEl = document.createElement('div');
+            nameEl.className = 'chatbot-card-name';
+            nameEl.textContent = titleText;
+
+            const metaEl = document.createElement('div');
+            metaEl.className = 'chatbot-card-meta';
+
+            if (priceText) {
+                const priceEl = document.createElement('span');
+                priceEl.className = 'chatbot-card-price';
+                priceEl.textContent = priceText;
+                metaEl.appendChild(priceEl);
+            }
+
+            const btnEl = document.createElement('span');
+            btnEl.className = 'chatbot-card-btn';
+            btnEl.textContent = 'Xem chi tiết ➔';
+            metaEl.appendChild(btnEl);
+
+            info.appendChild(nameEl);
+            info.appendChild(metaEl);
+            a.appendChild(icon);
+            a.appendChild(info);
+            return a;
+        }
+
+        function createSuggestionRowHeader(titleText) {
+            const label = document.createElement('div');
+            label.className = 'chatbot-suggestion-title';
+            const icon = document.createElement('span');
+            icon.textContent = '📌';
+            const strong = document.createElement('strong');
+            strong.textContent = ' ' + titleText;
+            label.appendChild(icon);
+            label.appendChild(strong);
+            return label;
+        }
+
         // ── Helper: Rich Product Suggestion Cards ──────────────────
         function appendRichProductCards(cards) {
             const wrap = document.createElement('div');
             wrap.className = 'chatbot-suggestion-row';
-
-            const label = document.createElement('div');
-            label.className = 'chatbot-suggestion-title';
-            label.innerHTML = '<span>📌</span> <strong>Gợi ý xem chi tiết sản phẩm:</strong>';
-            wrap.appendChild(label);
+            wrap.appendChild(createSuggestionRowHeader('Gợi ý xem chi tiết sản phẩm:'));
 
             cards.slice(0, 3).forEach(function (p) {
-                const a = document.createElement('a');
-                a.className = 'chatbot-suggestion-card';
-                a.href = ctx + '/products/' + p.id;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                a.title = 'Xem chi tiết ' + p.name;
-                a.innerHTML =
-                    '<div class="chatbot-card-icon">📱</div>' +
-                    '<div class="chatbot-card-info">' +
-                        '<div class="chatbot-card-name">' + p.name + '</div>' +
-                        '<div class="chatbot-card-meta">' +
-                            '<span class="chatbot-card-price">' + p.price + '</span>' +
-                            '<span class="chatbot-card-btn">Xem chi tiết ➔</span>' +
-                        '</div>' +
-                    '</div>';
-                wrap.appendChild(a);
+                const name = p && p.name != null ? String(p.name) : ('Sản phẩm #' + (p && p.id ? p.id : ''));
+                const price = p && p.price != null ? String(p.price) : '';
+                const card = createSuggestionCardElement(p && p.id, name, price);
+                if (card) {
+                    wrap.appendChild(card);
+                }
             });
 
             messagesEl.appendChild(wrap);
@@ -199,27 +235,13 @@
         function appendLegacyProductSuggestions(ids) {
             const wrap = document.createElement('div');
             wrap.className = 'chatbot-suggestion-row';
-
-            const label = document.createElement('div');
-            label.className = 'chatbot-suggestion-title';
-            label.innerHTML = '<span>📌</span> <strong>Gợi ý xem chi tiết:</strong>';
-            wrap.appendChild(label);
+            wrap.appendChild(createSuggestionRowHeader('Gợi ý xem chi tiết:'));
 
             ids.slice(0, 3).forEach(function (id) {
-                const a = document.createElement('a');
-                a.className = 'chatbot-suggestion-card';
-                a.href = ctx + '/products/' + id;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                a.innerHTML =
-                    '<div class="chatbot-card-icon">📱</div>' +
-                    '<div class="chatbot-card-info">' +
-                        '<div class="chatbot-card-name">Sản phẩm #' + id + '</div>' +
-                        '<div class="chatbot-card-meta">' +
-                            '<span class="chatbot-card-btn">Xem chi tiết ➔</span>' +
-                        '</div>' +
-                    '</div>';
-                wrap.appendChild(a);
+                const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '');
+                if (card) {
+                    wrap.appendChild(card);
+                }
             });
 
             messagesEl.appendChild(wrap);

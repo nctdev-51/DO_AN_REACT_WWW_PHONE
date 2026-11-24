@@ -14,6 +14,9 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/tokens.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/motion.css"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/retail.css">
+        <c:if test="${currentPage == 'analytics'}">
+          <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/analytics.css">
+        </c:if>
       </head>
       <body class="admin-body">
         <aside class="admin-sidebar">

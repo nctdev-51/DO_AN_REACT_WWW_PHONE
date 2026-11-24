@@ -51,6 +51,12 @@ public class AdminAnalyticsController {
         report.dailyViews().stream()
             .map(view -> Long.toString(view.count()))
             .collect(java.util.stream.Collectors.joining(",")));
+
+    // Bổ sung phân tích dự báo tồn kho (Chức năng 5) & tương tác AI (Chức năng 6)
+    model.addAttribute("stockoutForecasts", analytics.forecastStockoutRisk().stream().limit(20).toList());
+    model.addAttribute("recentAiQuestions", analytics.recentAiChatInsights(6));
+    model.addAttribute("aiTopicStats", analytics.aiTopicDistribution(range.from(), range.to()));
+
     return "admin/analytics/dashboard";
   }
 
@@ -121,15 +127,26 @@ public class AdminAnalyticsController {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Chỉ hỗ trợ bộ lọc 7 ngày hoặc 30 ngày.");
     }
-    LocalDate today = LocalDate.now();
+    LocalDate today = LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
     return new DateRange(today.minusDays(preset - 1L), today, Integer.toString(preset));
   }
 
   private void csvRow(PrintWriter writer, String... values) {
     writer.println(
         java.util.Arrays.stream(values)
-            .map(value -> "\"" + value.replace("\"", "\"\"") + "\"")
+            .map(AdminAnalyticsController::safeCsvCell)
             .collect(java.util.stream.Collectors.joining(",")));
+  }
+
+  public static String safeCsvCell(String raw) {
+    String value = raw == null ? "" : raw;
+    if (!value.isEmpty()) {
+      char first = value.charAt(0);
+      if (first == '=' || first == '+' || first == '-' || first == '@' || first == '\t' || first == '\r') {
+        value = "'" + value;
+      }
+    }
+    return "\"" + value.replace("\"", "\"\"") + "\"";
   }
 
   private record DateRange(LocalDate from, LocalDate to, String preset) {}

@@ -1,28 +1,38 @@
 /* Product media shares the storefront tokens and interaction states. */
 .product-gallery {
-  display: block; min-height: 0; padding: var(--space-11); align-self: start;
-  position: sticky; top: var(--header-offset); overflow: hidden;
+  display: block; min-height: 0; padding: var(--space-10); align-self: start;
+  position: static; overflow: hidden;
 }
 .product-gallery [hidden] { display: none !important; }
-.gallery-tabs { display: flex; gap: var(--space-5); padding-bottom: var(--space-10); border-bottom: 1px solid var(--color-divider); }
+.gallery-tabs { display: flex; justify-content: flex-end; gap: var(--space-5); margin-bottom: var(--space-7); padding-bottom: 0; border-bottom: 0; }
 .gallery-tabs button {
-  min-height: var(--space-15); border: 0; border-radius: var(--radius-sm);
-  padding: var(--space-6) var(--space-11); background: var(--color-canvas);
-  color: var(--color-text); font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold);
+  min-height: 36px; border: 1px solid var(--color-control-border); border-radius: var(--radius-sm);
+  padding: 6px 14px; background: var(--color-canvas);
+  color: var(--color-text); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold);
+  cursor: pointer; transition: border-color .15s ease, background .15s ease, color .15s ease;
 }
-.gallery-tabs button[aria-pressed=true] { background: var(--color-action); color: var(--color-surface-strong); }
-.gallery-tabs button:hover { box-shadow: inset 0 0 0 1px var(--color-action); }
-.gallery-stage { position: relative; margin-top: var(--space-10); }
-.gallery-main { display: block; width: 100%; padding: var(--space-12) var(--space-13); border: 0; border-radius: var(--radius-field); background: var(--color-card); cursor: zoom-in; }
-.product-gallery .gallery-main img { width: 100%; height: var(--size-gallery-image); max-height: none; object-fit: contain; transition: opacity var(--motion-duration-fast); }
+.gallery-tabs button[aria-pressed=true] { background: var(--color-action); border-color: var(--color-action); color: var(--color-surface-strong); }
+.gallery-tabs button:hover { border-color: var(--color-action); }
+.gallery-stage { position: relative; margin-top: 0; }
+.gallery-main { display: block; width: 100%; padding: var(--space-9) 48px; border: 0; border-radius: var(--radius-field); background: var(--color-card); cursor: zoom-in; }
+.product-gallery .gallery-main img { width: 100%; height: clamp(240px, 36vh, 330px); max-height: none; object-fit: contain; transition: opacity var(--motion-duration-fast); }
 .product-gallery[aria-busy=true] .gallery-main img { opacity: .4; }
-.gallery-arrow { position: absolute; top: 45%; width: var(--space-14); height: var(--space-14); border: 1px solid var(--color-control-border); border-radius: var(--radius-sm); background: var(--color-card); color: var(--color-text); font-size: var(--font-size-3xl); line-height: 1; }
-.gallery-arrow:hover { color: var(--color-action); border-color: var(--color-action); }
-.gallery-prev { left: 0; }.gallery-next { right: 0; }
+.gallery-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+  width: 40px; height: 40px; border: 1px solid var(--color-control-border); border-radius: 50%;
+  background: var(--color-card); color: var(--color-text); font-size: 1.45rem; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .08); cursor: pointer;
+  transition: color .15s ease, border-color .15s ease, background .15s ease, opacity .15s ease;
+}
+.gallery-arrow:hover:not(:disabled) { color: var(--color-action); border-color: var(--color-action); background: var(--color-canvas); }
+.gallery-arrow:disabled { opacity: .32; cursor: default; box-shadow: none; }
+.gallery-prev { left: 8px; }.gallery-next { right: 8px; }
 .gallery-counter { position: absolute; bottom: 0; right: var(--space-5); background: var(--color-canvas); color: var(--color-text-muted); padding: var(--space-2) var(--space-9); font-size: var(--font-size-xs); border-radius: var(--radius-sm); }
-.gallery-caption { margin: var(--space-10) 0; color: var(--color-text-muted); font-size: var(--font-size-sm); min-height: var(--space-11); }
-.gallery-thumbnails { display: flex; gap: var(--space-5); overflow-x: auto; padding: var(--space-2) 0 var(--space-9); scrollbar-width: thin; }
-.gallery-thumbnails button { flex: 0 0 var(--space-16); height: var(--space-16); padding: var(--space-3); border: 1px solid var(--color-control-border); border-radius: var(--radius-small); background: var(--color-card); }
+.gallery-caption { margin: var(--space-6) 0; color: var(--color-text-muted); font-size: var(--font-size-sm); min-height: 0; }
+.gallery-thumbnails { display: flex; gap: var(--space-5); overflow-x: auto; padding: var(--space-2) 0 var(--space-4); scrollbar-width: thin; }
+.gallery-thumbnails button { flex: 0 0 56px; height: 56px; padding: var(--space-3); border: 1px solid var(--color-control-border); border-radius: var(--radius-small); background: var(--color-card); }
+.gallery-thumbnails + p { margin: var(--space-5) 0 0; }
 .gallery-thumbnails button[aria-pressed=true] { border: 2px solid var(--color-action); }
 .product-gallery .gallery-thumbnails img { width: 100%; height: 100%; object-fit: contain; }
 .gallery-dialog { border: 0; border-radius: var(--radius-card); padding: var(--space-14) var(--space-12) var(--space-11); width: min(var(--layout-visual-width),94vw); max-height: 94dvh; background: var(--color-card); }
@@ -65,6 +75,10 @@
 .pill-btn.is-out-of-stock::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(to top right, transparent calc(50% - 0.5px), rgba(134, 134, 139, .45) calc(50% - 0.5px), rgba(134, 134, 139, .45) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+}
+@media (max-height: 780px) and (min-width: 768px) {
+  .product-gallery .gallery-main img { height: clamp(230px, 38vh, 360px); }
+  .spin-stage { height: clamp(240px, 42vh, 410px); }
 }
 @media (max-width: 767px) {
   .product-gallery { position: static; padding: var(--space-10); }

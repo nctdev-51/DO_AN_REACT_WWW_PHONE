@@ -59,6 +59,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  const syncStepper = (input, clampEmpty = true) => {
+    const stepper = input?.closest('[data-qty-stepper]');
+    if (!stepper) return;
+    const min = input.min === '' ? 0 : Number(input.min);
+    const max = input.max === '' ? 99 : Number(input.max);
+    const dec = stepper.querySelector('[data-qty-dec]');
+    const inc = stepper.querySelector('[data-qty-inc]');
+    if (!clampEmpty && input.value.trim() === '') {
+      if (dec) dec.disabled = input.disabled || true;
+      if (inc) inc.disabled = input.disabled || false;
+      return;
+    }
+    const val = Number(input.value);
+    const clamped = Number.isNaN(val) ? min : Math.max(min, Math.min(max, Math.trunc(val)));
+    if (String(clamped) !== input.value) input.value = String(clamped);
+    if (dec) dec.disabled = input.disabled || clamped <= min;
+    if (inc) inc.disabled = input.disabled || clamped >= max;
+  };
+  document.querySelectorAll('[data-qty-stepper]').forEach(stepper => {
+    const input = stepper.querySelector('input[type="number"]');
+    const dec = stepper.querySelector('[data-qty-dec]');
+    const inc = stepper.querySelector('[data-qty-inc]');
+    if (!input) return;
+    dec?.addEventListener('click', () => {
+      const min = input.min === '' ? 0 : Number(input.min);
+      const cur = Number(input.value) || min;
+      input.value = String(Math.max(min, cur - 1));
+      syncStepper(input, true);
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    inc?.addEventListener('click', () => {
+      const max = input.max === '' ? 99 : Number(input.max);
+      const cur = Number(input.value) || 0;
+      input.value = String(Math.min(max, cur + 1));
+      syncStepper(input, true);
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    input.addEventListener('input', () => syncStepper(input, false));
+    input.addEventListener('change', () => syncStepper(input, true));
+    input.addEventListener('blur', () => syncStepper(input, true));
+    syncStepper(input, true);
+  });
+
   const variants = document.getElementById('variant-select');
   if (variants) {
     const price = document.getElementById('product-price');
@@ -95,7 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
           ? `Sắp hết hàng (chỉ còn ${available} sản phẩm)`
           : `Còn ${available} sản phẩm`;
       quantity.max = Math.min(99, available);
-      quantity.value = available ? Math.max(1, Math.min(Number(quantity.value), available)) : 1;
+      quantity.disabled = available === 0;
+      quantity.value = available ? Math.max(1, Math.min(Number(quantity.value) || 1, available)) : 1;
+      syncStepper(quantity);
       button.disabled = available === 0;
     };
     variants.addEventListener('change', refreshVariant);

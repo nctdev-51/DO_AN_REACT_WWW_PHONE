@@ -5,8 +5,8 @@ import iuh.fit.www_phone_ver1.entity.Product;
 import iuh.fit.www_phone_ver1.repository.ProductRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -16,6 +16,7 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -35,13 +36,17 @@ public class ChatbotService {
     private ChatModel chatModel;
 
     @Autowired
+    private ChatMemory chatMemory;
+
+    @Autowired
     private ProductRepository productRepository;
 
     @Value("${spring.ai.openai.api-key:}")
     private String apiKey;
 
-    // Session history: sessionId -> list of messages
-    private final ConcurrentHashMap<String, List<Message>> sessionHistory = new ConcurrentHashMap<>();
+    @Value("${app.chatbot.knowledge:classpath:prompts/chatbot-knowledge.txt}")
+    private org.springframework.core.io.Resource knowledge =
+            new ClassPathResource("prompts/chatbot-knowledge.txt");
 
     private boolean isAiEnabled() {
         return chatModel != null
@@ -62,87 +67,133 @@ public class ChatbotService {
      * Xử lý tin nhắn chatbot từ người dùng.
      */
     public ChatResponseDTO chat(String userMessage, String sessionId) {
+        if (sessionId == null || sessionId.isBlank()) {
+            throw new IllegalArgumentException("A conversation ID is required.");
+        }
+        List<Message> history = chatMemory.get(sessionId, 20);
         if (!isAiEnabled()) {
-            return fallbackChat(userMessage);
+            return persistFallback(userMessage, sessionId);
         }
+
+        String productContext = buildProductContext(userMessage);
+        PromptTemplate systemTemplate =
+                new PromptTemplate(new ClassPathResource("prompts/chatbot-system.st"));
+        String systemText = systemTemplate.render(Map.of(
+                "productContext", productContext, "knowledgeContext", loadKnowledge()));
+        List<Message> messages = new ArrayList<>();
+        messages.add(new SystemMessage(systemText));
+        messages.addAll(history);
+        messages.add(new UserMessage(userMessage));
+
+        String replyRaw;
         try {
-            // Lấy hoặc khởi tạo lịch sử hội thoại
-            List<Message> history = sessionHistory.computeIfAbsent(
-                    sessionId != null ? sessionId : "default",
-                    k -> new ArrayList<>()
-            );
-
-            // Build system prompt với danh sách sản phẩm
-            String productContext = buildProductContext();
-            PromptTemplate systemTemplate = new PromptTemplate(
-                    new ClassPathResource("prompts/chatbot-system.st"));
-            String systemText = systemTemplate.render(Map.of("productContext", productContext));
-
-            // Build danh sách messages: system + history + user message mới
-            List<Message> messages = new ArrayList<>();
-            messages.add(new SystemMessage(systemText));
-            synchronized (history) {
-                messages.addAll(history);
-            }
-            messages.add(new UserMessage(userMessage));
-
-            // Gọi AI
-            Prompt prompt = new Prompt(messages);
-            String replyRaw = chatModel.call(prompt).getResult().getOutput().getText();
-
-            // 1. Parse suggested product IDs từ [SUGGEST:id]
-            List<Long> suggestedIds = extractSuggestedIds(replyRaw);
-
-            // 2. Cơ chế phòng vệ tự động: Quét tên sản phẩm hoặc ID trong reply nếu AI quên gắn thẻ [SUGGEST:id]
-            suggestedIds = autoMatchProductsIfEmpty(suggestedIds, replyRaw);
-
-            // 3. Làm sạch reply (bỏ các tag [SUGGEST:...])
-            String reply = replyRaw.replaceAll("\\[SUGGEST:\\d+\\]", "").trim();
-
-            // 4. Lấy thông tin chi tiết các sản phẩm gợi ý để hiển thị thẻ "Xem chi tiết" đẹp mắt
-            List<ChatResponseDTO.ProductCardDTO> productCards = buildProductCards(suggestedIds);
-
-            // 5. Cập nhật history (giữ tối đa 20 tin nhắn)
-            synchronized (history) {
-                history.add(new UserMessage(userMessage));
-                history.add(new AssistantMessage(reply));
-                if (history.size() > 20) {
-                    history.subList(0, history.size() - 20).clear();
-                }
-            }
-
-            return new ChatResponseDTO(reply, suggestedIds, productCards);
-        } catch (Exception e) {
-            log.error("Chatbot AI failed for session {}: ", sessionId, e);
-            return fallbackChat(userMessage);
+            var response = chatModel.call(new Prompt(messages));
+            replyRaw =
+                    response != null
+                                    && response.getResult() != null
+                                    && response.getResult().getOutput() != null
+                            ? response.getResult().getOutput().getText()
+                            : null;
+        } catch (RuntimeException ex) {
+            log.error("Chatbot AI failed for conversation {}.", sessionId, ex);
+            return persistFallback(userMessage, sessionId);
         }
+        if (replyRaw == null || replyRaw.isBlank()) {
+            return persistFallback(userMessage, sessionId);
+        }
+
+        List<Long> suggestedIds = extractSuggestedIds(replyRaw);
+        suggestedIds = autoMatchProductsIfEmpty(suggestedIds, replyRaw);
+        String reply = replyRaw.replaceAll("\\[SUGGEST:\\d+\\]", "").trim();
+        List<ChatResponseDTO.ProductCardDTO> productCards = buildProductCards(suggestedIds);
+        chatMemory.add(
+                sessionId, List.of(new UserMessage(userMessage), new AssistantMessage(reply)));
+        return new ChatResponseDTO(reply, suggestedIds, productCards);
+    }
+
+    private ChatResponseDTO persistFallback(String userMessage, String conversationId) {
+        ChatResponseDTO response = fallbackChat(userMessage);
+        chatMemory.add(
+                conversationId,
+                List.of(new UserMessage(userMessage), new AssistantMessage(response.getReply())));
+        return response;
     }
 
     // ── private helpers ────────────────────────────────────────────────────────
 
-    private String buildProductContext() {
+    private String loadKnowledge() {
+        try (var stream = knowledge.getInputStream()) {
+            return new String(stream.readNBytes(16_384), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (java.io.IOException ex) {
+            log.warn("Chatbot knowledge resource unavailable.", ex);
+            return "Hướng dẫn khách kiểm tra chính sách hiện hành với cửa hàng.";
+        }
+    }
+
+    private String buildProductContext(String userMessage) {
         try {
-            List<Product> products = productRepository.findByStatus(1, PageRequest.of(0, 25)).getContent();
-            if (products.isEmpty()) {
-                products = productRepository.findAll(PageRequest.of(0, 25)).getContent();
-            }
-            if (products.isEmpty()) {
+            List<Product> active = productRepository.findByStatus(1, PageRequest.of(0, 60)).getContent();
+            if (active.isEmpty()) {
                 return "- Hiện chưa có dữ liệu sản phẩm trong kho.";
             }
-            return products.stream()
-                    .map(p -> String.format("- ID: %d | Tên: %s | Hãng: %s | Giá: %s VNĐ | Chip: %s | Camera: %s | Pin: %s",
+            List<Product> ordered = prioritizeContextProducts(active, userMessage, 25);
+            return ordered.stream()
+                    .map(p -> String.format("- ID: %d | Tên: %s | Hãng: %s | Giá: %s VNĐ | Chip: %s | Camera: %s | Pin: %s | Bảo hành: %s",
                             p.getId() != null ? p.getId() : 0L,
                             p.getName() != null && !p.getName().isBlank() ? p.getName() : "Đang cập nhật",
                             p.getBrand() != null && !p.getBrand().isBlank() ? p.getBrand() : "Khác",
                             p.getPrice() != null ? String.format("%,d", p.getPrice().longValue()) : "Liên hệ",
                             p.getChipset() != null && !p.getChipset().isBlank() ? p.getChipset() : "Tiêu chuẩn",
                             p.getCamera() != null && !p.getCamera().isBlank() ? p.getCamera() : "Tiêu chuẩn",
-                            p.getBattery() != null && !p.getBattery().isBlank() ? p.getBattery() : "Tiêu chuẩn"))
+                            p.getBattery() != null && !p.getBattery().isBlank() ? p.getBattery() : "Tiêu chuẩn",
+                            p.getWarrantyMonths() != null ? p.getWarrantyMonths() + " tháng" : "Liên hệ"))
                     .collect(Collectors.joining("\n"));
         } catch (Exception e) {
             log.warn("Failed to build product context: {}", e.getMessage());
             return "- Thông tin sản phẩm tạm thời chưa tải được.";
         }
+    }
+
+    private List<Product> prioritizeContextProducts(List<Product> products, String userMessage, int limit) {
+        if (products.size() <= limit || userMessage == null || userMessage.isBlank()) {
+            return products.size() <= limit ? products : products.subList(0, limit);
+        }
+        String[] tokens = userMessage.toLowerCase(Locale.ROOT).trim().split("[^\\p{L}\\p{Nd}]+");
+        List<Product> matched = new ArrayList<>();
+        List<Product> rest = new ArrayList<>();
+        for (Product p : products) {
+            String haystack =
+                    ((p.getName() == null ? "" : p.getName())
+                            + " "
+                            + (p.getBrand() == null ? "" : p.getBrand())
+                            + " "
+                            + (p.getUsageTags() == null ? "" : p.getUsageTags())
+                            + " "
+                            + (p.getKind() == null ? "" : p.getKind()))
+                            .toLowerCase(Locale.ROOT);
+            boolean hit = false;
+            for (String token : tokens) {
+                if (token.length() >= 2 && haystack.contains(token)) {
+                    hit = true;
+                    break;
+                }
+            }
+            if (hit) {
+                matched.add(p);
+            } else {
+                rest.add(p);
+            }
+        }
+        List<Product> result = new ArrayList<>(limit);
+        for (Product p : matched) {
+            if (result.size() >= limit) break;
+            result.add(p);
+        }
+        for (Product p : rest) {
+            if (result.size() >= limit) break;
+            result.add(p);
+        }
+        return result;
     }
 
     private List<Long> extractSuggestedIds(String text) {
@@ -169,10 +220,7 @@ public class ChatbotService {
             return result;
         }
         try {
-            List<Product> all = productRepository.findByStatus(1, PageRequest.of(0, 30)).getContent();
-            if (all.isEmpty()) {
-                all = productRepository.findAll(PageRequest.of(0, 30)).getContent();
-            }
+            List<Product> all = productRepository.findByStatus(1, PageRequest.of(0, 50)).getContent();
             String lower = text.toLowerCase();
             for (Product p : all) {
                 if (p.getName() != null && !p.getName().isBlank()) {
@@ -199,15 +247,17 @@ public class ChatbotService {
         }
         for (Long id : ids) {
             try {
-                productRepository.findById(id).ifPresent(p -> {
-                    String priceStr = p.getPrice() != null ? String.format("%,d VNĐ", p.getPrice().longValue()) : "Liên hệ";
-                    cards.add(new ChatResponseDTO.ProductCardDTO(
-                            p.getId(),
-                            p.getName() != null ? p.getName() : ("Sản phẩm #" + p.getId()),
-                            priceStr,
-                            p.getBrand() != null ? p.getBrand() : "Chính hãng"
-                    ));
-                });
+                productRepository.findById(id)
+                        .filter(p -> Integer.valueOf(1).equals(p.getStatus()))
+                        .ifPresent(p -> {
+                            String priceStr = p.getPrice() != null ? String.format("%,d VNĐ", p.getPrice().longValue()) : "Liên hệ";
+                            cards.add(new ChatResponseDTO.ProductCardDTO(
+                                    p.getId(),
+                                    p.getName() != null ? p.getName() : ("Sản phẩm #" + p.getId()),
+                                    priceStr,
+                                    p.getBrand() != null ? p.getBrand() : "Chính hãng"
+                            ));
+                        });
             } catch (Exception ignored) {
             }
         }

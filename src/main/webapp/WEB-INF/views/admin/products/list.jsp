@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/admin/header.jsp" />
 <div class="section-heading">
@@ -24,7 +25,8 @@
           <tr>
             <td>
               <div class="table-product">
-                <img src="${pageContext.request.contextPath}${product.image}" alt="">
+                <c:set var="resolvedProductImg" value="${fn:startsWith(product.image, 'http') ? product.image : pageContext.request.contextPath.concat(product.image)}" />
+                <img src="${resolvedProductImg}" alt="">
                 <div>
                   <strong>
                     <c:out value="${product.name}"/>

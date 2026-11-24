@@ -24,9 +24,7 @@
         </div>
         <ui:addressPicker id="saved-${address.id}" provinceCode="${editing.provinceCode}" wardCode="${editing.wardCode}" province="${editing.province}" ward="${editing.ward}"/>
         <div class="field">
-          <label>Số nhà, tên đường<textarea class="form-control" name="line" required maxlength="255">
-            <c:out value="${editing.line}"/>
-          </textarea>
+          <label>Số nhà, tên đường<textarea class="form-control" name="line" required maxlength="255"><c:out value="${editing.line}"/></textarea>
         </label>
       </div>
       <label class="payment-choice">

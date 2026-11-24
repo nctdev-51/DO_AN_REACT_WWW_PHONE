@@ -135,4 +135,17 @@ public class AdminProductController {
     catalog.disableVariant(productId, id);
     return "redirect:/admin/products/" + productId + "/variants";
   }
+
+  @PostMapping("/{id}/toggle")
+  public String toggleProduct(@PathVariable Long id, RedirectAttributes flash) {
+    var product = products.findById(id)
+        .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+            org.springframework.http.HttpStatus.NOT_FOUND));
+    int newStatus = product.getStatus() == 1 ? 0 : 1;
+    product.setStatus(newStatus);
+    products.save(product);
+    flash.addFlashAttribute("successMsg",
+        newStatus == 1 ? "Đã kích hoạt sản phẩm #" + id : "Đã ngừng kinh doanh sản phẩm #" + id);
+    return "redirect:/admin/products";
+  }
 }

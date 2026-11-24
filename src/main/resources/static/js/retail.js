@@ -112,7 +112,14 @@ document.addEventListener('DOMContentLoaded', () => {
             link.tabIndex = -1;
             link.setAttribute('aria-selected', 'false');
             const image = document.createElement('img');
-            image.src = `${base}${item.image}`;
+            const rawImage = item.image || '';
+            image.src = rawImage
+              ? (rawImage.startsWith('http') ? rawImage : (rawImage.startsWith('/') ? `${base}${rawImage}` : `${base}/${rawImage}`))
+              : '';
+            image.hidden = !rawImage;
+            image.addEventListener('error', () => {
+              image.hidden = true;
+            });
             image.alt = '';
             const text = document.createElement('span');
             text.textContent = item.name;
@@ -324,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.className = 'compare-tray-item';
         card.dataset.trayVariantId = item.variantId;
         const img = document.createElement('img');
-        img.src = `${ctx}${item.image}`;
+        img.src = item.image && item.image.startsWith('http') ? item.image : `${ctx}${item.image}`;
         img.alt = '';
         const meta = document.createElement('div');
         meta.className = 'compare-tray-meta';
@@ -422,6 +429,14 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.classList.add('btn-brand');
       });
     });
+    wizard.addEventListener('submit', event => {
+      const budgetInput = wizard.querySelector('#budget');
+      if (budgetInput && !budgetInput.checkValidity()) {
+        event.preventDefault();
+        showStep('1');
+        budgetInput.reportValidity();
+      }
+    });
   }
 
   // 8. Checkout Inline Address Modal
@@ -475,6 +490,9 @@ document.addEventListener('DOMContentLoaded', () => {
           window.bootstrap.Modal.getInstance(modalEl)?.hide();
         }
         addressModalForm.reset();
+        addressModalForm.querySelector('[data-address-picker]')?.dispatchEvent(
+          new CustomEvent('ptv:set-address', {detail: {provinceCode: '', wardCode: ''}})
+        );
       } catch {
         if (errBox) {
           errBox.textContent = 'Lỗi kết nối khi lưu địa chỉ.';
@@ -504,6 +522,50 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!tick()) clearInterval(timerId);
       }, 1000);
     }
+  });
+
+  // 10. Product Rail Carousel Controls (Cuon muot khi nhan nut < >)
+  document.querySelectorAll('.product-rail-wrapper, .collection-section').forEach(container => {
+    const rail = container.querySelector('.product-rail');
+    if (!rail) return;
+    const prevBtn = container.querySelector('.rail-prev');
+    const nextBtn = container.querySelector('.rail-next');
+
+    function updateNav() {
+      const maxScroll = rail.scrollWidth - rail.clientWidth;
+      if (prevBtn) {
+        const canPrev = rail.scrollLeft > 15;
+        prevBtn.disabled = !canPrev;
+        prevBtn.setAttribute('aria-disabled', String(!canPrev));
+      }
+      if (nextBtn) {
+        const canNext = rail.scrollLeft < maxScroll - 15;
+        nextBtn.disabled = !canNext;
+        nextBtn.setAttribute('aria-disabled', String(!canNext));
+      }
+    }
+
+    function scrollStep(direction) {
+      const amount = Math.max(280, rail.clientWidth * 0.75) * direction;
+      rail.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', e => {
+        e.preventDefault();
+        scrollStep(-1);
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', e => {
+        e.preventDefault();
+        scrollStep(1);
+      });
+    }
+
+    rail.addEventListener('scroll', updateNav, { passive: true });
+    window.addEventListener('resize', updateNav, { passive: true });
+    setTimeout(updateNav, 200);
   });
 });
 

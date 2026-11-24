@@ -2,8 +2,10 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/admin/header.jsp" />
-<a href="${pageContext.request.contextPath}/admin/products/${product.id}/edit">← Sửa sản phẩm</a>
-<a class="btn btn-outline-dark ms-3" href="${pageContext.request.contextPath}/admin/products/${product.id}/media">Quản lý ảnh & 360°</a>
+<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+  <a class="btn btn-light btn-sm" href="${pageContext.request.contextPath}/admin/products/${product.id}/edit">← Sửa sản phẩm</a>
+  <a class="btn btn-outline-dark btn-sm" href="${pageContext.request.contextPath}/admin/products/${product.id}/media">Quản lý ảnh &amp; 360°</a>
+</div>
 <h2 class="my-4">
   <c:out value="${product.name}"/>
 </h2>
@@ -39,9 +41,20 @@
           </label>
         </div>
         <label class="payment-choice">
+          <input type="hidden" name="_active" value="on">
           <input type="checkbox" name="active" value="true" ${variant.active ? 'checked' : ''}>Đang bán</label>
         </div>
-        <button class="btn btn-brand mt-3">Lưu phiên bản</button>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <button class="btn btn-brand">Lưu phiên bản</button>
+          <c:if test="${variant.active}">
+            <button
+                class="btn btn-outline-danger"
+                type="submit"
+                formaction="${pageContext.request.contextPath}/admin/products/${product.id}/variants/${variant.id}/disable"
+                formmethod="post"
+                formnovalidate>Tạm ngưng bán</button>
+          </c:if>
+        </div>
       </form>
     </article>
   </c:forEach>
@@ -63,6 +76,7 @@
         <label>Tồn kho<input class="form-control" name="stock" type="number" min="0" max="1000000" required>
         </label>
         <label class="payment-choice">
+          <input type="hidden" name="_active" value="on">
           <input type="checkbox" name="active" value="true" checked>Đang bán</label>
         </div>
         <button class="btn btn-brand mt-3">Thêm phiên bản</button>

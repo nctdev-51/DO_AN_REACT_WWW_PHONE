@@ -75,6 +75,16 @@ public class VnPayService {
     if (!isAvailable())
       throw new IllegalArgumentException("Thanh toán VNPay hiện chưa sẵn sàng. Vui lòng chọn COD.");
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+    ZonedDateTime maxExpiry = now.plusMinutes(15);
+    ZonedDateTime orderExpiry =
+        order.getOrderDate() == null
+            ? maxExpiry
+            : order.getOrderDate().atZone(ZoneId.of("Asia/Ho_Chi_Minh")).plusMinutes(15);
+    ZonedDateTime expireAt =
+        orderExpiry.isBefore(now.plusMinutes(1))
+            ? now.plusMinutes(1)
+            : (orderExpiry.isAfter(maxExpiry) ? maxExpiry : orderExpiry);
+    String normalizedIp = normalizeIp(ip);
     DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
     Map<String, String> values = new TreeMap<>();
     values.put("vnp_Version", "2.1.0");
@@ -89,11 +99,18 @@ public class VnPayService {
     values.put("vnp_OrderType", "other");
     values.put("vnp_Locale", "vn");
     values.put("vnp_ReturnUrl", returnUrl);
-    values.put("vnp_IpAddr", ip);
+    values.put("vnp_IpAddr", normalizedIp);
     values.put("vnp_CreateDate", now.format(format));
-    values.put("vnp_ExpireDate", now.plusMinutes(15).format(format));
+    values.put("vnp_ExpireDate", expireAt.format(format));
     String query = canonical(values);
     return paymentUrl + "?" + query + "&vnp_SecureHash=" + sign(query);
+  }
+
+  public static String normalizeIp(String rawIp) {
+    if (rawIp == null || rawIp.isBlank() || "0:0:0:0:0:0:0:1".equals(rawIp) || "::1".equals(rawIp)) {
+      return "127.0.0.1";
+    }
+    return rawIp.trim();
   }
 
   public boolean verify(Map<String, String> values) {
