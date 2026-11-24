@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/store/header.jsp" />
 <div class="section-heading">
@@ -45,9 +46,10 @@
             Thông tin
           </th>
           <c:forEach var="variant" items="${comparison.variants}">
+            <c:set var="resolvedVariantImg" value="${fn:startsWith(variant.product.image, 'http') ? variant.product.image : pageContext.request.contextPath.concat(variant.product.image)}" />
             <th scope="col">
               <a href="${pageContext.request.contextPath}/products/${variant.product.id}">
-                <img class="compare-image" src="${pageContext.request.contextPath}${variant.product.image}" alt="<c:out value='${variant.product.name}'/>">
+                <img class="compare-image" src="${resolvedVariantImg}" alt="<c:out value='${variant.product.name}'/>">
                 <span>
                   <c:out value="${variant.product.name}"/>
                 </span>
@@ -145,8 +147,9 @@
   </form>
   <div class="comparison-suggestions">
     <c:forEach var="product" items="${suggestions}">
+      <c:set var="resolvedProductImg" value="${fn:startsWith(product.image, 'http') ? product.image : pageContext.request.contextPath.concat(product.image)}" />
       <article>
-        <img src="${pageContext.request.contextPath}${product.image}" alt="" loading="lazy">
+        <img src="${resolvedProductImg}" alt="" loading="lazy">
         <div>
           <a href="${pageContext.request.contextPath}/products/${product.id}">
             <c:out value="${product.name}"/>

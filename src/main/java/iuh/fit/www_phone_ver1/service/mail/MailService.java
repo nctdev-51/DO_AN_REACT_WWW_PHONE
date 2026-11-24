@@ -158,7 +158,12 @@ public class MailService {
     deliver(email, "PTV Mobile — Hoàn tiền đơn #" + order.getId(), body);
   }
 
-  private void deliver(String email, String subject, String body) {
+  public boolean sendInventoryAlert(String email, String summary) {
+    return deliver(email, "PTV Mobile — Cảnh báo tồn kho 48 giờ",
+        "<pre>" + escape(summary) + "</pre>");
+  }
+
+  private boolean deliver(String email, String subject, String body) {
     try {
       var message = sender.createMimeMessage();
       var helper = new MimeMessageHelper(message, false, "UTF-8");
@@ -174,8 +179,10 @@ public class MailService {
           message.writeTo(output);
         }
       }
+      return true;
     } catch (Exception error) {
       log.warn("Không gửi/lưu được email: {}", error.getClass().getSimpleName());
+      return false;
     }
   }
 
