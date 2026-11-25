@@ -48,16 +48,6 @@ public class ChatbotService {
   private org.springframework.core.io.Resource knowledge =
       new ClassPathResource("prompts/chatbot-knowledge.txt");
 
-  // Bounded LRU session cache so bot memory cannot grow unbounded across
-  // anonymous visitors
-  private final Map<String, SessionEntry> sessionHistory = Collections.synchronizedMap(
-      new LinkedHashMap<>(MAX_CACHED_SESSIONS + 1, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, SessionEntry> eldest) {
-          return size() > MAX_CACHED_SESSIONS;
-        }
-      });
-
   private boolean isAiEnabled() {
     return chatModel != null
       && apiKey != null
@@ -136,15 +126,6 @@ public class ChatbotService {
   }
 
   // ── private helpers ────────────────────────────────────────────────────────
-
-  private String loadKnowledge() {
-    try (var stream = knowledge.getInputStream()) {
-      return new String(stream.readNBytes(16_384), java.nio.charset.StandardCharsets.UTF_8);
-    } catch (java.io.IOException ex) {
-      log.warn("Chatbot knowledge resource unavailable.", ex);
-      return "Hướng dẫn khách kiểm tra chính sách hiện hành với cửa hàng.";
-    }
-  }
 
   private String loadKnowledge() {
     if (knowledge == null || !knowledge.exists()) {
