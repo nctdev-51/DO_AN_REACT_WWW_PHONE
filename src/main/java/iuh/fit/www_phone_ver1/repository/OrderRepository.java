@@ -91,4 +91,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
       java.util.Collection<String> paymentStatuses,
       String status,
       LocalDateTime cutoff);
+
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select o from Order o where o.paymentExpiresAt is not null "
+      + "and o.paymentExpiresAt < :now "
+      + "and o.status = :status "
+      + "and o.paymentStatus in :paymentStatuses")
+  List<Order> findExpiredUnpaidOrders(
+      @Param("now") LocalDateTime now,
+      @Param("status") String status,
+      @Param("paymentStatuses") java.util.Collection<String> paymentStatuses);
 }

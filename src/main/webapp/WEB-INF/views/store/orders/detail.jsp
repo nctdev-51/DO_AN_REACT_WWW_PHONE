@@ -45,6 +45,21 @@
   </c:choose>
 </section>
 
+<c:if test="${order.status == 'Chờ xử lý' and order.paymentMethod == 'QR' and order.paymentStatus != 'PAID'}">
+  <section class="panel mb-4">
+    <h2>Thanh toán QR động</h2>
+    <c:choose>
+      <c:when test="${not paymentExpired}">
+        <p>Đơn hàng đang giữ tồn kho trong 5 phút.</p>
+        <a class="btn btn-brand" href="${pageContext.request.contextPath}/payments/qr/${order.id}">Mở lại mã QR thanh toán</a>
+      </c:when>
+      <c:otherwise>
+        <p class="text-danger mb-0">Đã hết thời hạn thanh toán 5 phút.</p>
+      </c:otherwise>
+    </c:choose>
+  </section>
+</c:if>
+
 <c:if test="${order.status == 'Chờ xử lý' and order.paymentMethod == 'VNPAY' and (order.paymentStatus == 'UNPAID' or order.paymentStatus == 'FAILED')}">
   <section class="panel mb-4 payment-recovery-box">
     <h2>Hoàn tất thanh toán đơn hàng</h2>

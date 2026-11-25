@@ -17,7 +17,7 @@ public class PaymentExpiryJob {
     this.orders = orders;
   }
 
-  @Scheduled(fixedDelay = 60000, initialDelay = 60000)
+  @Scheduled(fixedDelay = 15000, initialDelay = 15000)
   public void expire() {
     orders.expireUnpaidOrders();
   }

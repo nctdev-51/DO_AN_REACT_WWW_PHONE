@@ -47,7 +47,12 @@ public class PaymentController {
     model.addAttribute("vnpResponseCode", values.get("vnp_ResponseCode"));
     model.addAttribute("vnpayAvailable", payments.isAvailable());
     model.addAttribute("paymentExpired", orderService.isPaymentWindowExpired(order));
-    model.addAttribute("paymentDeadlineIso", order.getOrderDate().plusMinutes(15).toString());
+    model.addAttribute(
+        "paymentDeadlineIso",
+        (order.getPaymentExpiresAt() != null
+                ? order.getPaymentExpiresAt()
+                : order.getOrderDate().plusMinutes(15))
+            .toString());
     return "store/checkout/payment-result";
   }
 }

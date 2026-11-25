@@ -97,6 +97,10 @@
           <form:radiobutton path="paymentMethod" value="VNPAY"/> Thanh toán trực tuyến VNPay <span class="muted small d-block">Đơn hàng giữ tồn kho trong 15 phút để bạn hoàn tất thanh toán.</span>
         </label>
       </c:if>
+      <label class="payment-choice">
+        <form:radiobutton path="paymentMethod" value="QR"/> Thanh toán QR VietQR / MoMo / ZaloPay / VNPay-QR
+        <span class="muted small d-block">Giữ tồn kho trong 5 phút, có thể quét mã bằng điện thoại.</span>
+      </label>
       <button class="btn btn-brand w-100 mt-4 btn-lg">Xác nhận đặt hàng</button>
     </form:form>
   </section>

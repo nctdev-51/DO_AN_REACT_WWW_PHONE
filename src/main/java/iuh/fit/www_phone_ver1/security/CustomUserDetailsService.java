@@ -4,6 +4,7 @@ import iuh.fit.www_phone_ver1.entity.User;
 import iuh.fit.www_phone_ver1.repository.UserRepository;
 import java.util.Collection;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,9 +16,14 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
 
   private final UserRepository userRepository;
+  private final boolean emailVerificationEnabled;
 
-  public CustomUserDetailsService(UserRepository userRepository) {
+  public CustomUserDetailsService(
+      UserRepository userRepository,
+      @Value("${app.account.email-verification-enabled:true}")
+          boolean emailVerificationEnabled) {
     this.userRepository = userRepository;
+    this.emailVerificationEnabled = emailVerificationEnabled;
   }
 
   @Override
@@ -39,6 +45,12 @@ public class CustomUserDetailsService implements UserDetailsService {
             .collect(Collectors.toList());
 
     return new org.springframework.security.core.userdetails.User(
-        user.getEmail(), user.getPassword(), user.isEmailVerified(), true, true, true, authorities);
+        user.getEmail(),
+        user.getPassword(),
+        !emailVerificationEnabled || user.isEmailVerified(),
+        true,
+        true,
+        true,
+        authorities);
   }
 }
