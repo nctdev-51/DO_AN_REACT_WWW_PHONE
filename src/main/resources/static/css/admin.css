@@ -180,6 +180,28 @@ a.btn-brand:focus {
   font-size: 1.15rem;
 }
 .admin-batch-items button:hover { background: #dce6f3; }
+.admin-body .status-badge {
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #eceef1;
+  color: #465362;
+  font-size: .78rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.admin-body .status-badge::before {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+.admin-body .status-success { background: #e5f3e9; color: #216344; }
+.admin-body .status-danger { background: #fcebec; color: #982b37; }
+.admin-body .status-warning { background: #fbf0d7; color: #78510c; }
+.admin-body .status-info { background: #e8eef9; color: #305789; }
 .admin-body{
   background:#f3f5f2
 }

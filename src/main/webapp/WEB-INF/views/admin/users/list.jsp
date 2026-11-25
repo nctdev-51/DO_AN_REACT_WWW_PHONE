@@ -25,6 +25,7 @@
         <c:forEach var="user" items="${users}">
           <tr>
             <td><input type="checkbox" name="ids" value="${user.id}" form="admin-batch" data-batch-label="<c:out value='${user.fullName}'/>"
+                data-batch-actions="${user.status == 0 ? 'enable' : (user.admin ? '' : 'disable')}${not user.admin and user.orderCount == 0 ? '|delete' : ''}"
                 aria-label="Chọn mục ${user.id}"></td>
             <td>
               <strong>
@@ -39,7 +40,7 @@
             </td>
             <td>${user.orderCount}</td>
             <td>${user.admin ? 'Quản trị' : 'Khách hàng'}</td>
-            <td>${user.status == 1 ? 'Hoạt động' : 'Đã khóa'}</td>
+            <td><span class="status-badge ${user.status == 1 ? 'status-success' : 'status-danger'}">${user.status == 1 ? 'Hoạt động' : 'Đã khóa'}</span></td>
             <td>
               <div class="table-actions">
                 <a class="btn btn-light btn-sm" href="${pageContext.request.contextPath}/admin/users/${user.id}/edit">Sửa</a>

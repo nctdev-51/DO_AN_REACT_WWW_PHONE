@@ -57,6 +57,7 @@
         <c:forEach var="order" items="${orders}">
           <tr>
             <td><input type="checkbox" name="ids" value="${order.id}" form="admin-batch" data-batch-label="<c:out value='#${order.id} · ${order.user.fullName}'/>"
+                data-batch-actions="${order.status == 'Chờ xử lý' ? (order.paymentMethod != 'VNPAY' or order.paymentStatus == 'PAID' ? 'Đang giao|Đã hủy' : 'Đã hủy') : (order.status == 'Đang giao' and (order.paymentMethod != 'VNPAY' or order.paymentStatus == 'PAID') ? 'Đã giao' : '')}"
                 aria-label="Chọn mục ${order.id}"></td>
             <td>#${order.id}</td>
             <td>
@@ -81,7 +82,7 @@
               </small>
             </td>
             <td>
-              <c:out value="${order.status}"/>
+              <ui:adminOrderStatus value="${order.status}"/>
             </td>
             <td>
               <a class="btn btn-light btn-sm" href="${pageContext.request.contextPath}/admin/orders/${order.id}">Chi tiết</a>

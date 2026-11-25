@@ -18,6 +18,37 @@
     <a class="btn btn-brand" href="${pageContext.request.contextPath}/admin/banners/new" style="min-height: 44px; display: inline-flex; align-items: center;">Thêm banner</a>
   </div>
 </div>
+<form method="get" action="${pageContext.request.contextPath}/admin/banners" class="row g-2 align-items-end mb-3" data-admin-name-search>
+  <div class="col-sm-6 col-xl-4">
+    <label for="banner-title-search" class="form-label">Tên chiến dịch</label>
+    <input id="banner-title-search" class="form-control" type="search" name="q"
+           value="<c:out value='${q}'/>" placeholder="Ví dụ Galaxy S25"
+           autocomplete="off" aria-controls="admin-name-results">
+  </div>
+  <div class="col-sm-6 col-xl-auto">
+    <label for="banner-from" class="form-label">Từ ngày</label>
+    <input id="banner-from" class="form-control" type="date" name="from" value="${from}">
+  </div>
+  <div class="col-sm-6 col-xl-auto">
+    <label for="banner-to" class="form-label">Đến ngày</label>
+    <input id="banner-to" class="form-control" type="date" name="to" value="${to}">
+  </div>
+  <div class="col-sm-6 col-xl-auto">
+    <label for="banner-state" class="form-label">Trạng thái</label>
+    <select id="banner-state" class="form-select" name="state">
+      <option value="">Tất cả trạng thái</option>
+      <option value="off" ${state == 'off' ? 'selected' : ''}>Đang tắt</option>
+      <option value="scheduled" ${state == 'scheduled' ? 'selected' : ''}>Chờ đến lịch</option>
+      <option value="live" ${state == 'live' ? 'selected' : ''}>Trong lịch phát</option>
+      <option value="expired" ${state == 'expired' ? 'selected' : ''}>Hết lịch</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-brand">Lọc</button>
+    <a class="btn btn-light ${hasFilters ? '' : 'd-none'}" href="${pageContext.request.contextPath}/admin/banners" data-search-clear>Xóa bộ lọc</a>
+  </div>
+  <span class="col-auto small muted" data-search-status role="status"></span>
+</form>
   <ui:adminBatchForm action="/admin/banners/batch">
     <option value="enable">Bật</option>
     <option value="disable">Tắt</option>
@@ -37,12 +68,12 @@
         <th style="min-width: 150px; text-align: right;">Thao tác</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="admin-name-results">
       <c:forEach var="b" items="${banners}">
         <tr>
-            <td><input type="checkbox" name="ids" value="${b.id}" form="admin-batch" data-batch-label="<c:out value='${b.title}'/>"
-                aria-label="Chọn mục ${b.id}">
-                <input type="hidden" name="version_${b.id}" value="${b.version}" form="admin-batch"></td>
+            <td><input type="checkbox" name="ids" value="${b.id}" form="admin-batch" data-batch-label="<c:out value='${b.title}'/>" data-batch-version="${b.version}"
+                data-batch-actions="${b.active ? 'disable' : 'enable'}|delete" aria-label="Chọn mục ${b.id}">
+                <input type="hidden" name="version_${b.id}" value="${b.version}" form="admin-batch" data-batch-version-field></td>
           <td>
             <c:choose>
               <c:when test="${not empty b.imagePath}">
@@ -57,6 +88,7 @@
           <td>
             <strong><c:out value="${b.title}"/></strong>
             <c:if test="${not empty b.subtitle}"><br><small class="text-muted"><c:out value="${b.subtitle}"/></small></c:if>
+            <c:if test="${b.target == 'SEARCH'}"><br><small class="text-muted">Từ khóa đích: <c:out value="${b.searchKeyword}"/></small></c:if>
           </td>
           <td>
             <span class="badge ${b.placement == 'HERO' ? 'bg-primary' : 'bg-info'} text-white">
@@ -68,11 +100,26 @@
           <td><strong>${b.position}</strong></td>
           <td>
             <c:choose>
-              <c:when test="${b.active}">
-                <span class="badge bg-success text-white">Đang bật</span>
+              <c:when test="${not b.active}">
+                <span class="status-badge status-danger">Đang tắt</span>
+                <form method="post" action="${pageContext.request.contextPath}/admin/banners/${b.id}/enable" class="mt-2">
+                  <ui:csrf/>
+                  <input type="hidden" name="version" value="${b.version}">
+                  <input type="hidden" name="q" value="<c:out value='${q}'/>">
+                  <input type="hidden" name="from" value="${from}">
+                  <input type="hidden" name="to" value="${to}">
+                  <input type="hidden" name="state" value="${state}">
+                  <button type="submit" class="btn btn-sm btn-outline-success" aria-label="Bật banner <c:out value='${b.title}'/>">Bật</button>
+                </form>
+              </c:when>
+              <c:when test="${b.startsAt.isAfter(bannerNow)}">
+                <span class="status-badge status-warning">Chờ đến lịch</span>
+              </c:when>
+              <c:when test="${not b.endsAt.isAfter(bannerNow)}">
+                <span class="status-badge">Hết lịch</span>
               </c:when>
               <c:otherwise>
-                <span class="badge bg-secondary text-white">Đang tắt</span>
+                <span class="status-badge status-success">Trong lịch phát</span>
               </c:otherwise>
             </c:choose>
           </td>
@@ -88,13 +135,15 @@
           </td>
         </tr>
       </c:forEach>
+      <c:if test="${empty banners}">
+        <tr><td colspan="8">
+          <c:choose>
+            <c:when test="${not empty filterError}"><span class="text-danger" role="alert"><c:out value="${filterError}"/></span></c:when>
+            <c:otherwise><span class="muted">${hasFilters ? 'Không tìm thấy chiến dịch phù hợp.' : 'Chưa có chiến dịch.'}</span></c:otherwise>
+          </c:choose>
+        </td></tr>
+      </c:if>
     </tbody>
   </table>
 </div>
-<c:if test="${empty banners}">
-  <div class="panel empty-state mt-3">
-    <h2>Chưa có banner chiến dịch</h2>
-    <p>Trang chủ đang dùng sản phẩm trình bày trong Nội dung cửa hàng. Thêm banner để thay khối giới thiệu theo lịch.</p>
-  </div>
-</c:if>
 <jsp:include page="/WEB-INF/views/shared/admin/footer.jsp"/>

@@ -11,13 +11,21 @@
   <ui:adminBatchForm action="/admin/products/batch">
     <jsp:attribute name="fields">
       <div data-batch-field="category">
-        <label class="form-label" for="bulk-category">Danh mục đích</label>
+        <label class="form-label" for="bulk-category" data-category-fallback>Danh mục đích</label>
         <select id="bulk-category" class="form-select" name="categoryId">
           <option value="">Chọn danh mục</option>
           <c:forEach var="category" items="${categories}">
             <option value="${category.id}"><c:out value="${category.name}"/></option>
           </c:forEach>
         </select>
+        <div data-category-picker class="d-none">
+          <label class="form-label" for="bulk-category-search">Danh mục đích</label>
+          <input id="bulk-category-search" type="search" class="form-control"
+                 list="bulk-category-options" autocomplete="off" placeholder="Nhập một phần tên danh mục"
+                 aria-describedby="bulk-category-hint">
+          <datalist id="bulk-category-options"></datalist>
+          <small id="bulk-category-hint" class="muted">Chọn một danh mục từ gợi ý.</small>
+        </div>
       </div>
     </jsp:attribute>
     <jsp:body>
@@ -44,7 +52,8 @@
         <c:forEach var="product" items="${products}">
           <tr>
             <td><input type="checkbox" name="ids" value="${product.id}" form="admin-batch" data-batch-label="<c:out value='${product.name}'/>"
-                aria-label="Chọn mục ${product.id}"></td>
+                data-batch-actions="${product.status == 1 ? 'disable' : 'enable'}|category|delete"
+                data-batch-category="${product.category.id}" aria-label="Chọn mục ${product.id}"></td>
             <td>
               <div class="table-product">
                 <ui:adminProductImage path="${product.image}"/>
@@ -65,7 +74,7 @@
               <ui:money value="${product.price}"/>
             </td>
             <td>${product.stock}</td>
-            <td>${product.status == 1 ? 'Đang bán' : 'Ngừng bán'}</td>
+            <td><span class="status-badge ${product.status == 1 ? 'status-success' : 'status-danger'}">${product.status == 1 ? 'Đang bán' : 'Ngừng bán'}</span></td>
             <td>
               <div class="table-actions">
                 <a class="btn btn-light btn-sm" href="${pageContext.request.contextPath}/admin/products/${product.id}/edit">Sửa</a>

@@ -90,7 +90,7 @@
         <c:forEach var="promotion" items="${promotions}">
           <tr>
             <td><input type="checkbox" name="ids" value="${promotion.id}" form="admin-batch" data-batch-label="<c:out value='${promotion.code}'/>"
-                aria-label="Chọn mục ${promotion.id}"></td>
+                data-batch-actions="${promotion.active ? 'disable' : 'enable'}|delete" aria-label="Chọn mục ${promotion.id}"></td>
             <td>
               <c:out value="${promotion.code}"/>
             </td>
@@ -111,10 +111,10 @@
             </td>
             <td>
               <c:choose>
-                <c:when test="${promotionStates[promotion.id] == 'expired'}">Đã hết hạn</c:when>
-                <c:when test="${promotionStates[promotion.id] == 'scheduled'}">Sắp diễn ra</c:when>
-                <c:when test="${promotionStates[promotion.id] == 'active'}">Đang chạy</c:when>
-                <c:otherwise>Đang tắt</c:otherwise>
+                <c:when test="${promotionStates[promotion.id] == 'expired'}"><span class="status-badge">Đã hết hạn</span></c:when>
+                <c:when test="${promotionStates[promotion.id] == 'scheduled'}"><span class="status-badge status-warning">Sắp diễn ra</span></c:when>
+                <c:when test="${promotionStates[promotion.id] == 'active'}"><span class="status-badge status-success">Đang chạy</span></c:when>
+                <c:otherwise><span class="status-badge status-danger">Đang tắt</span></c:otherwise>
               </c:choose>
             </td>
             <td>${promotion.combinableWithPoints ? 'Áp dụng chung' : 'Áp dụng riêng'}</td>

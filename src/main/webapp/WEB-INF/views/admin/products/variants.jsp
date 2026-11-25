@@ -26,11 +26,14 @@
   <input type="checkbox" data-batch-all> Chọn tất cả phiên bản
 </label>
 <c:forEach var="variant" items="${variants}">
-  <article class="panel mb-3">
+  <article class="panel mb-3" data-batch-row>
     <label class="d-inline-flex align-items-center gap-2 mb-2">
-      <input type="checkbox" name="ids" value="${variant.id}" form="admin-batch" data-batch-label="<c:out value='${variant.sku}'/>">
+      <input type="checkbox" name="ids" value="${variant.id}" form="admin-batch"
+             data-batch-label="<c:out value='${variant.sku}'/>"
+             data-batch-actions="${variant.active ? 'disable' : 'enable'}|stock">
       Chọn <c:out value="${variant.sku}"/>
     </label>
+    <span class="status-badge ${variant.active ? 'status-success' : 'status-danger'}">${variant.active ? 'Đang bán' : 'Ngừng bán'}</span>
     <form action="${pageContext.request.contextPath}/admin/products/${product.id}/variants" method="post">
       <ui:csrf/>
       <input type="hidden" name="id" value="${variant.id}">

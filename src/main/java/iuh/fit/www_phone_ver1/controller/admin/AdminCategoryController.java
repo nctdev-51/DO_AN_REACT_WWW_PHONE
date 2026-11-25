@@ -33,6 +33,7 @@ public class AdminCategoryController {
   public String list(@RequestParam(defaultValue = "") String q, Model model) {
     String keyword = q.trim();
     model.addAttribute("q", keyword);
+    model.addAttribute("usedCategoryIds", new java.util.HashSet<>(categories.findIdsWithProducts()));
     model.addAttribute("categories", keyword.isEmpty() ? categories.findAll(Sort.by("name"))
         : categories.findByNameContainingIgnoreCase(keyword, Sort.by("name")));
     return "admin/categories/list";

@@ -16,26 +16,72 @@ document.addEventListener('DOMContentLoaded', () => {
   let syncBatchSelection = () => {};
   if (batch) {
     const rowSelector = 'input[type="checkbox"][form="admin-batch"][name="ids"]';
-    const visibleRows = () => [...document.querySelectorAll(rowSelector)];
+    const rowsOnPage = () => [...document.querySelectorAll(rowSelector)];
     const selectAll = document.querySelector('[data-batch-all]');
     const count = batch.querySelector('[data-batch-count]');
+    const eligibility = batch.querySelector('[data-batch-eligibility]');
     const hiddenIds = batch.querySelector('[data-batch-hidden-ids]');
     const selection = document.querySelector('[data-batch-selection]');
     const items = selection.querySelector('[data-batch-items]');
     const clearSelection = selection.querySelector('[data-batch-clear]');
     const action = batch.elements.namedItem('action');
     const submit = batch.querySelector('button[type="submit"]');
+    const destination = batch.elements.namedItem('categoryId');
     const selected = new Map();
+    const rowDetails = row => ({
+      label: row.dataset.batchLabel || 'Mục #' + row.value,
+      version: row.dataset.batchVersion,
+      actions: row.dataset.batchActions?.split('|'),
+      category: row.dataset.batchCategory
+    });
+
+    function isEligible(details) {
+      if (!action.value) return true;
+      if (details.actions && !details.actions.includes(action.value)) return false;
+      return action.value !== 'category' || !destination?.value || details.category !== destination.value;
+    }
 
     const select = (row, checked) => {
-      if (checked) selected.set(row.value, row.dataset.batchLabel || 'Mục #' + row.value);
-      else selected.delete(row.value);
+      if (!checked) selected.delete(row.value);
+      else if (!selected.has(row.value)) {
+        const details = rowDetails(row);
+        if (isEligible(details)) selected.set(row.value, details);
+      }
     };
-    visibleRows().filter(row => row.checked).forEach(row => select(row, true));
+    rowsOnPage().filter(row => row.checked).forEach(row => select(row, true));
+
+    if (destination) {
+      const picker = batch.querySelector('[data-category-picker]');
+      const categorySearch = picker.querySelector('input');
+      const suggestions = picker.querySelector('datalist');
+      const normalize = text => text.trim().toLocaleLowerCase('vi')
+        .normalize('NFD').replace(/\p{M}/gu, '').replace(/đ/g, 'd');
+      const categories = [...destination.options].filter(option => option.value);
+      const occurrences = new Map();
+      categories.forEach(option => {
+        const key = normalize(option.text);
+        occurrences.set(key, (occurrences.get(key) || 0) + 1);
+      });
+      const choices = categories.map(option => ({
+        id: option.value,
+        name: occurrences.get(normalize(option.text)) === 1
+          ? option.text : option.text + ' (#' + option.value + ')'
+      }));
+      suggestions.replaceChildren(...choices.map(choice => new Option('', choice.name)));
+      categorySearch.value = choices.find(choice => choice.id === destination.value)?.name || '';
+      categorySearch.addEventListener('input', () => {
+        const typed = normalize(categorySearch.value);
+        destination.value = choices.find(choice => normalize(choice.name) === typed)?.id || '';
+        syncBatchSelection();
+      });
+      batch.querySelector('[data-category-fallback]').classList.add('d-none');
+      destination.classList.add('d-none');
+      picker.classList.remove('d-none');
+    }
 
     function renderSelection() {
       const list = document.createDocumentFragment();
-      for (const [id, label] of selected) {
+      for (const [id, { label }] of selected) {
         const item = document.createElement('li');
         const name = document.createElement('span');
         name.textContent = label;
@@ -51,29 +97,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     syncBatchSelection = (renderNames = true) => {
-      const rows = visibleRows();
-      const visibleIds = new Set(rows.map(row => row.value));
-      rows.forEach(row => { row.checked = selected.has(row.value); });
-      const checkedCount = rows.filter(row => row.checked).length;
-      selectAll.disabled = rows.length === 0;
-      selectAll.checked = checkedCount > 0 && checkedCount === rows.length;
-      selectAll.indeterminate = checkedCount > 0 && checkedCount < rows.length;
+      const rows = rowsOnPage();
+      const current = new Map(rows.map(row => [row.value, rowDetails(row)]));
+      const initialCount = selected.size;
+      for (const [id, details] of selected) {
+        if (!isEligible(current.get(id) || details)) selected.delete(id);
+      }
+      const visible = rows.filter(row => isEligible(current.get(row.value)));
+      const visibleIds = new Set(visible.map(row => row.value));
+      rows.forEach(row => {
+        row.closest('tr, [data-batch-row]').classList.toggle('d-none', !visibleIds.has(row.value));
+        row.disabled = !visibleIds.has(row.value);
+        row.checked = selected.has(row.value);
+        const version = row.parentElement.querySelector('[data-batch-version-field]');
+        if (version) version.value = selected.get(row.value)?.version ?? row.dataset.batchVersion;
+      });
+      const checkedCount = visible.filter(row => row.checked).length;
+      selectAll.disabled = visible.length === 0;
+      selectAll.checked = checkedCount > 0 && checkedCount === visible.length;
+      selectAll.indeterminate = checkedCount > 0 && checkedCount < visible.length;
       count.textContent = 'Đã chọn ' + selected.size + ' mục';
-      submit.disabled = selected.size === 0 || action.value === '';
+      const destinationMissing = action.value === 'category' && !destination?.value;
+      submit.disabled = selected.size === 0 || action.value === '' || destinationMissing;
       selection.classList.toggle('d-none', selected.size === 0);
+      eligibility.hidden = !action.value;
+      const excluded = initialCount - selected.size;
+      eligibility.textContent = (visible.length
+        ? 'Có ' + visible.length + ' mục phù hợp đang hiển thị.'
+        : 'Không có mục phù hợp với thao tác này trong kết quả hiện tại.')
+        + (destinationMissing ? ' Chọn danh mục đích để tiếp tục.' : '')
+        + (excluded ? ' Đã bỏ ' + excluded + ' mục không còn phù hợp.' : '');
 
       // Checked visible rows submit themselves. Submit only offscreen selections as hidden inputs.
       const hidden = document.createDocumentFragment();
-      for (const id of selected.keys()) {
-        if (visibleIds.has(id)) continue;
+      function appendHidden(name, value) {
         const input = document.createElement('input');
         input.type = 'hidden';
-        input.name = 'ids';
-        input.value = id;
+        input.name = name;
+        input.value = value;
         hidden.append(input);
       }
+      for (const [id, { version }] of selected) {
+        if (visibleIds.has(id)) continue;
+        appendHidden('ids', id);
+        if (version !== undefined) appendHidden('version_' + id, version);
+      }
       hiddenIds.replaceChildren(hidden);
-      if (renderNames) renderSelection();
+      if (renderNames || excluded) renderSelection();
+      return visible.length;
     };
 
     function updateAction() {
@@ -86,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     selectAll.addEventListener('change', () => {
-      visibleRows().forEach(row => select(row, selectAll.checked));
+      rowsOnPage().filter(row => !row.disabled).forEach(row => select(row, selectAll.checked));
       syncBatchSelection();
     });
     document.addEventListener('change', event => {
@@ -109,7 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     action.addEventListener('change', updateAction);
     batch.addEventListener('submit', event => {
-      if (!selected.size || (action.selectedOptions[0].hasAttribute('data-destructive')
+      if (!selected.size || (action.value === 'category' && !destination?.value)
+          || (action.selectedOptions[0].hasAttribute('data-destructive')
           && !window.confirm('Xác nhận thực hiện thao tác trên ' + selected.size + ' mục đã chọn?'))) {
         event.preventDefault();
       }
@@ -125,16 +197,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = search.elements.namedItem('q');
     const clear = search.querySelector('[data-search-clear]');
     const status = search.querySelector('[data-search-status]');
-    let appliedQuery = input.value.trim();
+    function searchUrl() {
+      const url = new URL(search.action);
+      for (const [name, raw] of new FormData(search)) {
+        const value = raw.trim();
+        if (value) url.searchParams.set(name, value);
+      }
+      return url;
+    }
+    let appliedUrl = searchUrl().href;
     let request;
     let timer;
 
     function scheduleSearch(delay) {
       clearTimeout(timer);
       request?.abort();
-      const query = input.value.trim();
-      clear.classList.toggle('d-none', !query);
-      if (query === appliedQuery) {
+      const url = searchUrl();
+      clear.classList.toggle('d-none', !url.search);
+      if (url.href === appliedUrl) {
         status.textContent = '';
         results.removeAttribute('aria-busy');
         return;
@@ -143,8 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
       timer = setTimeout(async () => {
         const pending = new AbortController();
         request = pending;
-        const url = new URL(search.action);
-        if (query) url.searchParams.set('q', query);
         try {
           const response = await fetch(url, { signal: pending.signal, cache: 'no-store' });
           if (!response.ok) throw new Error('Search failed');
@@ -153,13 +231,13 @@ document.addEventListener('DOMContentLoaded', () => {
           const updated = page.getElementById(results.id);
           if (!updated) throw new Error('Search results missing');
           results.replaceChildren(...updated.children);
-          appliedQuery = query;
+          appliedUrl = url.href;
           history.replaceState(history.state, '', url);
-          const matches = results.querySelectorAll('input[name="ids"]').length;
-          status.textContent = query ? matches + ' kết quả' : '';
-          syncBatchSelection(false);
+          const matches = syncBatchSelection(false)
+            ?? results.querySelectorAll('input[name="ids"]').length;
+          status.textContent = url.search ? matches + ' kết quả' : '';
         } catch (error) {
-          if (!pending.signal.aborted) status.textContent = 'Chưa tải được kết quả. Bấm Tìm để thử lại.';
+          if (!pending.signal.aborted) status.textContent = 'Chưa tải được kết quả. Bấm nút lọc để thử lại.';
         } finally {
           if (!pending.signal.aborted) results.removeAttribute('aria-busy');
         }
@@ -170,13 +248,16 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!event.isComposing) scheduleSearch(input.value.trim() ? 200 : 0);
     });
     input.addEventListener('compositionend', () => scheduleSearch(200));
+    search.addEventListener('change', event => {
+      if (event.target !== input) scheduleSearch(0);
+    });
     search.addEventListener('submit', event => {
       event.preventDefault();
       scheduleSearch(0);
     });
     clear.addEventListener('click', event => {
       event.preventDefault();
-      input.value = '';
+      for (const name of new FormData(search).keys()) search.elements.namedItem(name).value = '';
       scheduleSearch(0);
       input.focus();
     });

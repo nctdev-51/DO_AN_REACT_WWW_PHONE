@@ -17,6 +17,7 @@
   <jsp:invoke fragment="fields"/>
   <button class="btn btn-outline-dark" type="submit">Áp dụng</button>
   <span class="small muted align-self-center" data-batch-count aria-live="polite" hidden></span>
+  <p class="small muted mb-0 w-100" data-batch-eligibility role="status" hidden></p>
   <div data-batch-hidden-ids hidden></div>
 </form>
 <section class="admin-batch-selection d-none" data-batch-selection aria-label="Danh sách đã chọn">

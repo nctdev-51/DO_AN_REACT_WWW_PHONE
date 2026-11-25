@@ -54,6 +54,109 @@ class RetailIntegrationTests {
   MockMvc mvc;
 
   @Test
+  void productBatchRejectsRowsAlreadyInTheRequestedStatusOrCategory() throws Exception {
+    Product product = variant.getProduct();
+    product.setStatus(1);
+    products.saveAndFlush(product);
+    mvc.perform(post("/admin/products/batch").with(user("admin").roles("ADMIN")).with(csrf())
+            .param("ids", product.getId().toString()).param("action", "enable"))
+        .andExpect(redirectedUrl("/admin/products")).andExpect(flash().attributeExists("errorMsg"));
+    mvc.perform(post("/admin/products/batch").with(user("admin").roles("ADMIN")).with(csrf())
+            .param("ids", product.getId().toString()).param("action", "category")
+            .param("categoryId", product.getCategory().getId().toString()))
+        .andExpect(redirectedUrl("/admin/products")).andExpect(flash().attributeExists("errorMsg"));
+    assertEquals(1, product.getStatus());
+  }
+
+  @Test
+  void adminCanFilterDisabledBannersAndEnableWithoutChangingTheirSchedule() throws Exception {
+    var repository = context.getBean(CampaignBannerRepository.class);
+    LocalDateTime now = LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).withNano(0);
+    CampaignBanner disabled = new CampaignBanner();
+    disabled.setTitle("Banner quản trị kiểm thử");
+    disabled.setTarget("OFFERS");
+    disabled.setStartsAt(now.minusDays(1));
+    disabled.setEndsAt(now.plusDays(1));
+    disabled.setActive(false);
+    repository.saveAndFlush(disabled);
+    String path = "/admin/banners/" + disabled.getId() + "/enable";
+
+    mvc.perform(get("/admin/banners").with(user("admin").roles("ADMIN"))
+            .param("q", disabled.getTitle()).param("state", "off"))
+        .andExpect(status().isOk()).andExpect(model().attribute("banners", List.of(disabled)));
+    mvc.perform(post(path).with(user("admin").roles("ADMIN")).with(csrf())
+            .param("version", Long.toString(disabled.getVersion())).param("state", "off"))
+        .andExpect(redirectedUrl("/admin/banners?state=off"));
+    assertTrue(disabled.isActive());
+    assertEquals(now.minusDays(1), disabled.getStartsAt());
+    assertEquals(now.plusDays(1), disabled.getEndsAt());
+    mvc.perform(get("/admin/banners").with(user("admin").roles("ADMIN"))
+            .param("q", disabled.getTitle()).param("state", "live"))
+        .andExpect(status().isOk()).andExpect(model().attribute("banners", List.of(disabled)));
+  }
+
+  @Test
+  void adminFiltersCampaignsByNameAndInclusiveCalendarDates() throws Exception {
+    var repository = context.getBean(CampaignBannerRepository.class);
+    CampaignBanner matching = new CampaignBanner();
+    matching.setTitle("Galaxy Demo đang chạy");
+    matching.setTarget("OFFERS");
+    matching.setStartsAt(LocalDateTime.of(2025, 4, 29, 12, 0));
+    matching.setEndsAt(LocalDateTime.of(2025, 5, 3, 12, 0));
+    repository.saveAndFlush(matching);
+    CampaignBanner later = new CampaignBanner();
+    later.setTitle("Galaxy Demo quý sau");
+    later.setTarget("OFFERS");
+    later.setStartsAt(LocalDateTime.of(2025, 5, 4, 0, 0));
+    later.setEndsAt(LocalDateTime.of(2025, 5, 8, 0, 0));
+    repository.saveAndFlush(later);
+
+    mvc.perform(get("/admin/banners").with(user("admin").roles("ADMIN"))
+            .param("q", "gALAxY demO").param("from", "2025-05-01").param("to", "2025-05-03"))
+        .andExpect(status().isOk()).andExpect(model().attribute("banners", List.of(matching)));
+    mvc.perform(get("/admin/banners").with(user("admin").roles("ADMIN"))
+            .param("q", "missing campaign").param("from", "2025-05-01"))
+        .andExpect(status().isOk()).andExpect(model().attribute("banners", List.of()));
+    mvc.perform(get("/admin/banners").with(user("admin").roles("ADMIN"))
+            .param("from", "2025-05-04").param("to", "2025-05-01"))
+        .andExpect(status().isOk()).andExpect(model().attributeExists("filterError"));
+  }
+
+  @Test
+  void analyticsBannerDraftUsesLiveProductOrSearchDestinationWithoutPublishing() throws Exception {
+    Product product = variant.getProduct();
+    var repo = context.getBean(CampaignBannerRepository.class);
+    long existing = repo.count();
+
+    var productDraft = mvc.perform(get("/admin/banners/new").with(user("admin").roles("ADMIN"))
+            .param("productId", product.getId().toString()))
+        .andExpect(status().isOk()).andReturn();
+    var productForm = (iuh.fit.www_phone_ver1.dto.catalog.CampaignBannerForm)
+        productDraft.getModelAndView().getModel().get("bannerForm");
+    assertEquals(product.getId(), productForm.getProductId());
+    assertEquals("PRODUCT", productForm.getTarget());
+    assertFalse(productForm.isActive());
+
+    var keywordDraft = mvc.perform(get("/admin/banners/new").with(user("admin").roles("ADMIN"))
+            .param("keyword", product.getSku()))
+        .andExpect(status().isOk()).andReturn();
+    var keywordForm = (iuh.fit.www_phone_ver1.dto.catalog.CampaignBannerForm)
+        keywordDraft.getModelAndView().getModel().get("bannerForm");
+    assertEquals("SEARCH", keywordForm.getTarget());
+    assertEquals(product.getSku(), keywordForm.getSearchKeyword());
+    assertEquals(product.getId(), keywordForm.getProductId());
+    assertFalse(keywordForm.isActive());
+    assertEquals(existing, repo.count());
+
+    keywordForm.setSearchKeyword("ốp + sạc");
+    context.getBean(CampaignBannerService.class).save(null, keywordForm, null);
+    var saved = repo.findAll().stream().filter(b -> "ốp + sạc".equals(b.getSearchKeyword()))
+        .findFirst().orElseThrow();
+    assertEquals("/products?keyword=%E1%BB%91p+%2B+s%E1%BA%A1c", saved.getTargetPath());
+    assertFalse(saved.isActive());
+  }
+
+  @Test
   void adminCanFilterOrdersBySnapshotPhoneDateCodeAndStatus() throws Exception {
     Order order = checkout.placeOrder(cart(), buyer.getEmail(), form());
     String filtersDate = order.getOrderDate().toLocalDate().toString();

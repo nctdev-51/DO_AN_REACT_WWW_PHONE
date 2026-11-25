@@ -34,6 +34,7 @@
       <c:forEach var="category" items="${categories}">
         <tr>
             <td><input type="checkbox" name="ids" value="${category.id}" form="admin-batch" data-batch-label="<c:out value='${category.name}'/>"
+                data-batch-actions="${usedCategoryIds.contains(category.id) ? 'description' : 'description|delete'}"
                 aria-label="Chọn mục ${category.id}"></td>
           <td>
             <c:out value="${category.name}"/>

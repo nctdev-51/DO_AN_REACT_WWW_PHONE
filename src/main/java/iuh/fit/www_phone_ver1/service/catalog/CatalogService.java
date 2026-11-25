@@ -177,10 +177,16 @@ public class CatalogService {
   public void updateProductBatchFields(Long id, Integer status, Long categoryId) {
     Product product = product(id);
     if (categoryId != null) {
+      if (product.getCategory() != null && categoryId.equals(product.getCategory().getId()))
+        throw new IllegalArgumentException("Sản phẩm đã thuộc danh mục này.");
       product.setCategory(categories.findById(categoryId)
           .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục.")));
     }
-    if (status != null) product.setStatus(status);
+    if (status != null) {
+      if (status.equals(product.getStatus()))
+        throw new IllegalArgumentException("Sản phẩm đã ở trạng thái này.");
+      product.setStatus(status);
+    }
     publishProductChanged(id, !Integer.valueOf(1).equals(product.getStatus()));
   }
 
