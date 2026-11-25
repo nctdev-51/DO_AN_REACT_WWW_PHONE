@@ -12,6 +12,9 @@
     <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
       <span class="status-badge">Đơn hàng: <c:out value="${order.status}"/></span>
       <span class="status-badge">Thanh toán (<c:out value="${order.paymentMethod}"/>): <ui:paymentStatus value="${order.paymentStatus}"/></span>
+      <c:if test="${order.status != 'Đã hủy'}">
+        <a class="btn btn-outline-dark btn-sm ms-2" href="${pageContext.request.contextPath}/orders/${order.id}/invoice.pdf">Xuất hóa đơn PDF</a>
+      </c:if>
     </div>
   </div>
   <strong class="price">
