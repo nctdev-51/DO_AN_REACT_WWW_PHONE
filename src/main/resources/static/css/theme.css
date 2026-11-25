@@ -1,13 +1,35 @@
 /* The shared presentation layer. Business layouts stay in store/admin CSS. */
 body {
   background: var(--color-canvas);
-  color: var(--color-text);
-  font-family: var(--font-family-stack);
+  color: var(--text-primary);
+  font-family: var(--font-apple-text);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-base);
   line-height: var(--line-height-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
-h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: anywhere; }
+h1, h2, h3, h4, h5, h6 { 
+  font-family: var(--font-apple-display);
+  color: var(--text-primary); 
+  overflow-wrap: anywhere; 
+}
+h1 {
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+h2 {
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+h3 {
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+}
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: var(--space-2);
@@ -181,8 +203,19 @@ h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: a
 .page-heading .eyebrow { color: var(--color-text-muted); }
 .page-heading p { font-size: var(--font-size-md); }
 .section-heading { margin: var(--space-16) 0 var(--space-13); align-items: end; }
-.section-heading h2 { font-size: clamp(var(--font-size-3xl), 3vw, var(--font-size-4xl)); font-weight: var(--font-weight-semibold); }
-.section-heading a { color: var(--color-action); font-size: var(--font-size-sm); }
+.section-heading h2 { 
+  font-family: var(--font-apple-display);
+  font-size: clamp(var(--font-size-3xl), 3vw, var(--font-size-4xl)); 
+  font-weight: 600; 
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+.section-heading a { 
+  font-family: var(--font-apple-text);
+  color: var(--link-blue); 
+  font-size: var(--font-size-sm); 
+  letter-spacing: -0.01em;
+}
 .section-heading a:hover { text-decoration: underline; }
 .section-heading a.btn-brand,
 .section-heading a.btn-brand:hover,
@@ -191,11 +224,14 @@ h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: a
 .panel { box-shadow: none; padding: var(--space-13); }
 .panel h2 { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); }
 .btn {
+  font-family: var(--font-apple-text);
   border-radius: var(--radius-sm);
   min-height: var(--space-15);
   padding: var(--space-9) var(--space-12);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0em;
   transition: background var(--motion-duration-fast), border-color var(--motion-duration-fast), color var(--motion-duration-fast), box-shadow var(--motion-duration-fast);
 }
 .btn-brand { background: var(--color-action); border-color: var(--color-action); color: var(--color-surface-strong); }
@@ -308,39 +344,45 @@ h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: a
 }
 
 .product-card h3 {
+  font-family: var(--font-apple-display);
   font-size: var(--font-size-md, 15px);
-  line-height: var(--line-height-body, 1.45);
+  line-height: 1.25;
   min-height: 2.6rem;
   margin: 0 0 6px;
   font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .product-card h3 a {
-  color: #1E293B;
+  color: var(--text-primary);
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
 .product-card h3 a:hover {
-  color: #2563EB;
+  color: var(--link-blue);
 }
 
 .product-card .compact-spec {
-  color: #64748B;
+  font-family: var(--font-apple-text);
+  color: var(--text-secondary);
   font-size: 0.72rem;
   margin-bottom: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   min-height: 18px;
+  letter-spacing: -0.01em;
 }
 
 /* Giá bán chính */
 .product-card .price {
-  font-weight: 700 !important;
-  color: #111827 !important;
+  font-family: var(--font-apple-text);
+  font-weight: 500 !important;
+  color: var(--text-primary) !important;
   font-size: 1.15rem !important;
-  letter-spacing: -0.02em;
+  letter-spacing: 0 !important;
+  line-height: 1.35;
   margin: 4px 0 2px;
 }
 
@@ -659,4 +701,60 @@ h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: a
   .auth-panel { padding: var(--space-12); }
   .auth-panel h1 { font-size: var(--font-size-3xl); }
   .admin-main .page-heading h1 { font-size: var(--font-size-3xl); }
+}
+
+/* ============================================================
+   Apple Store Typography Utility Classes
+   ============================================================ */
+
+/* Tiêu đề chính trên Banner */
+.apple-hero-title {
+  font-family: var(--font-apple-display);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+
+/* Tiêu đề từng khu vực sản phẩm */
+.apple-section-title {
+  font-family: var(--font-apple-display);
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+/* Tên điện thoại trên thẻ sản phẩm */
+.apple-card-title {
+  font-family: var(--font-apple-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+/* Mô tả ngắn thông số */
+.apple-card-subtitle {
+  font-family: var(--font-apple-text);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+/* Liên kết hành động chuẩn Apple */
+.apple-link {
+  font-family: var(--font-apple-text);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--link-blue);
+  text-decoration: none;
+}
+
+.apple-link:hover {
+  text-decoration: underline;
 }

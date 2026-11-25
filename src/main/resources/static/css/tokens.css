@@ -1,7 +1,17 @@
 /* Reference palette and semantic roles shared by every PTV Mobile screen. */
 :root {
-  --font-family-primary: "SF Pro Text";
-  --font-family-stack: "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* Apple Typography System */
+  --font-apple-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-apple-text: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Bảng màu chữ chuẩn Apple Store */
+  --text-primary: #1d1d1f;     /* Đen than chì dịu mắt (thay cho #000000) */
+  --text-secondary: #6e6e73;   /* Xám trung tính cho mô tả phụ */
+  --text-tertiary: #86868b;    /* Xám nhạt cho chú thích, bản quyền */
+  --link-blue: #0066cc;        /* Xanh đặc trưng cho liên kết "Tìm hiểu thêm >" */
+
+  --font-family-primary: var(--font-apple-text);
+  --font-family-stack: var(--font-apple-text);
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-md: 17px;
@@ -24,13 +34,13 @@
   --color-surface-base: #000000;
   --color-surface-strong: #ffffff;
   --color-surface-muted: #0071e3;
-  --color-text-secondary: #1d1d1f;
-  --color-text-tertiary: #0066cc;
+  --color-text-secondary: var(--text-primary);
+  --color-text-tertiary: var(--link-blue);
   --color-text-inverse: #f5f5f7;
   --color-canvas: #ffffff;
   --color-card: var(--color-surface-strong);
-  --color-text: var(--color-text-secondary);
-  --color-text-muted: #626267;
+  --color-text: var(--text-primary);
+  --color-text-muted: var(--text-secondary);
   --color-text-on-dark: var(--color-text-inverse);
   --color-action: var(--color-text-tertiary);
   --color-action-hover: #0054ad;
