@@ -159,9 +159,47 @@ public class CatalogService {
 
   @Transactional
   public void deleteCategory(Long id) {
+    var category = categories.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục."));
     if (products.countByCategoryId(id) > 0)
       throw new IllegalArgumentException("Không thể xóa danh mục đang có sản phẩm.");
-    categories.deleteById(id);
+    categories.delete(category);
+  }
+
+  @Transactional
+  public void updateCategoryDescription(Long id, String description) {
+    var category = categories.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục."));
+    category.setDescription(description);
+  }
+
+  @Transactional
+  public void updateProductBatchFields(Long id, Integer status, Long categoryId) {
+    Product product = product(id);
+    if (categoryId != null) {
+      if (product.getCategory() != null && categoryId.equals(product.getCategory().getId()))
+        throw new IllegalArgumentException("Sản phẩm đã thuộc danh mục này.");
+      product.setCategory(categories.findById(categoryId)
+          .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục.")));
+    }
+    if (status != null) {
+      if (status.equals(product.getStatus()))
+        throw new IllegalArgumentException("Sản phẩm đã ở trạng thái này.");
+      product.setStatus(status);
+    }
+    publishProductChanged(id, !Integer.valueOf(1).equals(product.getStatus()));
+  }
+
+  @Transactional
+  public void updateVariantBatchFields(Long productId, Long id, Boolean active, Integer stock) {
+    var variant = variants.lockAll(List.of(id)).stream()
+        .filter(v -> v.getProduct().getId().equals(productId))
+        .findFirst().orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiên bản."));
+    if (active != null) variant.setActive(active);
+    if (stock != null) variant.setStock(stock);
+    variants.flush();
+    updateMinimumPrice(variant.getProduct());
+    publishProductChanged(productId, !Integer.valueOf(1).equals(variant.getProduct().getStatus()));
   }
 
   @Transactional

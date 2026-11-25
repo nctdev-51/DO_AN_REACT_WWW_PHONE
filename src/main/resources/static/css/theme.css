@@ -618,14 +618,6 @@ h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: a
 .comparison-table tr > :first-child { background: var(--color-canvas); color: var(--color-text-muted); }
 .comparison-different td { background: var(--color-action-tint); }
 .admin-body { background: var(--color-canvas); }
-.admin-sidebar { background: var(--color-text); color: var(--color-text-on-dark); }
-.admin-sidebar .brand::before { background: var(--color-surface-strong); color: var(--color-text); }
-.admin-sidebar .eyebrow, .admin-sidebar nav a { color: var(--color-text-inverse); }
-.admin-sidebar nav a::before { background: currentColor; border-radius: var(--radius-sm); }
-.admin-sidebar nav a:hover { background: var(--color-surface-base); }
-.admin-sidebar nav a.active { color: var(--color-text); background: var(--color-card); }
-.admin-sidebar nav a.active::before { background: var(--color-action); }
-.admin-sidebar > form .btn { color: var(--color-text-on-dark); border-color: var(--color-control-border); }
 .admin-main .page-heading h1 { font-size: var(--font-size-4xl); }
 .admin-main .panel { padding: var(--space-12); }
 .chart-empty { background: var(--color-canvas); }

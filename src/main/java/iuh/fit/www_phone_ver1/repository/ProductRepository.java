@@ -21,6 +21,9 @@ public interface ProductRepository
 
   List<Product> findByStatus(Integer status);
 
+  List<Product> findByNameContainingIgnoreCase(String name, org.springframework.data.domain.Sort sort);
+
+
   Page<Product> findByStatus(Integer status, Pageable pageable);
 
   default Page<Product> search(

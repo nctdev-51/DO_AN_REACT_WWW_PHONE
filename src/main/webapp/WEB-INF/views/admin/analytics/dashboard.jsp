@@ -114,6 +114,12 @@
     <section class="insights-card" aria-labelledby="analytics-products-title">
       <header class="insights-card-head">
         <div><h2 id="analytics-products-title">Tương tác sản phẩm</h2><p>So sánh 5 sản phẩm có nhiều lượt xem nhất</p></div>
+        <c:if test="${not empty report.topProducts}">
+          <c:url var="leadBanner" value="/admin/banners/new">
+            <c:param name="productId" value="${report.topProducts[0].productId}"/>
+          </c:url>
+          <a class="insights-action" href="<c:out value='${leadBanner}'/>">Tạo banner dẫn đầu</a>
+        </c:if>
       </header>
       <c:choose>
         <c:when test="${not empty report.topProducts}">
@@ -127,7 +133,7 @@
             <summary>Xem số liệu sản phẩm</summary>
             <div class="insights-table-scroll">
               <table class="insights-table">
-                <thead><tr><th scope="col">Sản phẩm</th><th scope="col">Xem</th><th scope="col">Nhấp</th><th scope="col">Thêm giỏ</th><th scope="col">Tỷ lệ</th></tr></thead>
+                <thead><tr><th scope="col">Sản phẩm</th><th scope="col">Xem</th><th scope="col">Nhấp</th><th scope="col">Thêm giỏ</th><th scope="col">Tỷ lệ</th><th scope="col">Chiến dịch</th></tr></thead>
                 <tbody>
                   <c:forEach var="product" items="${report.topProducts}">
                     <tr data-product-views="${product.views}" data-product-clicks="${product.clicks}" data-product-carts="${product.cartAdds}">
@@ -136,6 +142,12 @@
                       <td><fmt:formatNumber value="${product.clicks}"/></td>
                       <td><fmt:formatNumber value="${product.cartAdds}"/></td>
                       <td><fmt:formatNumber value="${product.conversionRate}" maxFractionDigits="1"/>%</td>
+                      <td>
+                        <c:url var="productBanner" value="/admin/banners/new">
+                          <c:param name="productId" value="${product.productId}"/>
+                        </c:url>
+                        <a class="insights-campaign-link" href="<c:out value='${productBanner}'/>">Tạo banner</a>
+                      </td>
                     </tr>
                   </c:forEach>
                 </tbody>
@@ -158,6 +170,11 @@
               <li>
                 <div><span><c:out value="${keyword.keyword}"/></span><strong><fmt:formatNumber value="${keyword.count}"/></strong></div>
                 <meter min="0" max="${report.topKeywords[0].count}" value="${keyword.count}" aria-hidden="true"></meter>
+                <c:url var="keywordBanner" value="/admin/banners/new">
+                  <c:param name="keyword" value="${keyword.keyword}"/>
+                </c:url>
+                <a class="insights-campaign-link" href="<c:out value='${keywordBanner}'/>"
+                   aria-label="Tạo banner từ từ khóa <c:out value='${keyword.keyword}'/>">Tạo banner</a>
               </li>
             </c:forEach>
           </ol>

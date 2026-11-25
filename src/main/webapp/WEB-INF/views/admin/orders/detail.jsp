@@ -8,7 +8,7 @@
     <span class="eyebrow">THEO DÕI ĐƠN HÀNG</span>
     <h1>Đơn hàng #${order.id}</h1>
     <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
-      <span class="status-badge"><c:out value="${order.status}"/></span>
+      <ui:adminOrderStatus value="${order.status}"/>
       <c:if test="${order.status != 'Đã hủy'}">
         <a class="btn btn-outline-dark btn-sm" href="${pageContext.request.contextPath}/admin/orders/${order.id}/invoice.pdf">Xuất hóa đơn PDF</a>
       </c:if>
@@ -40,10 +40,9 @@
     </p>
     <ui:paymentStatus value="${order.paymentStatus}"/>
     <c:if test="${not empty order.cancellationReason}">
-      <p class="mt-3">Lý do hủy: <c:out value="${order.cancellationReason}"/>
-    </p>
-  </c:if>
-</section>
+      <p class="mt-3">Lý do hủy: <c:out value="${order.cancellationReason}"/></p>
+    </c:if>
+  </section>
 </div>
 <section class="panel">
   <h2>Sản phẩm đã đặt</h2>
