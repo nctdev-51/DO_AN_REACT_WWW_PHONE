@@ -1,9 +1,14 @@
 package iuh.fit.www_phone_ver1.controller.admin;
 
 import iuh.fit.www_phone_ver1.repository.OrderRepository;
+import iuh.fit.www_phone_ver1.service.order.InvoicePdfService;
 import iuh.fit.www_phone_ver1.service.order.OrderService;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +21,17 @@ public class AdminOrderController {
   private final OrderRepository orders;
   private final iuh.fit.www_phone_ver1.repository.RefundRepository refunds;
   private final OrderService admin;
+  private final InvoicePdfService invoicePdf;
 
   public AdminOrderController(
       OrderRepository orders,
       OrderService admin,
-      iuh.fit.www_phone_ver1.repository.RefundRepository refunds) {
+      iuh.fit.www_phone_ver1.repository.RefundRepository refunds,
+      InvoicePdfService invoicePdf) {
     this.orders = orders;
     this.refunds = refunds;
     this.admin = admin;
+    this.invoicePdf = invoicePdf;
   }
 
   @GetMapping
@@ -45,6 +53,21 @@ public class AdminOrderController {
     model.addAttribute("statuses", iuh.fit.www_phone_ver1.service.order.OrderStatuses.ALL);
     model.addAttribute("refunds", refunds.findByOrder_IdOrderByIdDesc(id));
     return "admin/orders/detail";
+  }
+
+  @GetMapping("/{id}/invoice.pdf")
+  public Object downloadInvoice(@PathVariable Long id, RedirectAttributes flash) {
+    try {
+      byte[] pdf = invoicePdf.generateAdminInvoice(id);
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_PDF);
+      headers.setContentDisposition(
+          ContentDisposition.attachment().filename("hoa-don-ptv-" + id + ".pdf").build());
+      return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+    } catch (IllegalStateException ex) {
+      flash.addFlashAttribute("errorMsg", ex.getMessage());
+      return "redirect:/admin/orders/" + id;
+    }
   }
 
   @PostMapping("/{id}/status")

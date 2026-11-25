@@ -12,8 +12,11 @@
   </p>
   <p>Giao đến: <c:out value="${order.shippingAddress}"/>
 </p>
-<div class="d-flex gap-3 justify-content-center">
+<div class="d-flex flex-wrap gap-3 justify-content-center">
   <a class="btn btn-brand" href="${pageContext.request.contextPath}/orders/${order.id}">Xem đơn hàng</a>
+  <c:if test="${order.status != 'Đã hủy'}">
+    <a class="btn btn-outline-dark" href="${pageContext.request.contextPath}/orders/${order.id}/invoice.pdf">Xuất hóa đơn PDF</a>
+  </c:if>
   <a class="btn btn-light" href="${pageContext.request.contextPath}/products">Tiếp tục mua sắm</a>
 </div>
 </section>

@@ -7,9 +7,12 @@
   <div>
     <span class="eyebrow">THEO DÕI ĐƠN HÀNG</span>
     <h1>Đơn hàng #${order.id}</h1>
-    <p>
-      <c:out value="${order.status}"/>
-    </p>
+    <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+      <span class="status-badge"><c:out value="${order.status}"/></span>
+      <c:if test="${order.status != 'Đã hủy'}">
+        <a class="btn btn-outline-dark btn-sm" href="${pageContext.request.contextPath}/admin/orders/${order.id}/invoice.pdf">Xuất hóa đơn PDF</a>
+      </c:if>
+    </div>
   </div>
   <strong class="price">
     <ui:money value="${order.totalAmount}"/>
