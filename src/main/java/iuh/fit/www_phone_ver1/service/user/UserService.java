@@ -5,10 +5,15 @@ import iuh.fit.www_phone_ver1.entity.Role;
 import iuh.fit.www_phone_ver1.entity.User;
 import iuh.fit.www_phone_ver1.repository.RoleRepository;
 import iuh.fit.www_phone_ver1.repository.UserRepository;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -20,11 +25,20 @@ public class UserService {
   private final boolean emailVerificationEnabled;
 
   public UserService(
-      UserRepository userRepository,
-      RoleRepository roleRepository,
-      PasswordEncoder passwordEncoder,
-      AccountTokenService tokens,
-      @Value("${app.account.email-verification-enabled:true}") boolean emailVerificationEnabled) {
+    UserRepository userRepository,
+    RoleRepository roleRepository,
+    PasswordEncoder passwordEncoder,
+    AccountTokenService tokens) {
+    this(userRepository, roleRepository, passwordEncoder, tokens, true);
+  }
+
+  @Autowired
+  public UserService(
+    UserRepository userRepository,
+    RoleRepository roleRepository,
+    PasswordEncoder passwordEncoder,
+    AccountTokenService tokens,
+    @Value("${app.account.email-verification-enabled:true}") boolean emailVerificationEnabled) {
     this.userRepository = userRepository;
     this.roleRepository = roleRepository;
     this.passwordEncoder = passwordEncoder;
@@ -32,11 +46,10 @@ public class UserService {
     this.emailVerificationEnabled = emailVerificationEnabled;
   }
 
-  @org.springframework.transaction.annotation.Transactional
+  @Transactional
   public void registerUser(UserRegistrationDto registrationDto) {
-    registrationDto.setEmail(registrationDto.getEmail().trim().toLowerCase(java.util.Locale.ROOT));
-    if (registrationDto.getPassword().getBytes(java.nio.charset.StandardCharsets.UTF_8).length
-        > 72) {
+    registrationDto.setEmail(registrationDto.getEmail().trim().toLowerCase(Locale.ROOT));
+    if (registrationDto.getPassword().getBytes(StandardCharsets.UTF_8).length > 72) {
       throw new IllegalArgumentException("Mật khẩu tối đa 72 byte UTF-8.");
     }
     if (!registrationDto.getPassword().equals(registrationDto.getConfirmPassword())) {
@@ -58,21 +71,26 @@ public class UserService {
 
     Optional<Role> roleOpt = roleRepository.findByName("USER");
     Role role =
-        roleOpt.orElseGet(
-            () -> {
-              Role newRole = new Role();
-              newRole.setName("USER");
-              return roleRepository.save(newRole);
-            });
+      roleOpt.orElseGet(
+        () -> {
+          Role newRole = new Role();
+          newRole.setName("USER");
+          return roleRepository.save(newRole);
+        });
 
     user.getRoles().add(role);
 
     try {
       userRepository.saveAndFlush(user);
-    } catch (org.springframework.dao.DataIntegrityViolationException e) {
+    } catch (DataIntegrityViolationException e) {
       throw new IllegalArgumentException("Email đã được sử dụng hoặc dữ liệu không hợp lệ.");
     }
 
-    if (emailVerificationEnabled) tokens.sendVerification(user);
+    if (emailVerificationEnabled) {
+      try {
+        tokens.sendVerification(user);
+      } catch (Exception ignored) {
+      }
+    }
   }
 }

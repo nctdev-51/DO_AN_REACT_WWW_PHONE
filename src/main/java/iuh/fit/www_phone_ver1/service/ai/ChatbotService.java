@@ -46,7 +46,7 @@ public class ChatbotService {
 
   @Value("${app.chatbot.knowledge:classpath:prompts/chatbot-knowledge.txt}")
   private org.springframework.core.io.Resource knowledge =
-    new ClassPathResource("prompts/chatbot-knowledge.txt");
+      new ClassPathResource("prompts/chatbot-knowledge.txt");
 
   private boolean isAiEnabled() {
     return chatModel != null
@@ -75,15 +75,21 @@ public class ChatbotService {
       return persistFallback(userMessage, sessionId);
     }
 
-    String productContext = buildProductContext(userMessage);
-    PromptTemplate systemTemplate =
-      new PromptTemplate(new ClassPathResource("prompts/chatbot-system.st"));
-    String systemText = systemTemplate.render(Map.of(
-      "productContext", productContext, "knowledgeContext", loadKnowledge()));
-    List<Message> messages = new ArrayList<>();
-    messages.add(new SystemMessage(systemText));
-    messages.addAll(history);
-    messages.add(new UserMessage(userMessage));
+      // Build system prompt với danh sách sản phẩm ưu tiên theo từ khóa câu hỏi
+      String productContext = buildProductContext(userMessage);
+      PromptTemplate systemTemplate = new PromptTemplate(
+          new ClassPathResource("prompts/chatbot-system.st"));
+      String systemText = systemTemplate.render(Map.of(
+          "productContext", productContext,
+          "knowledgeContext", loadKnowledge()));
+
+      // Build danh sách messages: system + history + user message mới
+      List<Message> messages = new ArrayList<>();
+      messages.add(new SystemMessage(systemText));
+      synchronized (history) {
+        messages.addAll(history);
+      }
+      messages.add(new UserMessage(userMessage));
 
     String replyRaw;
     try {
@@ -122,11 +128,14 @@ public class ChatbotService {
   // ── private helpers ────────────────────────────────────────────────────────
 
   private String loadKnowledge() {
+    if (knowledge == null || !knowledge.exists()) {
+      return "Chính sách: Khách hàng liên hệ trực tiếp nhân viên cửa hàng hoặc xem tại chân trang để được tư vấn cụ thể.";
+    }
     try (var stream = knowledge.getInputStream()) {
       return new String(stream.readNBytes(16_384), java.nio.charset.StandardCharsets.UTF_8);
-    } catch (java.io.IOException ex) {
-      log.warn("Chatbot knowledge resource unavailable.", ex);
-      return "Hướng dẫn khách kiểm tra chính sách hiện hành với cửa hàng.";
+    } catch (Exception ex) {
+      log.warn("Chatbot knowledge resource unavailable: {}", ex.getMessage());
+      return "Chính sách: Khách hàng liên hệ trực tiếp nhân viên cửa hàng hoặc xem tại chân trang để được tư vấn cụ thể.";
     }
   }
 

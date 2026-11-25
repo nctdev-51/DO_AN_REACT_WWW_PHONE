@@ -57,8 +57,10 @@
         <c:if test="${param.verified != null}"><div class="alert alert-success">Email đã được xác minh. Bạn có thể đăng nhập ngay.</div></c:if>
         <c:if test="${param.reset != null}"><div class="alert alert-success">Đã đặt lại mật khẩu thành công. Hãy đăng nhập bằng mật khẩu mới.</div></c:if>
         <c:if test="${param.expired != null}"><div class="alert alert-info">Phiên đăng nhập đã kết thúc. Vui lòng đăng nhập lại.</div></c:if>
-        <c:if test="${param.error != null}">
-          <div class="alert alert-danger">Email hoặc mật khẩu không đúng, tài khoản bị khóa hoặc email chưa được xác minh.</div>
+        <c:if test="${param.registered != null or not empty successMsg}">
+          <div class="alert alert-success">
+            🎉 <strong>Đăng ký thành công!</strong> Bạn có thể đăng nhập ngay bằng email hoặc số điện thoại vừa tạo.
+          </div>
         </c:if>
         <c:if test="${param.logout != null}">
           <div class="alert alert-success">Bạn đã đăng xuất an toàn.</div>
@@ -80,8 +82,8 @@
               <input type="hidden" name="redirect" value="<c:out value='${redirectTarget}'/>">
             </c:if>
             <div class="field">
-              <label for="username">Email hoặc tên tài khoản</label>
-              <input id="username" name="username" class="form-control" required autocomplete="username" placeholder="name@example.com">
+              <label for="username">Email hoặc số điện thoại</label>
+              <input id="username" name="username" class="form-control" required autocomplete="username" placeholder="name@example.com hoặc 09xxxxxxxx">
             </div>
             <div class="field">
               <label for="password">Mật khẩu</label>
@@ -89,6 +91,11 @@
                 <input id="password" name="password" type="password" class="form-control" required autocomplete="current-password" placeholder="••••••••">
                 <button class="login-password-toggle" type="button" data-password-toggle aria-controls="password" aria-pressed="false" hidden>Hiện</button>
               </div>
+              <c:if test="${param.error != null}">
+                <div style="color: #dc2626; font-size: 0.875rem; margin-top: 8px; font-weight: 500;">
+                  Email, số điện thoại hoặc mật khẩu không đúng, tài khoản bị khóa hoặc email chưa được xác minh.
+                </div>
+              </c:if>
             </div>
             <label class="login-remember"><input type="checkbox" data-remember-account> Nhớ tên tài khoản trên thiết bị này</label>
             <button class="btn btn-brand">Đăng nhập</button>
@@ -171,6 +178,21 @@
       var params = new URLSearchParams(window.location.search);
       if (params.get('tab') === 'register' || window.location.pathname.indexOf('/register') !== -1) {
         switchAuthTab('register');
+      }
+
+      // Giữ lại email/sdt khi nhập sai để không phải gõ lại
+      var userInput = document.getElementById('username');
+      var loginForm = document.querySelector('#section-login form');
+      if (userInput && loginForm) {
+        var saved = sessionStorage.getItem('last_login_id');
+        if (saved && !userInput.value) {
+          userInput.value = saved;
+        }
+        loginForm.addEventListener('submit', function() {
+          if (userInput.value) {
+            sessionStorage.setItem('last_login_id', userInput.value.trim());
+          }
+        });
       }
     })();
   </script>

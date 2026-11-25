@@ -56,7 +56,7 @@
 
         <!-- Alerts thông báo -->
         <c:if test="${param.success != null}">
-          <div class="alert alert-success">Đăng ký thành công! Hãy kiểm tra hộp thư email và xác minh tài khoản trước khi đăng nhập. Liên kết có hiệu lực 24 giờ. <a href="${pageContext.request.contextPath}/resend-verification">Gửi lại email xác minh</a>.</div>
+          <div class="alert alert-success">🎉 <strong>Đăng ký thành công!</strong> Bạn có thể <a href="${pageContext.request.contextPath}/login" class="alert-link">đăng nhập ngay tại đây</a>.</div>
         </c:if>
 
         <!-- FORM ĐĂNG KÝ -->
