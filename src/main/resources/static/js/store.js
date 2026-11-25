@@ -53,11 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const pathname = new URL(link.href, window.location.origin).pathname;
     if (pathname === window.location.pathname) link.setAttribute('aria-current', 'page');
   });
-  document.querySelectorAll('form[data-confirm]').forEach(form => {
-    form.addEventListener('submit', event => {
-      if (!window.confirm(form.dataset.confirm)) event.preventDefault();
-    });
-  });
+  document.addEventListener('submit', event => {
+    const form = event.target;
+    if (form instanceof HTMLFormElement && form.hasAttribute('data-confirm')
+        && !window.confirm(form.dataset.confirm)) event.preventDefault();
+  }, true);
 
   const syncStepper = (input, clampEmpty = true) => {
     const stepper = input?.closest('[data-qty-stepper]');

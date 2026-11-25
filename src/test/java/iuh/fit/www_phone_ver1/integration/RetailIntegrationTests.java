@@ -39,6 +39,7 @@ class RetailIntegrationTests {
   @Autowired UserRepository users;
   @Autowired RoleRepository roles;
   @Autowired OrderRepository orders;
+  @Autowired OrderDetailRepository orderDetails;
   @Autowired PromotionRepository promotions;
   @Autowired StorePolicyRepository policies;
   @Autowired PricingService pricing;
@@ -51,6 +52,110 @@ class RetailIntegrationTests {
   User buyer;
   ProductVariant variant;
   MockMvc mvc;
+
+  @Test
+  void adminCanFilterOrdersBySnapshotPhoneDateCodeAndStatus() throws Exception {
+    Order order = checkout.placeOrder(cart(), buyer.getEmail(), form());
+    String filtersDate = order.getOrderDate().toLocalDate().toString();
+    var result = mvc.perform(get("/admin/orders").with(user("admin").roles("ADMIN"))
+            .param("code", "#" + order.getId()).param("placedOn", filtersDate)
+            .param("status", OrderStatuses.PENDING).param("phone", "090-123"))
+        .andExpect(status().isOk()).andReturn();
+    assertEquals(List.of(order), result.getModelAndView().getModel().get("orders"));
+    mvc.perform(get("/admin/orders").with(user("admin").roles("ADMIN"))
+            .param("code", order.getId().toString()).param("phone", "099999"))
+        .andExpect(status().isOk()).andExpect(model().attribute("orders", List.of()));
+  }
+
+  @Test
+  void adminCanSearchAndBatchEditCategoriesWhilePreservingAssignedProducts() throws Exception {
+    var categories = context.getBean(CategoryRepository.class);
+    Category first = categories.saveAndFlush(Category.builder().name("Test Batch One").build());
+    Category second = categories.saveAndFlush(Category.builder().name("Test Batch Two").build());
+    mvc.perform(get("/admin/categories").with(user("admin").roles("ADMIN")).param("q", "test batch"))
+        .andExpect(status().isOk()).andExpect(model().attribute("categories", List.of(first, second)));
+    mvc.perform(post("/admin/categories/batch").with(user("admin").roles("ADMIN")).with(csrf())
+            .param("ids", first.getId().toString(), second.getId().toString())
+            .param("action", "description").param("description", "Mô tả chung"))
+        .andExpect(status().is3xxRedirection());
+    assertEquals("Mô tả chung", first.getDescription());
+    assertEquals("Mô tả chung", second.getDescription());
+    Long categoryInUse = variant.getProduct().getCategory().getId();
+    mvc.perform(post("/admin/categories/batch").with(user("admin").roles("ADMIN")).with(csrf())
+            .param("ids", first.getId().toString(), categoryInUse.toString()).param("action", "delete"))
+        .andExpect(status().is3xxRedirection()).andExpect(flash().attributeExists("errorMsg"));
+    assertFalse(categories.existsById(first.getId()));
+    assertTrue(categories.existsById(categoryInUse));
+  }
+
+  @Test
+  void promotionQuarterFilterIncludesOverlapsAndExcludesAdjacentQuarters() throws Exception {
+    Promotion spanning = coupon();
+    spanning.setCode("QUARTER-SPANNING");
+    spanning.setStartsAt(LocalDateTime.of(2024, 12, 20, 0, 0));
+    spanning.setEndsAt(LocalDateTime.of(2025, 1, 10, 0, 0));
+    promotions.saveAndFlush(spanning);
+
+    Promotion adjacent = coupon();
+    adjacent.setCode("QUARTER-ADJACENT");
+    adjacent.setStartsAt(LocalDateTime.of(2025, 4, 1, 0, 0));
+    adjacent.setEndsAt(LocalDateTime.of(2025, 4, 15, 0, 0));
+    promotions.saveAndFlush(adjacent);
+
+    mvc.perform(get("/admin/promotions").with(user("admin").roles("ADMIN"))
+            .param("q", "QUARTER-").param("year", "2025").param("quarter", "1"))
+        .andExpect(status().isOk())
+        .andExpect(model().attribute("promotions", List.of(spanning)))
+        .andExpect(model().attribute("year", 2025))
+        .andExpect(model().attribute("quarter", 1));
+    mvc.perform(get("/admin/promotions").with(user("admin").roles("ADMIN"))
+            .param("year", "2025").param("quarter", "5"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void inventorySuggestionsCountOnlyCompletedOrdersWithinTheDeliveryWindow() {
+    variant.setStock(60);
+    variants.saveAndFlush(variant);
+    Product product = variant.getProduct();
+    LocalDateTime now = LocalDateTime.now().withNano(0);
+    saveStockTestOrder(product, OrderStatuses.DELIVERED, 4, now.minusDays(45), now.minusDays(2));
+    saveStockTestOrder(product, OrderStatuses.DELIVERED, 3, now.minusDays(3), null);
+    saveStockTestOrder(product, OrderStatuses.DELIVERED, 20, now.minusDays(31), now.minusDays(31));
+    saveStockTestOrder(product, OrderStatuses.PENDING, 30, now.minusDays(1), null);
+
+    var result = orderDetails.findSlowStock(50, 10, now.minusDays(30), now, OrderStatuses.DELIVERED)
+        .stream().filter(row -> row.getProductId().equals(product.getId())).findFirst().orElseThrow();
+    assertEquals(product.getStock(), result.getStock());
+    assertEquals(7, result.getUnitsSold());
+    assertEquals(now.minusDays(2), result.getLastSale());
+
+    saveStockTestOrder(product, OrderStatuses.DELIVERED, 3, now.minusDays(1), now.minusDays(1));
+    assertTrue(orderDetails.findSlowStock(50, 10, now.minusDays(30), now, OrderStatuses.DELIVERED)
+        .stream().noneMatch(row -> row.getProductId().equals(product.getId())));
+  }
+
+  private void saveStockTestOrder(Product product, String status, int quantity,
+      LocalDateTime orderDate, LocalDateTime deliveredAt) {
+    Order order = Order.builder().status(status).orderDate(orderDate).deliveredAt(deliveredAt)
+        .totalAmount(BigDecimal.ONE).build();
+    order.getOrderDetails().add(OrderDetail.builder().order(order).product(product)
+        .quantity(quantity).price(BigDecimal.ONE).build());
+    orders.saveAndFlush(order);
+  }
+
+  @Test
+  void checkoutRejectsPointsWithAnExclusivePromotion() {
+    Promotion promotion = coupon();
+    promotion.setCombinableWithPoints(false);
+    promotions.saveAndFlush(promotion);
+    var checkoutForm = form();
+    checkoutForm.setPromotionCode(promotion.getCode());
+    checkoutForm.setRedeemPoints(1);
+    var failure = assertThrows(IllegalArgumentException.class,
+        () -> checkout.placeOrder(cart(), buyer.getEmail(), checkoutForm));
+    assertEquals("Mã này không áp dụng cùng điểm thưởng.", failure.getMessage());
+  }
 
   ProductMedia photo(Product product, String color, String kind, String path, int position) {
     ProductMedia entry = new ProductMedia();

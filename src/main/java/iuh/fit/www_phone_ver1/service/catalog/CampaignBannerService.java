@@ -82,6 +82,16 @@ public class CampaignBannerService {
     banners.flush();
   }
 
+  @Transactional
+  public void setBannerActive(Long id, long version, boolean active) {
+    var banner = banners.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy banner."));
+    if (banner.getVersion() != version)
+      throw new IllegalArgumentException("Banner vừa thay đổi. Hãy tải lại.");
+    banner.setActive(active);
+    banners.flush();
+  }
+
   private void cleanup(String next, String previous) {
     if (Objects.equals(next, previous)) return;
     TransactionSynchronizationManager.registerSynchronization(

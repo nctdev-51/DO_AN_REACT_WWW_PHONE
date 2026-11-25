@@ -132,6 +132,18 @@ public class AdminUserService {
   }
 
   @Transactional
+  public void setUserStatus(Long id, int status, String actor) {
+    User user = users.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng."));
+    if (status == 0 && (user.isAdmin() || user.getEmail().equalsIgnoreCase(actor))) {
+      throw new IllegalArgumentException("Không thể khóa tài khoản quản trị viên hoặc chính mình.");
+    }
+    user.setStatus(status);
+    users.saveAndFlush(user);
+    if (status == 0) expireActiveSessions(user.getEmail());
+  }
+
+  @Transactional
   public void deleteUser(Long id, String actor) {
     User user =
         users

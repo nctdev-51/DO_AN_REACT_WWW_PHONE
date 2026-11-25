@@ -106,4 +106,24 @@ public class AdminBannerController {
     }
     return "redirect:/admin/banners";
   }
+
+  @PostMapping("/batch")
+  public String batch(@RequestParam(required = false) java.util.List<Long> ids,
+      @RequestParam String action, @RequestParam java.util.Map<String, String> parameters,
+      RedirectAttributes flash) {
+    if (!java.util.Set.of("enable", "disable", "delete").contains(action)) {
+      flash.addFlashAttribute("errorMsg", "Chọn thao tác hợp lệ.");
+    } else {
+      AdminBatch.run(ids, id -> {
+        String version = parameters.get("version_" + id);
+        if (version == null || !version.matches("[0-9]{1,18}")) {
+          throw new IllegalArgumentException("Thiếu phiên bản banner. Hãy tải lại.");
+        }
+        if ("delete".equals(action)) service.delete(id, Long.parseLong(version));
+        else service.setBannerActive(id, Long.parseLong(version), "enable".equals(action));
+        return null;
+      }, flash);
+    }
+    return "redirect:/admin/banners";
+  }
 }

@@ -3,10 +3,16 @@
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/admin/header.jsp" />
 <section class="panel">
+    <ui:adminBatchForm action="/admin/users/batch">
+    <option value="enable">Kích hoạt tài khoản</option>
+    <option value="disable" data-destructive>Khóa tài khoản</option>
+    <option value="delete" data-destructive>Xóa người dùng</option>
+  </ui:adminBatchForm>
   <div class="table-responsive">
     <table class="table align-middle">
       <thead>
         <tr>
+          <th scope="col"><input type="checkbox" data-batch-all aria-label="Chọn tất cả kết quả"></th>
           <th>Người dùng</th>
           <th>Số điện thoại</th>
           <th>Số đơn</th>
@@ -18,6 +24,8 @@
       <tbody>
         <c:forEach var="user" items="${users}">
           <tr>
+            <td><input type="checkbox" name="ids" value="${user.id}" form="admin-batch" data-batch-label="<c:out value='${user.fullName}'/>"
+                aria-label="Chọn mục ${user.id}"></td>
             <td>
               <strong>
                 <c:out value="${user.fullName}"/>

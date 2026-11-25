@@ -1,6 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/admin/header.jsp" />
 <div class="section-heading">
@@ -8,10 +7,31 @@
   <a class="btn btn-brand" href="${pageContext.request.contextPath}/admin/products/new">+ Thêm sản phẩm</a>
 </div>
 <section class="panel">
+    <ui:adminNameSearch action="/admin/products" label="Tên sản phẩm" query="${q}"/>
+  <ui:adminBatchForm action="/admin/products/batch">
+    <jsp:attribute name="fields">
+      <div data-batch-field="category">
+        <label class="form-label" for="bulk-category">Danh mục đích</label>
+        <select id="bulk-category" class="form-select" name="categoryId">
+          <option value="">Chọn danh mục</option>
+          <c:forEach var="category" items="${categories}">
+            <option value="${category.id}"><c:out value="${category.name}"/></option>
+          </c:forEach>
+        </select>
+      </div>
+    </jsp:attribute>
+    <jsp:body>
+      <option value="enable">Chuyển sang đang bán</option>
+      <option value="disable">Ngừng bán</option>
+      <option value="category">Chuyển danh mục</option>
+      <option value="delete" data-destructive>Xóa sản phẩm</option>
+    </jsp:body>
+  </ui:adminBatchForm>
   <div class="table-responsive">
     <table class="table align-middle">
       <thead>
         <tr>
+          <th scope="col"><input type="checkbox" data-batch-all aria-label="Chọn tất cả kết quả"></th>
           <th>Sản phẩm</th>
           <th>Thương hiệu</th>
           <th>Giá từ</th>
@@ -20,13 +40,14 @@
           <th>Thao tác</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="admin-name-results">
         <c:forEach var="product" items="${products}">
           <tr>
+            <td><input type="checkbox" name="ids" value="${product.id}" form="admin-batch" data-batch-label="<c:out value='${product.name}'/>"
+                aria-label="Chọn mục ${product.id}"></td>
             <td>
               <div class="table-product">
-                <c:set var="resolvedProductImg" value="${fn:startsWith(product.image, 'http') ? product.image : pageContext.request.contextPath.concat(product.image)}" />
-                <img src="${resolvedProductImg}" alt="">
+                <ui:adminProductImage path="${product.image}"/>
                 <div>
                   <strong>
                     <c:out value="${product.name}"/>
@@ -57,7 +78,7 @@
             </td>
           </tr>
         </c:forEach>
-      </tbody>
+      <c:if test="${empty products}"><tr><td colspan="7">Không tìm thấy sản phẩm phù hợp.</td></tr></c:if></tbody>
     </table>
   </div>
 </section>

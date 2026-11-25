@@ -18,10 +18,16 @@
     <a class="btn btn-brand" href="${pageContext.request.contextPath}/admin/banners/new" style="min-height: 44px; display: inline-flex; align-items: center;">Thêm banner</a>
   </div>
 </div>
-<div class="table-responsive">
+  <ui:adminBatchForm action="/admin/banners/batch">
+    <option value="enable">Bật</option>
+    <option value="disable">Tắt</option>
+    <option value="delete" data-destructive>Xóa mục đã chọn</option>
+  </ui:adminBatchForm>
+  <div class="table-responsive">
   <table class="table align-middle">
     <thead>
       <tr>
+          <th scope="col"><input type="checkbox" data-batch-all aria-label="Chọn tất cả kết quả"></th>
         <th style="min-width: 100px;">Ảnh banner</th>
         <th style="min-width: 180px;">Tiêu đề chiến dịch</th>
         <th style="min-width: 140px;">Vị trí & Màu</th>
@@ -34,6 +40,9 @@
     <tbody>
       <c:forEach var="b" items="${banners}">
         <tr>
+            <td><input type="checkbox" name="ids" value="${b.id}" form="admin-batch" data-batch-label="<c:out value='${b.title}'/>"
+                aria-label="Chọn mục ${b.id}">
+                <input type="hidden" name="version_${b.id}" value="${b.version}" form="admin-batch"></td>
           <td>
             <c:choose>
               <c:when test="${not empty b.imagePath}">
