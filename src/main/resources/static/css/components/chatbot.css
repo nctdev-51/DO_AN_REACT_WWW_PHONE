@@ -41,6 +41,10 @@
 }
 
 /* ── Chatbot Panel ─────────────────────────────────────────── */
+.chatbot-panel[hidden] {
+    display: none !important;
+}
+
 .chatbot-panel {
     position: fixed;
     bottom: 162px;
@@ -165,10 +169,10 @@
 .chatbot-suggestion-card {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 12px;
+    gap: 12px;
+    padding: 8px 12px;
     background: #ffffff;
-    border: 1.5px solid rgba(195, 77, 45, 0.3);
+    border: 1.5px solid rgba(195, 77, 45, 0.25);
     border-radius: 12px;
     text-decoration: none;
     color: var(--ink, #1c3032);
@@ -182,6 +186,32 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(195, 77, 45, 0.2);
     text-decoration: none;
+}
+
+.chatbot-card-media {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.chatbot-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 2px;
+    display: block;
+    transition: transform 0.2s ease;
+}
+
+.chatbot-suggestion-card:hover .chatbot-card-img {
+    transform: scale(1.06);
 }
 
 .chatbot-card-icon {

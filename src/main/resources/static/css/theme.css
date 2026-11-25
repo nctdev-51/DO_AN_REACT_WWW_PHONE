@@ -157,18 +157,59 @@ h3 {
   font-size: 14.5px !important;
   flex-shrink: 0 !important;
 }
-.store-nav a, .store-nav button, .nav-link-btn {
+.store-nav a, 
+.store-nav button, 
+.store-nav .nav-link-btn,
+.store-nav .nav-account {
   font-size: 14.5px !important;
-  font-weight: 550 !important;
-  color: #1E293B !important;
+  font-weight: 500 !important;
+  color: var(--text-primary, #1d1d1f) !important;
   letter-spacing: -0.01em;
-  transition: color 0.15s ease;
+  transition: opacity 0.18s ease, color 0.18s ease;
   white-space: nowrap !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
-.store-nav a:hover, .store-nav button:hover, .nav-link-btn:hover {
-  color: #2563EB !important;
+
+/* Khi hover: làm chữ hơi nhạt lại một chút (phong cách Apple tinh tế), tuyệt đối không viền xanh */
+.store-nav a:hover, 
+.store-nav button:hover, 
+.store-nav .nav-link-btn:hover,
+.store-nav .nav-account:hover,
+.store-nav .dropdown:hover > button,
+.store-nav .dropdown:hover > .nav-link-btn,
+.store-nav .dropdown:hover > .nav-account {
+  color: var(--text-primary, #1d1d1f) !important;
+  opacity: 0.62 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
-.store-nav a[aria-current=page] { color: #2563EB !important; font-weight: 650 !important; }
+
+/* Triệt tiêu hoàn toàn viền xanh outline/border/box-shadow khi focus, active hoặc đang mở dropdown */
+.store-nav a:focus,
+.store-nav button:focus,
+.store-nav .nav-link-btn:focus,
+.store-nav .nav-account:focus,
+.store-nav a:focus-visible,
+.store-nav button:focus-visible,
+.store-nav .nav-link-btn:focus-visible,
+.store-nav .nav-account:focus-visible,
+.store-nav .dropdown.show > button,
+.store-nav button.dropdown-toggle.show,
+.store-nav button.dropdown-toggle:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.store-nav a[aria-current=page] { 
+  color: var(--text-primary, #1d1d1f) !important; 
+  font-weight: 600 !important;
+  opacity: 1 !important; 
+}
 .store-nav .icon {
   width: 20px;
   height: 20px;
@@ -179,15 +220,56 @@ h3 {
   box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08) !important;
   padding: 8px 0 !important;
 }
-.dropdown-item {
-  font-size: 14.5px !important;
-  font-weight: 500;
-  color: #334155 !important;
-  padding: 8px 18px !important;
+
+/* Store Header Hover Dropdown Bridge & Smooth Transition */
+@media (min-width: 768px) {
+  .store-nav .dropdown {
+    position: relative;
+  }
+  .store-nav .nav-link-btn,
+  .store-nav .nav-account {
+    position: relative;
+    cursor: pointer;
+  }
+  .store-nav .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: auto !important;
+    transform: none !important;
+    margin-top: 6px !important;
+    transform-origin: top center;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+  }
+  .store-nav .dropdown-menu.dropdown-menu-end {
+    left: auto !important;
+    right: 0 !important;
+  }
+  /* Vùng đệm vô hình (hover bridge) chống rớt chuột khi di chuyển từ nút xuống menu con */
+  .store-nav .dropdown-menu::before {
+    content: "";
+    position: absolute;
+    top: -14px;
+    left: 0;
+    right: 0;
+    height: 14px;
+    background: transparent;
+  }
 }
-.dropdown-item:hover {
-  background: #EFF6FF !important;
-  color: #1D4ED8 !important;
+.dropdown-item {
+  font-size: 14px !important;
+  font-weight: 450;
+  color: var(--text-primary, #1d1d1f) !important;
+  padding: 8px 18px !important;
+  transition: background-color 0.15s ease, opacity 0.15s ease, color 0.15s ease;
+}
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: rgba(0, 0, 0, 0.04) !important;
+  color: var(--text-primary, #1d1d1f) !important;
+  opacity: 0.65 !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 .count-badge {
   font-size: 12px !important;

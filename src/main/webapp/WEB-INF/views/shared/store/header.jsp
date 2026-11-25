@@ -88,7 +88,7 @@
           </a>
           <c:choose>
             <c:when test="${pageContext.request.userPrincipal != null}">
-              <div class="dropdown">
+              <div class="dropdown nav-group-dropdown">
                 <button class="nav-account dropdown-toggle" data-bs-toggle="dropdown" type="button" aria-expanded="false"><ui:icon name="user"/> Tài khoản</button>
                 <ul class="dropdown-menu dropdown-menu-end">
                   <li>
