@@ -49,6 +49,10 @@ public class ChatbotService {
   @Value("${spring.ai.openai.api-key:}")
   private String apiKey;
 
+  @Value("${app.chatbot.knowledge:classpath:prompts/chatbot-knowledge.txt}")
+  private org.springframework.core.io.Resource knowledge =
+      new ClassPathResource("prompts/chatbot-knowledge.txt");
+
   // Bounded LRU session cache so bot memory cannot grow unbounded across
   // anonymous visitors
   private final Map<String, SessionEntry> sessionHistory = Collections.synchronizedMap(
@@ -89,7 +93,9 @@ public class ChatbotService {
       String productContext = buildProductContext(userMessage);
       PromptTemplate systemTemplate = new PromptTemplate(
           new ClassPathResource("prompts/chatbot-system.st"));
-      String systemText = systemTemplate.render(Map.of("productContext", productContext));
+      String systemText = systemTemplate.render(Map.of(
+          "productContext", productContext,
+          "knowledgeContext", loadKnowledge()));
 
       // Build danh sách messages: system + history + user message mới
       List<Message> messages = new ArrayList<>();
@@ -150,6 +156,18 @@ public class ChatbotService {
       SessionEntry entry = sessionHistory.computeIfAbsent(sessionKey, k -> new SessionEntry());
       entry.lastAccessedAt = now;
       return entry.messages;
+    }
+  }
+
+  private String loadKnowledge() {
+    if (knowledge == null || !knowledge.exists()) {
+      return "Chính sách: Khách hàng liên hệ trực tiếp nhân viên cửa hàng hoặc xem tại chân trang để được tư vấn cụ thể.";
+    }
+    try (var stream = knowledge.getInputStream()) {
+      return new String(stream.readNBytes(16_384), java.nio.charset.StandardCharsets.UTF_8);
+    } catch (Exception ex) {
+      log.warn("Chatbot knowledge resource unavailable: {}", ex.getMessage());
+      return "Chính sách: Khách hàng liên hệ trực tiếp nhân viên cửa hàng hoặc xem tại chân trang để được tư vấn cụ thể.";
     }
   }
 

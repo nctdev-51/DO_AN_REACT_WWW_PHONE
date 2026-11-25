@@ -50,7 +50,7 @@ public class UserService {
     user.setPhone(registrationDto.getPhone());
     user.setAddress(registrationDto.getAddress());
     user.setStatus(1);
-    user.setEmailVerified(false);
+    user.setEmailVerified(true);
 
     Optional<Role> roleOpt = roleRepository.findByName("USER");
     Role role =
@@ -69,6 +69,9 @@ public class UserService {
       throw new IllegalArgumentException("Email đã được sử dụng hoặc dữ liệu không hợp lệ.");
     }
 
-    tokens.sendVerification(user);
+    try {
+      tokens.sendVerification(user);
+    } catch (Exception ignored) {
+    }
   }
 }

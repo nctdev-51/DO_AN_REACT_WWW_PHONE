@@ -4,19 +4,6 @@
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/store/header.jsp" />
 <div class="home-page">
-  <c:set var="budgetFirst" value="${not empty budgetProducts and (homeInterest == 'GAMING' or homeInterest == 'BUDGET')}"/>
-  <c:if test="${not empty interestProducts}">
-    <div class="section-heading">
-      <h2>${homeInterest == 'CAMERA' ? 'Điện thoại chụp ảnh' : 'Điện thoại chơi game'}</h2>
-      <a href="${pageContext.request.contextPath}/products?purpose=${homeInterest}">Khám phá →</a>
-    </div>
-    <div class="product-grid">
-      <c:forEach var="product" items="${interestProducts}">
-        <ui:productCard product="${product}"/>
-      </c:forEach>
-    </div>
-  </c:if>
-  <c:if test="${budgetFirst}"><ui:homeBudget products="${budgetProducts}" variants="${budgetVariants}"/></c:if>
   <section class="store-hero-overlay" data-reveal>
     <div class="store-hero-bg">
       <img src="https://getjar.com/_next/image?url=https%3A%2F%2Fwww.platformocho.io%2Fassets%2F51d48807-070c-48a0-9eb1-82a0287cf8c6&w=1920&q=75" alt="PTV Mobile Hero Banner" fetchpriority="high" onerror="this.style.display='none'">
@@ -59,10 +46,26 @@
       </div>
     </section>
   </c:if>
+  <c:if test="${not empty interestProducts}">
+    <section class="collection-section mb-4" data-reveal>
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow" style="color: var(--ana-primary, #2563eb);">✨ DÀNH CHO BẠN</span>
+          <h2>${homeInterest == 'CAMERA' ? 'Điện thoại chụp ảnh đỉnh cao' : 'Điện thoại chơi game mượt mà'}</h2>
+        </div>
+        <a href="${pageContext.request.contextPath}/products?purpose=${homeInterest}">Khám phá →</a>
+      </div>
+      <div class="product-grid">
+        <c:forEach var="product" items="${interestProducts}">
+          <ui:productCard product="${product}"/>
+        </c:forEach>
+      </div>
+    </section>
+  </c:if>
 
   <div class="section-heading"><div><span class="eyebrow">KHÁM PHÁ PTV MOBILE</span><h2>Tìm chiếc điện thoại<br>hợp với bạn.</h2></div><a href="${pageContext.request.contextPath}/products">Xem tất cả sản phẩm →</a></div>
   <div class="product-grid"><c:forEach var="product" items="${featuredProducts}"><ui:productCard product="${product}"/></c:forEach></div>
-  <c:if test="${not budgetFirst}"><ui:homeBudget products="${budgetProducts}" variants="${budgetVariants}"/></c:if>
+  <ui:homeBudget products="${budgetProducts}" variants="${budgetVariants}"/>
   <section class="journey-grid"><a href="${pageContext.request.contextPath}/choose"><span class="eyebrow">TÌM LỰA CHỌN PHÙ HỢP</span><h2>Bắt đầu từ ngân sách.</h2><span>Chọn hãng và mức chi →</span></a><a href="${pageContext.request.contextPath}/account/consultations?type=TRADE_IN"><span class="eyebrow">THU CŨ ĐỔI MỚI</span><h2>Sẵn sàng cho máy mới?</h2><span>Gửi yêu cầu kiểm tra máy cũ →</span></a><a href="${pageContext.request.contextPath}/account/points"><span class="eyebrow">THÀNH VIÊN PTV</span><h2>Mỗi lần mua, thêm điểm.</h2><span>Xem điểm và quy tắc →</span></a></section>
   <section class="benefits" aria-label="Mua sắm tại PTV Mobile">
     <div><ui:icon name="phone"/><strong>Chọn đúng phiên bản</strong><span>Màu sắc, bộ nhớ và giá rõ ràng.</span></div>

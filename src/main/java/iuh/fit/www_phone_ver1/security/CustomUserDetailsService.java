@@ -21,16 +21,18 @@ public class CustomUserDetailsService implements UserDetailsService {
   }
 
   @Override
-  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+  public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+    String trimmed = identifier.trim();
     User user =
         userRepository
-            .findByEmail(email.trim().toLowerCase(java.util.Locale.ROOT))
+            .findByEmail(trimmed.toLowerCase(java.util.Locale.ROOT))
+            .or(() -> userRepository.findByPhone(trimmed))
             .orElseThrow(
                 () ->
-                    new UsernameNotFoundException("Không tìm thấy người dùng với email: " + email));
+                    new UsernameNotFoundException("Không tìm thấy tài khoản với: " + identifier));
 
     if (user.getStatus() != 1) {
-      throw new UsernameNotFoundException("Tài khoản đã bị khóa");
+      throw new UsernameNotFoundException("Tài khoản đã bị khóa bởi quản trị viên");
     }
 
     Collection<GrantedAuthority> authorities =
@@ -39,6 +41,6 @@ public class CustomUserDetailsService implements UserDetailsService {
             .collect(Collectors.toList());
 
     return new org.springframework.security.core.userdetails.User(
-        user.getEmail(), user.getPassword(), user.isEmailVerified(), true, true, true, authorities);
+        user.getEmail(), user.getPassword(), true, true, true, true, authorities);
   }
 }

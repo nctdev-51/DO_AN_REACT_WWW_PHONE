@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
   Optional<User> findByEmail(String email);
+  Optional<User> findByPhone(String phone);
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("select u from User u where u.email = :email")
