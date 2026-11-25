@@ -13,6 +13,9 @@
   <p>Giao đến: <c:out value="${order.shippingAddress}"/>
 </p>
 <div class="d-flex gap-3 justify-content-center">
+  <c:if test="${order.paymentMethod == 'QR' and order.paymentStatus != 'PAID' and order.status == 'Chờ xử lý'}">
+    <a class="btn btn-brand" href="${pageContext.request.contextPath}/payments/qr/${order.id}">Thanh toán QR 5 phút</a>
+  </c:if>
   <a class="btn btn-brand" href="${pageContext.request.contextPath}/orders/${order.id}">Xem đơn hàng</a>
   <a class="btn btn-light" href="${pageContext.request.contextPath}/products">Tiếp tục mua sắm</a>
 </div>

@@ -100,6 +100,8 @@
 <script src="${pageContext.request.contextPath}/vendor/nouislider/nouislider.min.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/store.js" defer>
 </script>
+<script src="${pageContext.request.contextPath}/js/offline-db.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/offline-sync.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/catalog-cards.js" defer></script>
 <%-- Step 3: Live search autocomplete — only active when #keyword input is present (catalog list page) --%>
 <script src="${pageContext.request.contextPath}/js/catalog-search.js" defer></script>

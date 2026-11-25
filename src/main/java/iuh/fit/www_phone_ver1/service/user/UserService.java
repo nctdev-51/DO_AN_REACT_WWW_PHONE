@@ -6,6 +6,7 @@ import iuh.fit.www_phone_ver1.entity.User;
 import iuh.fit.www_phone_ver1.repository.RoleRepository;
 import iuh.fit.www_phone_ver1.repository.UserRepository;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,16 +17,19 @@ public class UserService {
   private final RoleRepository roleRepository;
   private final PasswordEncoder passwordEncoder;
   private final AccountTokenService tokens;
+  private final boolean emailVerificationEnabled;
 
   public UserService(
       UserRepository userRepository,
       RoleRepository roleRepository,
       PasswordEncoder passwordEncoder,
-      AccountTokenService tokens) {
+      AccountTokenService tokens,
+      @Value("${app.account.email-verification-enabled:true}") boolean emailVerificationEnabled) {
     this.userRepository = userRepository;
     this.roleRepository = roleRepository;
     this.passwordEncoder = passwordEncoder;
     this.tokens = tokens;
+    this.emailVerificationEnabled = emailVerificationEnabled;
   }
 
   @org.springframework.transaction.annotation.Transactional
@@ -50,7 +54,7 @@ public class UserService {
     user.setPhone(registrationDto.getPhone());
     user.setAddress(registrationDto.getAddress());
     user.setStatus(1);
-    user.setEmailVerified(false);
+    user.setEmailVerified(!emailVerificationEnabled);
 
     Optional<Role> roleOpt = roleRepository.findByName("USER");
     Role role =
@@ -69,6 +73,6 @@ public class UserService {
       throw new IllegalArgumentException("Email đã được sử dụng hoặc dữ liệu không hợp lệ.");
     }
 
-    tokens.sendVerification(user);
+    if (emailVerificationEnabled) tokens.sendVerification(user);
   }
 }
