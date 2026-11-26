@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 /** Scheduled batch job that reindexes active catalog products into MongoDB and Milvus. */
 @Component
+@org.springframework.context.annotation.Lazy(false)
 @ConditionalOnProperty(name = "app.recommendation.reindex-enabled", havingValue = "true")
 public class VectorIndexJob {
 
