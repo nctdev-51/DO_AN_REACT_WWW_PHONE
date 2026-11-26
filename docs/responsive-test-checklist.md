@@ -24,4 +24,13 @@ Các tài liệu HTML độc lập trong JSP đã có viewport. Các trang cửa
 
 ## Kết quả đo trên Chrome
 
-Đã chạy Chrome DevTools Protocol trên năm trang trong ma trận, nạp CSS sửa đổi vào bản demo và áp dụng class bảng banner trong DOM. Ở 412, 768 và 1280px, cả năm trang đo được 0px tràn ngang toàn trang. Bảng banner cuộn bên trong ở 375, 412 và 768px. Ở 375px, trước khi giới hạn chiều rộng ô tìm kiếm, ba trang cửa hàng còn tràn 5px. Cần đo lại trên bản build mới và nghiệm thu các thao tác trong checklist.
+Đã chạy Chrome DevTools Protocol trên bản demo. Chrome nhận CSS của nhánh qua request intercept và class bảng banner được áp dụng trong DOM của trang. Mọi trang trong ma trận đều có viewport meta.
+
+| Chiều rộng | Trang chủ | Danh sách | Chi tiết | Đăng nhập | Banner admin | Bảng banner |
+|---|---:|---:|---:|---:|---:|---|
+| 375px | 0px | 0px | 0px | 0px | 0px | Cuộn trong khung |
+| 412px | 0px | 0px | 0px | 0px | 0px | Cuộn trong khung |
+| 768px | 0px | 0px | 0px | 0px | 0px | Cuộn trong khung |
+| 1280px | 0px | 0px | 0px | 0px | 0px | Vừa khung |
+
+Các ô số là mức tràn ngang của toàn trang. Cần thực hiện thêm checklist thao tác với bản build của nhánh khi nghiệm thu.
