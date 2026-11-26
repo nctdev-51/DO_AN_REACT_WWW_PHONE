@@ -30,7 +30,14 @@ import org.springframework.stereotype.Service;
 public class ChatbotService {
 
   private static final Logger log = LoggerFactory.getLogger(ChatbotService.class);
+<<<<<<< HEAD
   private static final Pattern SUGGEST_PATTERN = Pattern.compile("\\[SUGGEST:(\\d+)\\]");
+=======
+  private static final Pattern SUGGEST_PATTERN = Pattern.compile(
+      "(?i)\\[[\\s\\p{Z}]*(?:SUGGEST|GỢI Ý|PRODUCT|ID)?[\\s\\p{Z}]*:?[\\s\\p{Z}]*(\\d+)[\\s\\p{Z}]*\\]");
+  private static final Pattern CLEAN_SUGGEST_PATTERN = Pattern.compile(
+      "(?i)\\[[\\s\\p{Z}]*(?:SUGGEST|GỢI Ý|PRODUCT|ID)?[\\s\\p{Z}]*:?[\\s\\p{Z}]*\\d+[\\s\\p{Z}]*\\]");
+>>>>>>> origin/taidev
 
   @Autowired(required = false)
   private ChatModel chatModel;
@@ -111,8 +118,14 @@ public class ChatbotService {
     }
 
     List<Long> suggestedIds = extractSuggestedIds(replyRaw);
+<<<<<<< HEAD
     suggestedIds = autoMatchProductsIfEmpty(suggestedIds, replyRaw);
     String reply = replyRaw.replaceAll("\\[SUGGEST:\\d+\\]", "").trim();
+=======
+    suggestedIds = autoMatchProductsIfEmpty(suggestedIds, replyRaw, userMessage);
+    String reply = CLEAN_SUGGEST_PATTERN.matcher(replyRaw).replaceAll("").trim();
+    reply = reply.replaceAll("[\\s\\p{Z}]{2,}", " ").replaceAll(" +([.,:;!?])", "$1");
+>>>>>>> origin/taidev
     List<ChatResponseDTO.ProductCardDTO> productCards = buildProductCards(suggestedIds);
     chatMemory.add(
       sessionId, List.of(new UserMessage(userMessage), new AssistantMessage(reply)));
@@ -225,6 +238,7 @@ public class ChatbotService {
     return ids;
   }
 
+<<<<<<< HEAD
   private List<Long> autoMatchProductsIfEmpty(List<Long> currentIds, String text) {
     List<Long> result = new ArrayList<>(currentIds);
     if (text == null || text.isBlank()) {
@@ -237,6 +251,29 @@ public class ChatbotService {
         if (p.getName() != null && !p.getName().isBlank()) {
           String pName = p.getName().toLowerCase().trim();
           if (lower.contains(pName) && !result.contains(p.getId())) {
+=======
+  private List<Long> autoMatchProductsIfEmpty(List<Long> currentIds, String text, String userMessage) {
+    List<Long> result = new ArrayList<>(currentIds);
+    if ((text == null || text.isBlank()) && (userMessage == null || userMessage.isBlank())) {
+      return result;
+    }
+    try {
+      List<Product> all = productRepository.findByStatus(1, PageRequest.of(0, 60)).getContent();
+      String normalizedReply = normalizeForMatch(text);
+      for (Product p : all) {
+        if (p.getName() != null && !p.getName().isBlank()) {
+          String pName = normalizeForMatch(p.getName());
+          if (pName.length() >= 3 && normalizedReply.contains(pName) && !result.contains(p.getId())) {
+            result.add(p.getId());
+          }
+        }
+      }
+      // Nếu vẫn rỗng nhưng câu trả lời hoặc câu hỏi của khách là tư vấn máy: tự động lấy sản phẩm phù hợp nhất
+      if (result.isEmpty()) {
+        List<Product> matched = prioritizeContextProducts(all, (userMessage != null ? userMessage : text), 3);
+        for (Product p : matched) {
+          if (!result.contains(p.getId())) {
+>>>>>>> origin/taidev
             result.add(p.getId());
           }
         }
@@ -251,6 +288,17 @@ public class ChatbotService {
     return result;
   }
 
+<<<<<<< HEAD
+=======
+  private String normalizeForMatch(String input) {
+    if (input == null) return "";
+    return input.toLowerCase(Locale.ROOT)
+        .replaceAll("[\\s\\p{Z}]+", " ")
+        .replaceAll("[^a-z0-9à-ỹ\\s]", "")
+        .trim();
+  }
+
+>>>>>>> origin/taidev
   private List<ChatResponseDTO.ProductCardDTO> buildProductCards(List<Long> ids) {
     List<ChatResponseDTO.ProductCardDTO> cards = new ArrayList<>();
     if (ids == null || ids.isEmpty()) {
@@ -262,11 +310,23 @@ public class ChatbotService {
           .filter(p -> Integer.valueOf(1).equals(p.getStatus()))
           .ifPresent(p -> {
             String priceStr = p.getPrice() != null ? String.format("%,d VNĐ", p.getPrice().longValue()) : "Liên hệ";
+<<<<<<< HEAD
+=======
+            String imgUrl = p.getImage();
+            if ((imgUrl == null || imgUrl.isBlank()) && p.getDefaultVariant() != null) {
+              imgUrl = p.getDefaultVariant().getImage();
+            }
+>>>>>>> origin/taidev
             cards.add(new ChatResponseDTO.ProductCardDTO(
               p.getId(),
               p.getName() != null ? p.getName() : ("Sản phẩm #" + p.getId()),
               priceStr,
+<<<<<<< HEAD
               p.getBrand() != null ? p.getBrand() : "Chính hãng"
+=======
+              p.getBrand() != null ? p.getBrand() : "Chính hãng",
+              imgUrl != null && !imgUrl.isBlank() ? imgUrl.trim() : null
+>>>>>>> origin/taidev
             ));
           });
       } catch (Exception ignored) {

@@ -53,6 +53,121 @@ document.addEventListener('DOMContentLoaded', () => {
     const pathname = new URL(link.href, window.location.origin).pathname;
     if (pathname === window.location.pathname) link.setAttribute('aria-current', 'page');
   });
+<<<<<<< HEAD
+=======
+
+  // ── Store Header Dropdowns: Hover, Safe Bridge & Multi-Device Accessibility ──
+  const navDropdowns = document.querySelectorAll('.store-nav .dropdown');
+  let activeNavDropdown = null;
+  let navCloseTimer = null;
+
+  navDropdowns.forEach(dropdown => {
+    const toggleBtn = dropdown.querySelector('[data-bs-toggle="dropdown"]');
+    const menu = dropdown.querySelector('.dropdown-menu');
+    if (!toggleBtn || !menu) return;
+
+    const showDropdown = () => {
+      if (navCloseTimer) {
+        clearTimeout(navCloseTimer);
+        navCloseTimer = null;
+      }
+      // Đóng dropdown khác nếu đang mở để đảm bảo chỉ có 1 dropdown mở cùng lúc
+      if (activeNavDropdown && activeNavDropdown !== dropdown) {
+        activeNavDropdown.classList.remove('show');
+        const otherBtn = activeNavDropdown.querySelector('[data-bs-toggle="dropdown"]');
+        if (otherBtn) {
+          otherBtn.classList.remove('show');
+          otherBtn.setAttribute('aria-expanded', 'false');
+        }
+        const otherMenu = activeNavDropdown.querySelector('.dropdown-menu');
+        if (otherMenu) otherMenu.classList.remove('show');
+      }
+      activeNavDropdown = dropdown;
+
+      // Kích hoạt hiển thị bằng class, tuyệt đối không gọi bs.show() hay focus() để tránh browser tự cuộn/trượt trang
+      dropdown.classList.add('show');
+      toggleBtn.classList.add('show');
+      toggleBtn.setAttribute('aria-expanded', 'true');
+      menu.classList.add('show');
+    };
+
+    const hideDropdown = (delay = 140) => {
+      if (navCloseTimer) clearTimeout(navCloseTimer);
+      navCloseTimer = setTimeout(() => {
+        dropdown.classList.remove('show');
+        toggleBtn.classList.remove('show');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        menu.classList.remove('show');
+        if (activeNavDropdown === dropdown) activeNavDropdown = null;
+      }, delay);
+    };
+
+    // Kích hoạt hover cho thiết bị hỗ trợ hover (desktop / laptop)
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      dropdown.addEventListener('mouseenter', () => {
+        showDropdown();
+      });
+
+      dropdown.addEventListener('mouseleave', () => {
+        hideDropdown(140);
+      });
+    }
+
+    // Hỗ trợ bàn phím (focus-within): khi tab vào mở, khi tab ra ngoài đóng
+    dropdown.addEventListener('focusin', () => {
+      showDropdown();
+    });
+
+    dropdown.addEventListener('focusout', (e) => {
+      if (!dropdown.contains(e.relatedTarget)) {
+        hideDropdown(80);
+      }
+    });
+
+    // Bàn phím: phím Escape đóng dropdown ngay lập tức và focus lại vào nút không cuộn trang
+    dropdown.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        hideDropdown(0);
+        if (toggleBtn.focus) {
+          toggleBtn.focus({ preventScroll: true });
+        }
+        if (activeNavDropdown === dropdown) activeNavDropdown = null;
+      }
+    });
+
+    // Hỗ trợ click/tap (ngăn chặn browser scroll nhảy trang)
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (navCloseTimer) {
+        clearTimeout(navCloseTimer);
+        navCloseTimer = null;
+      }
+      const isOpen = dropdown.classList.contains('show');
+      if (isOpen) {
+        hideDropdown(0);
+      } else {
+        showDropdown();
+      }
+    });
+  });
+
+  // Đóng khi click ngoài menu
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.store-nav .dropdown')) {
+      if (activeNavDropdown) {
+        activeNavDropdown.classList.remove('show');
+        const otherBtn = activeNavDropdown.querySelector('[data-bs-toggle="dropdown"]');
+        if (otherBtn) {
+          otherBtn.classList.remove('show');
+          otherBtn.setAttribute('aria-expanded', 'false');
+        }
+        const otherMenu = activeNavDropdown.querySelector('.dropdown-menu');
+        if (otherMenu) otherMenu.classList.remove('show');
+        activeNavDropdown = null;
+      }
+    }
+  });
+>>>>>>> origin/taidev
   document.addEventListener('submit', event => {
     const form = event.target;
     if (form instanceof HTMLFormElement && form.hasAttribute('data-confirm')

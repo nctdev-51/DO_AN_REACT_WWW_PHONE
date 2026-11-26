@@ -5,7 +5,11 @@
 (function () {
     'use strict';
 
+<<<<<<< HEAD
     document.addEventListener('DOMContentLoaded', function () {
+=======
+    function initChatbot() {
+>>>>>>> origin/taidev
         const fabBtn      = document.getElementById('chatbot-fab-btn');
         const chatPanel   = document.getElementById('chatbot-panel');
         const closeBtn    = document.getElementById('chatbot-close-btn');
@@ -21,6 +25,7 @@
             || '';
 
         // ── Toggle Panel ──────────────────────────────────────────
+<<<<<<< HEAD
         fabBtn.addEventListener('click', function () {
             const isHidden = chatPanel.hidden;
             chatPanel.hidden = !isHidden;
@@ -34,6 +39,32 @@
         if (closeBtn) {
             closeBtn.addEventListener('click', function () {
                 chatPanel.hidden = true;
+=======
+        function toggleChatPanel() {
+            const isHidden = chatPanel.hasAttribute('hidden') || chatPanel.hidden || chatPanel.style.display === 'none';
+            if (isHidden) {
+                chatPanel.removeAttribute('hidden');
+                chatPanel.hidden = false;
+                chatPanel.style.display = 'flex';
+                fabBtn.setAttribute('aria-expanded', 'true');
+                setTimeout(function () { inputEl.focus(); }, 100);
+                scrollMessages();
+            } else {
+                chatPanel.setAttribute('hidden', '');
+                chatPanel.hidden = true;
+                chatPanel.style.display = 'none';
+                fabBtn.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        fabBtn.addEventListener('click', toggleChatPanel);
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () {
+                chatPanel.setAttribute('hidden', '');
+                chatPanel.hidden = true;
+                chatPanel.style.display = 'none';
+>>>>>>> origin/taidev
                 fabBtn.setAttribute('aria-expanded', 'false');
             });
         }
@@ -97,8 +128,16 @@
         // ── Markdown & Table Formatter ────────────────────────────
         function formatMessageHtml(raw) {
             if (!raw) return '';
+<<<<<<< HEAD
             // 1. Escape HTML an toàn
             let s = raw
+=======
+            // 0. Loại bỏ triệt để các mã SUGGEST (kể cả chứa khoảng trắng unicode)
+            let s = raw.replace(/\[[\s\S]*?(?:SUGGEST|GỢI Ý|PRODUCT|ID)\s*:?\s*\d+[\s\S]*?\]/gi, '');
+
+            // 1. Escape HTML an toàn
+            s = s
+>>>>>>> origin/taidev
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;');
@@ -155,7 +194,11 @@
         }
 
         // ── Helper: Safe Product Card Builder (anti-XSS) ──────────
+<<<<<<< HEAD
         function createSuggestionCardElement(productId, titleText, priceText) {
+=======
+        function createSuggestionCardElement(productId, titleText, priceText, imageUrl) {
+>>>>>>> origin/taidev
             const safeId = Number(productId);
             if (!Number.isInteger(safeId) || safeId <= 0) {
                 return null;
@@ -167,9 +210,39 @@
             a.rel = 'noopener noreferrer';
             a.title = 'Xem chi tiết ' + titleText;
 
+<<<<<<< HEAD
             const icon = document.createElement('div');
             icon.className = 'chatbot-card-icon';
             icon.textContent = '📱';
+=======
+            // Media: Ảnh sản phẩm thật từ hệ thống kèm fallback
+            const mediaWrap = document.createElement('div');
+            mediaWrap.className = 'chatbot-card-media';
+
+            const defaultImg = ctx + '/images/products/placeholder.svg';
+            const img = document.createElement('img');
+            img.className = 'chatbot-card-img';
+            img.alt = titleText || 'Sản phẩm';
+            img.loading = 'lazy';
+
+            let src = imageUrl;
+            if (src && typeof src === 'string' && src.trim().length > 0) {
+                src = src.trim();
+                if (!src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('//')) {
+                    src = ctx + (src.startsWith('/') ? src : '/' + src);
+                }
+            } else {
+                src = defaultImg;
+            }
+
+            img.src = src;
+            img.onerror = function () {
+                if (this.src !== defaultImg) {
+                    this.src = defaultImg;
+                }
+            };
+            mediaWrap.appendChild(img);
+>>>>>>> origin/taidev
 
             const info = document.createElement('div');
             info.className = 'chatbot-card-info';
@@ -195,7 +268,11 @@
 
             info.appendChild(nameEl);
             info.appendChild(metaEl);
+<<<<<<< HEAD
             a.appendChild(icon);
+=======
+            a.appendChild(mediaWrap);
+>>>>>>> origin/taidev
             a.appendChild(info);
             return a;
         }
@@ -221,7 +298,12 @@
             cards.slice(0, 3).forEach(function (p) {
                 const name = p && p.name != null ? String(p.name) : ('Sản phẩm #' + (p && p.id ? p.id : ''));
                 const price = p && p.price != null ? String(p.price) : '';
+<<<<<<< HEAD
                 const card = createSuggestionCardElement(p && p.id, name, price);
+=======
+                const imageUrl = p && p.imageUrl != null ? String(p.imageUrl) : '';
+                const card = createSuggestionCardElement(p && p.id, name, price, imageUrl);
+>>>>>>> origin/taidev
                 if (card) {
                     wrap.appendChild(card);
                 }
@@ -238,7 +320,11 @@
             wrap.appendChild(createSuggestionRowHeader('Gợi ý xem chi tiết:'));
 
             ids.slice(0, 3).forEach(function (id) {
+<<<<<<< HEAD
                 const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '');
+=======
+                const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '', null);
+>>>>>>> origin/taidev
                 if (card) {
                     wrap.appendChild(card);
                 }
@@ -267,5 +353,15 @@
                 messagesEl.scrollTop = messagesEl.scrollHeight;
             }, 30);
         }
+<<<<<<< HEAD
     });
+=======
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initChatbot);
+    } else {
+        initChatbot();
+    }
+>>>>>>> origin/taidev
 })();
