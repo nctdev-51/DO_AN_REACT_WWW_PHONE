@@ -272,26 +272,3 @@ html:has(.sticky-purchase){scroll-padding-bottom:var(--space-19)}
   .device-warranty-meta{grid-template-columns:1fr}
 }
 
-/* Store Core Mobile Responsiveness (Catalog, Detail, Cart, Checkout, Orders) */
-html,body.storefront{overflow-x:clip}
-@media(max-width:767px){
-  .checkout-layout,.detail-sections,.product-detail{grid-template-columns:1fr}
-  .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .page-heading{flex-wrap:wrap;gap:10px}
-}
-@media(max-width:575px){
-  .purchase-row{flex-wrap:wrap}
-  .purchase-row #buy-button{width:100%;min-height:44px}
-  .cart-line-info{min-width:0;flex:1 1 180px}
-  .cart-line-info form{flex-wrap:wrap}
-  .cart-line>div:last-child{width:100%;display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px dashed var(--color-divider);text-align:left!important;margin-left:0}
-  .cart-line>div:last-child form{margin-top:0!important}
-  .promo-offer-row{flex-wrap:wrap}
-  .spec-list{grid-template-columns:1fr;gap:4px}
-  .spec-list dt{color:var(--color-text-muted);font-size:var(--font-size-xs);margin-top:6px}
-  .spec-list dd{margin:0;word-break:break-word}
-}
-@media(max-width:374px){
-  .catalog-grid,.product-grid{grid-template-columns:1fr}
-}
-

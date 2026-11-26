@@ -55,8 +55,7 @@
 }
 .insights-dates { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .insights-dates label { color: var(--muted); font-size: .82rem; }
-.insights-dates input,
-.insights-dates select {
+.insights-dates input {
   min-height: 36px;
   min-width: 0;
   padding: 5px 8px;
@@ -258,6 +257,7 @@
   .insights-card { padding: 14px; }
   .insights-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .insights-metric { padding: 12px; }
+  .insights-metric dd { font-size: clamp(1.2rem, 4.5vw, 1.65rem); }
   .insights-toolbar { display: grid; grid-template-columns: auto auto; }
   .insights-toolbar > a { grid-row: 1; grid-column: 2; }
   .insights-dates { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }

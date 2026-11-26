@@ -8,24 +8,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>
       <c:out value="${pageTitle}"/> — PTV Mobile Admin</title>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
->>>>>>> origin/taidev
-=======
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
->>>>>>> origin/taidev
-=======
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
->>>>>>> origin/taidev
         <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/bootstrap/bootstrap.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/store.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css">
@@ -39,7 +24,11 @@
         </c:if>
       </head>
       <body class="admin-body">
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar offcanvas-lg offcanvas-start" id="adminSidebarOffcanvas" tabindex="-1" aria-labelledby="adminSidebarLabel">
+          <div class="offcanvas-header d-lg-none d-flex justify-content-between align-items-center w-100 pb-3 border-bottom mb-2">
+            <span class="fs-6 fw-bold" id="adminSidebarLabel">Menu quản trị</span>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#adminSidebarOffcanvas" aria-label="Đóng menu"></button>
+          </div>
           <a class="admin-sidebar-brand" href="${pageContext.request.contextPath}/admin">
             <span class="admin-sidebar-mark" aria-hidden="true">P</span>
             <span>PTV <strong>Mobile</strong></span>
@@ -88,7 +77,21 @@
           </form>
         </aside>
         <main class="admin-main">
-          <div class="admin-topbar"><span>PTV Mobile <span aria-hidden="true">/</span> <strong>Quản trị cửa hàng</strong></span><a href="${pageContext.request.contextPath}/" target="_blank" rel="noopener">Xem cửa hàng <ui:icon name="arrow"/></a></div>
+          <div class="admin-topbar">
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-outline-secondary d-lg-none d-inline-flex align-items-center justify-content-center p-0"
+                      type="button"
+                      data-bs-toggle="offcanvas"
+                      data-bs-target="#adminSidebarOffcanvas"
+                      aria-controls="adminSidebarOffcanvas"
+                      aria-label="Mở menu quản trị"
+                      style="width: 44px; height: 44px; min-width: 44px; border-radius: 8px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+              </button>
+              <span>PTV Mobile <span aria-hidden="true">/</span> <strong>Quản trị cửa hàng</strong></span>
+            </div>
+            <a href="${pageContext.request.contextPath}/" target="_blank" rel="noopener">Xem cửa hàng <ui:icon name="arrow"/></a>
+          </div>
           <div class="page-heading">
             <div>
               <span class="eyebrow">KHÔNG GIAN QUẢN LÝ</span>

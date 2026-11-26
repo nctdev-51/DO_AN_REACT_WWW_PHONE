@@ -133,7 +133,9 @@ a.btn-brand:focus {
 .table-actions {
   display: inline-flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 8px;
+  white-space: nowrap;
 }
 .table-actions form {
   margin: 0;
@@ -235,24 +237,7 @@ a.btn-brand:focus {
   margin:0 0 26px
 }
 .admin-main .page-heading h1{
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-  font-size:var(--font-heading-section)
-}
-.campaign-admin-table { min-inline-size: 52rem; }
-.campaign-admin-thumbnail {
-  inline-size: 5rem;
-  aspect-ratio: 8 / 5;
-  object-fit: cover;
-  border: 1px solid var(--color-divider);
-  border-radius: var(--radius-small);
-=======
->>>>>>> origin/taidev
-=======
->>>>>>> origin/taidev
-=======
->>>>>>> origin/taidev
+  font-size:1.8rem
 }
 .admin-main .page-heading .eyebrow{
   font-size:.62rem
@@ -393,64 +378,65 @@ a.btn-brand:focus {
 .admin-main .form-control,.admin-main .form-select{
   font-size:.83rem
 }
-@media(max-width:1100px){
-  .admin-main{
-    padding-left:22px;
-    padding-right:22px
+@media (max-width: 991.98px) {
+  .admin-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden;
+    padding: 0 16px 35px;
   }
-  .stat-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr))
+  .admin-topbar {
+    min-height: 56px;
+    margin-bottom: 20px;
   }
-  .variant-form-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr))
+  .admin-main .page-heading h1 {
+    font-size: 1.55rem;
+  }
+  .admin-main .panel {
+    padding: 18px;
+  }
+  .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .stat-grid article strong {
+    font-size: clamp(1.2rem, 2.5vw, 1.45rem);
+    margin-top: 12px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .form-grid, .variant-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .chart-box {
+    height: 240px;
+  }
+  .admin-topbar > span {
+    font-size: .75rem;
+  }
+  .admin-main .btn,
+  .admin-main .form-control,
+  .admin-main .form-select {
+    min-height: 44px;
+  }
+  .admin-main .btn-sm {
+    min-height: 40px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
 }
-@media(max-width:800px){
-  .admin-main{
-    margin:0;
-    padding:0 16px 35px
+
+@media (max-width: 576px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
-  .admin-topbar{
-    min-height:56px;
-    margin-bottom:25px
+  .stat-grid article strong {
+    font-size: clamp(1.25rem, 4.5vw, 1.55rem);
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-  .admin-main .page-heading h1{
-    font-size:1.55rem
-  }
->>>>>>> origin/taidev
-=======
-  .admin-main .page-heading h1{
-    font-size:1.55rem
-  }
->>>>>>> origin/taidev
-=======
-  .admin-main .page-heading h1{
-    font-size:1.55rem
-  }
->>>>>>> origin/taidev
-  .admin-main .panel{
-    padding:18px
-  }
-  .stat-grid{
-    gap:10px
-  }
-  .stat-grid article strong{
-    font-size:1.45rem;
-    margin-top:12px;
-    overflow-wrap:anywhere
-  }
-  .form-grid,.variant-form-grid{
-    grid-template-columns:1fr
-  }
-  .chart-box{
-    height:240px
-  }
-  .admin-topbar>span{
-    font-size:.67rem
+  .admin-main .table-responsive {
+    margin-bottom: 12px;
   }
 }
 
