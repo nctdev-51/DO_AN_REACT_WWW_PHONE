@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>PTV Mobile — Điện thoại & công nghệ</title>
     <meta name="theme-color" content="#ffffff">
+<<<<<<< HEAD
     <link rel="manifest" href="${pageContext.request.contextPath}/manifest.json">
     <script>
       if ('serviceWorker' in navigator) {
@@ -17,6 +18,11 @@
       }
     </script>
 <<<<<<< HEAD
+=======
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+>>>>>>> origin/taidev
 =======
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,7 +106,11 @@
           <c:choose>
             <c:when test="${pageContext.request.userPrincipal != null}">
 <<<<<<< HEAD
+<<<<<<< HEAD
               <div class="dropdown">
+=======
+              <div class="dropdown nav-group-dropdown">
+>>>>>>> origin/taidev
 =======
               <div class="dropdown nav-group-dropdown">
 >>>>>>> origin/taidev

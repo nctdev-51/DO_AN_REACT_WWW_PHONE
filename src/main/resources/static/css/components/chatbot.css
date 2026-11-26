@@ -42,11 +42,17 @@
 
 /* ── Chatbot Panel ─────────────────────────────────────────── */
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/taidev
 .chatbot-panel[hidden] {
     display: none !important;
 }
 
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 .chatbot-panel {
     position: fixed;
@@ -173,15 +179,21 @@
     display: flex;
     align-items: center;
 <<<<<<< HEAD
+<<<<<<< HEAD
     gap: 10px;
     padding: 9px 12px;
     background: #ffffff;
     border: 1.5px solid rgba(195, 77, 45, 0.3);
 =======
+=======
+>>>>>>> origin/taidev
     gap: 12px;
     padding: 8px 12px;
     background: #ffffff;
     border: 1.5px solid rgba(195, 77, 45, 0.25);
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
     border-radius: 12px;
     text-decoration: none;
@@ -199,7 +211,10 @@
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/taidev
 .chatbot-card-media {
     width: 48px;
     height: 48px;
@@ -226,6 +241,9 @@
     transform: scale(1.06);
 }
 
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 .chatbot-card-icon {
     font-size: 1.35rem;

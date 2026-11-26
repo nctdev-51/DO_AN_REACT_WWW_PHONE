@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <<<<<<< HEAD
+<<<<<<< HEAD
   <%@ taglib prefix="c" uri="jakarta.tags.core" %>
     <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
       <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
@@ -167,6 +168,8 @@
           </div>
           <jsp:include page="/WEB-INF/views/shared/admin/footer.jsp" />
 =======
+=======
+>>>>>>> origin/taidev
 <%@ taglib prefix="c" uri="jakarta.tags.core" %><%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %><%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %><%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <jsp:include page="/WEB-INF/views/shared/admin/header.jsp"/>
 <c:if test="${not empty successMsg}"><div class="alert alert-success alert-dismissible fade show" role="alert"><c:out value="${successMsg}"/><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div></c:if>
@@ -315,4 +318,7 @@
   </table>
 </div>
 <jsp:include page="/WEB-INF/views/shared/admin/footer.jsp"/>
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev

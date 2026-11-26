@@ -57,16 +57,22 @@
 .store-hero-content h1 {
   color: #ffffff;
 <<<<<<< HEAD
+<<<<<<< HEAD
   font-size: clamp(2.1rem, 4.8vw, 3.8rem);
   line-height: 1.12;
   letter-spacing: -0.04em;
   font-weight: 750;
 =======
+=======
+>>>>>>> origin/taidev
   font-family: var(--font-apple-display);
   font-size: clamp(2.1rem, 4.8vw, 3.8rem);
   line-height: 1.08;
   letter-spacing: -0.025em;
   font-weight: 700;
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
   margin: 0 0 var(--space-10);
   max-width: 680px;
@@ -75,14 +81,20 @@
 .store-hero-content p {
   color: rgba(255, 255, 255, 0.92);
 <<<<<<< HEAD
+<<<<<<< HEAD
   font-size: clamp(1rem, 1.8vw, 1.25rem);
   line-height: 1.5;
 =======
+=======
+>>>>>>> origin/taidev
   font-family: var(--font-apple-display);
   font-size: clamp(1rem, 1.8vw, 1.25rem);
   font-weight: 400;
   line-height: 1.18;
   letter-spacing: -0.015em;
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
   max-width: 580px;
   margin: 0 0 var(--space-12);
@@ -98,13 +110,19 @@
 .store-hero-content .quick-links a {
   color: #ffffff;
 <<<<<<< HEAD
+<<<<<<< HEAD
   font-size: 0.92rem;
   font-weight: 600;
 =======
+=======
+>>>>>>> origin/taidev
   font-family: var(--font-apple-text);
   font-size: 0.92rem;
   font-weight: 500;
   letter-spacing: 0em;
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
   text-decoration: none;
   display: inline-flex;

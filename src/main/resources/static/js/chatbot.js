@@ -6,7 +6,11 @@
     'use strict';
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     document.addEventListener('DOMContentLoaded', function () {
+=======
+    function initChatbot() {
+>>>>>>> origin/taidev
 =======
     function initChatbot() {
 >>>>>>> origin/taidev
@@ -26,6 +30,7 @@
 
         // ── Toggle Panel ──────────────────────────────────────────
 <<<<<<< HEAD
+<<<<<<< HEAD
         fabBtn.addEventListener('click', function () {
             const isHidden = chatPanel.hidden;
             chatPanel.hidden = !isHidden;
@@ -40,6 +45,8 @@
             closeBtn.addEventListener('click', function () {
                 chatPanel.hidden = true;
 =======
+=======
+>>>>>>> origin/taidev
         function toggleChatPanel() {
             const isHidden = chatPanel.hasAttribute('hidden') || chatPanel.hidden || chatPanel.style.display === 'none';
             if (isHidden) {
@@ -64,6 +71,9 @@
                 chatPanel.setAttribute('hidden', '');
                 chatPanel.hidden = true;
                 chatPanel.style.display = 'none';
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
                 fabBtn.setAttribute('aria-expanded', 'false');
             });
@@ -129,14 +139,20 @@
         function formatMessageHtml(raw) {
             if (!raw) return '';
 <<<<<<< HEAD
+<<<<<<< HEAD
             // 1. Escape HTML an toàn
             let s = raw
 =======
+=======
+>>>>>>> origin/taidev
             // 0. Loại bỏ triệt để các mã SUGGEST (kể cả chứa khoảng trắng unicode)
             let s = raw.replace(/\[[\s\S]*?(?:SUGGEST|GỢI Ý|PRODUCT|ID)\s*:?\s*\d+[\s\S]*?\]/gi, '');
 
             // 1. Escape HTML an toàn
             s = s
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -195,7 +211,11 @@
 
         // ── Helper: Safe Product Card Builder (anti-XSS) ──────────
 <<<<<<< HEAD
+<<<<<<< HEAD
         function createSuggestionCardElement(productId, titleText, priceText) {
+=======
+        function createSuggestionCardElement(productId, titleText, priceText, imageUrl) {
+>>>>>>> origin/taidev
 =======
         function createSuggestionCardElement(productId, titleText, priceText, imageUrl) {
 >>>>>>> origin/taidev
@@ -211,10 +231,13 @@
             a.title = 'Xem chi tiết ' + titleText;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             const icon = document.createElement('div');
             icon.className = 'chatbot-card-icon';
             icon.textContent = '📱';
 =======
+=======
+>>>>>>> origin/taidev
             // Media: Ảnh sản phẩm thật từ hệ thống kèm fallback
             const mediaWrap = document.createElement('div');
             mediaWrap.className = 'chatbot-card-media';
@@ -242,6 +265,9 @@
                 }
             };
             mediaWrap.appendChild(img);
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 
             const info = document.createElement('div');
@@ -269,7 +295,11 @@
             info.appendChild(nameEl);
             info.appendChild(metaEl);
 <<<<<<< HEAD
+<<<<<<< HEAD
             a.appendChild(icon);
+=======
+            a.appendChild(mediaWrap);
+>>>>>>> origin/taidev
 =======
             a.appendChild(mediaWrap);
 >>>>>>> origin/taidev
@@ -299,7 +329,12 @@
                 const name = p && p.name != null ? String(p.name) : ('Sản phẩm #' + (p && p.id ? p.id : ''));
                 const price = p && p.price != null ? String(p.price) : '';
 <<<<<<< HEAD
+<<<<<<< HEAD
                 const card = createSuggestionCardElement(p && p.id, name, price);
+=======
+                const imageUrl = p && p.imageUrl != null ? String(p.imageUrl) : '';
+                const card = createSuggestionCardElement(p && p.id, name, price, imageUrl);
+>>>>>>> origin/taidev
 =======
                 const imageUrl = p && p.imageUrl != null ? String(p.imageUrl) : '';
                 const card = createSuggestionCardElement(p && p.id, name, price, imageUrl);
@@ -321,7 +356,11 @@
 
             ids.slice(0, 3).forEach(function (id) {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '');
+=======
+                const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '', null);
+>>>>>>> origin/taidev
 =======
                 const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '', null);
 >>>>>>> origin/taidev
@@ -354,8 +393,11 @@
             }, 30);
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
     });
 =======
+=======
+>>>>>>> origin/taidev
     }
 
     if (document.readyState === 'loading') {
@@ -363,5 +405,8 @@
     } else {
         initChatbot();
     }
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 })();

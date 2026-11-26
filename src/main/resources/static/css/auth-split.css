@@ -9,14 +9,20 @@
   min-height: 100vh;
   background: #ffffff;
 <<<<<<< HEAD
+<<<<<<< HEAD
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: #0f172a;
 =======
+=======
+>>>>>>> origin/taidev
   font-family: var(--font-apple-text);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
   overflow-x: hidden;
 }
@@ -124,16 +130,22 @@
 
 .visual-caption h2 {
 <<<<<<< HEAD
+<<<<<<< HEAD
   font-size: clamp(2.8rem, 4.8vw, 4rem);
   font-weight: 850;
   line-height: 1.15;
   letter-spacing: -0.04em;
 =======
+=======
+>>>>>>> origin/taidev
   font-family: var(--font-apple-display);
   font-size: clamp(2.8rem, 4.8vw, 4rem);
   font-weight: 700;
   line-height: 1.08;
   letter-spacing: -0.025em;
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
   margin-bottom: 20px;
   color: #ffffff !important;
@@ -142,14 +154,20 @@
 
 .visual-caption p {
 <<<<<<< HEAD
+<<<<<<< HEAD
   font-size: 1.25rem;
   line-height: 1.7;
 =======
+=======
+>>>>>>> origin/taidev
   font-family: var(--font-apple-display);
   font-size: 1.25rem;
   font-weight: 400;
   line-height: 1.18;
   letter-spacing: -0.015em;
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
   color: #ffffff !important;
   font-weight: 500;
@@ -249,30 +267,42 @@
 
 .form-heading h2 {
 <<<<<<< HEAD
+<<<<<<< HEAD
   font-size: 1.75rem;
   font-weight: 750;
   letter-spacing: -0.03em;
   color: #0f172a;
 =======
+=======
+>>>>>>> origin/taidev
   font-family: var(--font-apple-display);
   font-size: 1.75rem;
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.02em;
   color: var(--text-primary);
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
   margin-bottom: 6px;
 }
 
 .form-heading p {
 <<<<<<< HEAD
+<<<<<<< HEAD
   font-size: 0.92rem;
   color: #64748b;
 =======
+=======
+>>>>>>> origin/taidev
   font-family: var(--font-apple-text);
   font-size: 0.92rem;
   line-height: 1.45;
   color: var(--text-secondary);
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
   margin: 0;
 }

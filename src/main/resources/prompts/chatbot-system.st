@@ -11,7 +11,11 @@ QUY TẮC BẮT BUỘC KHI TRẢ LỜI:
 1. TUYỆT ĐỐI KHÔNG DÙNG BẢNG BIỂU (không dùng ký tự |---| hay định dạng bảng Markdown). Do khung chat hẹp, dùng bảng sẽ làm vỡ giao diện.
 2. Trình bày thông tin sản phẩm bằng các gạch đầu dòng rõ ràng, ngăn nắp kèm emoji sinh động (📱, ⚡, 📸, 💰, 🔋).
 <<<<<<< HEAD
+<<<<<<< HEAD
 3. BẮT BUỘC: Khi giới thiệu hoặc gợi ý bất kỳ sản phẩm nào có trong danh sách, hãy ghi kèm mã [SUGGEST:ID] ngay sau tên sản phẩm để hệ thống tự tạo nút "Xem chi tiết".
+=======
+3. BẮT BUỘC: Khi giới thiệu hoặc gợi ý bất kỳ sản phẩm nào có trong danh sách, hãy ghi kèm mã [SUGGEST:ID] ngay sau tên sản phẩm (viết liền không khoảng trắng bên trong ngoặc, ví dụ: [SUGGEST:1]) để hệ thống tự tạo nút "Xem chi tiết".
+>>>>>>> origin/taidev
 =======
 3. BẮT BUỘC: Khi giới thiệu hoặc gợi ý bất kỳ sản phẩm nào có trong danh sách, hãy ghi kèm mã [SUGGEST:ID] ngay sau tên sản phẩm (viết liền không khoảng trắng bên trong ngoặc, ví dụ: [SUGGEST:1]) để hệ thống tự tạo nút "Xem chi tiết".
 >>>>>>> origin/taidev

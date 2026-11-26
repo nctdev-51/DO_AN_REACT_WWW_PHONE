@@ -54,7 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pathname === window.location.pathname) link.setAttribute('aria-current', 'page');
   });
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/taidev
 
   // ── Store Header Dropdowns: Hover, Safe Bridge & Multi-Device Accessibility ──
   const navDropdowns = document.querySelectorAll('.store-nav .dropdown');
@@ -167,6 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
   document.addEventListener('submit', event => {
     const form = event.target;
