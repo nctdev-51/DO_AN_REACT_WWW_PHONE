@@ -1,2 +1,18 @@
-<%@ tag pageEncoding="UTF-8" %><%@ attribute name="banner" required="true" type="iuh.fit.www_phone_ver1.entity.CampaignBanner" %><%@ taglib prefix="c" uri="jakarta.tags.core" %><%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
-<section class="campaign-banner ${banner.theme == 'DARK' ? 'campaign-dark' : ''} ${banner.placement == 'TILE' ? 'campaign-tile' : ''}" data-reveal><div><span class="eyebrow">PTV MOBILE</span><h2><c:out value="${banner.title}"/></h2><p><c:out value="${banner.subtitle}"/></p><a class="btn btn-brand" href="${pageContext.request.contextPath}${banner.targetPath}"><c:out value="${banner.actionLabel}"/></a></div><c:if test="${not empty banner.imagePath}"><c:set var="resolvedBannerImg" value="${fn:startsWith(banner.imagePath, 'http') ? banner.imagePath : pageContext.request.contextPath.concat(banner.imagePath)}" /><img src="${resolvedBannerImg}" alt="<c:out value='${banner.imageLabel}'/>" loading="lazy" style="aspect-ratio: 16/9; object-fit: cover; max-width: 100%; height: auto; border-radius: 8px;"></c:if></section>
+<%@ tag pageEncoding="UTF-8" %>
+<%@ attribute name="banner" required="true" type="iuh.fit.www_phone_ver1.entity.CampaignBanner" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<section class="campaign-banner ${banner.theme == 'DARK' ? 'campaign-dark' : ''} ${banner.placement == 'TILE' ? 'campaign-tile' : ''} ${empty banner.imagePath ? 'campaign-banner-text-only' : ''}" data-reveal>
+  <div>
+    <span class="eyebrow">PTV MOBILE</span>
+    <h2><c:out value="${banner.title}"/></h2>
+    <c:if test="${not empty banner.subtitle}"><p><c:out value="${banner.subtitle}"/></p></c:if>
+    <c:url var="destination" value="${banner.targetPath}"/>
+    <a class="btn btn-brand" href="<c:out value='${destination}'/>"><c:out value="${banner.actionLabel}"/></a>
+  </div>
+  <c:if test="${not empty banner.imagePath}">
+    <c:url var="imageUrl" value="${banner.imagePath}"/>
+    <div class="campaign-banner-media">
+      <img src="<c:out value='${imageUrl}'/>" alt="<c:out value='${banner.imageLabel}'/>" loading="lazy">
+    </div>
+  </c:if>
+</section>

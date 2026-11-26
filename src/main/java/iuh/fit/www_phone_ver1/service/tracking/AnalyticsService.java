@@ -1,13 +1,14 @@
 package iuh.fit.www_phone_ver1.service.tracking;
 
 import iuh.fit.www_phone_ver1.entity.Product;
+import iuh.fit.www_phone_ver1.entity.mongo.UserEventDailyStats;
+import iuh.fit.www_phone_ver1.entity.mongo.UserEventDailyStats.Interaction;
 import iuh.fit.www_phone_ver1.repository.OrderRepository;
 import iuh.fit.www_phone_ver1.repository.ProductRepository;
 import iuh.fit.www_phone_ver1.repository.mongo.UserEventRepository;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -22,20 +23,19 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
-import org.springframework.data.mongodb.core.aggregation.DateOperators;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AnalyticsService {
-  private static final ZoneId BUSINESS_TIME_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
   private final UserEventRepository events;
   private final MongoTemplate mongo;
   private final OrderRepository orders;
   private final ProductRepository products;
   private final JdbcTemplate jdbcTemplate;
+  private final DailyTrackingStats dailyStats;
 
   @Autowired
   public AnalyticsService(
@@ -43,21 +43,14 @@ public class AnalyticsService {
       MongoTemplate mongo,
       OrderRepository orders,
       ProductRepository products,
+      DailyTrackingStats dailyStats,
       ObjectProvider<JdbcTemplate> jdbcTemplateProvider) {
     this.events = events;
     this.mongo = mongo;
     this.orders = orders;
     this.products = products;
+    this.dailyStats = dailyStats;
     this.jdbcTemplate = jdbcTemplateProvider == null ? null : jdbcTemplateProvider.getIfAvailable();
-  }
-
-  // Tương thích ngược với các unit tests hiện tại
-  public AnalyticsService(
-      UserEventRepository events,
-      MongoTemplate mongo,
-      OrderRepository orders,
-      ProductRepository products) {
-    this(events, mongo, orders, products, null);
   }
 
   public record Report(
@@ -95,23 +88,27 @@ public class AnalyticsService {
 
 
   public Report report(LocalDate fromDate, LocalDate toDate) {
+    return report(fromDate, toDate, null);
+  }
+
+  public Report report(LocalDate fromDate, LocalDate toDate, Long categoryId) {
+    var summaries = dailyStats.read(fromDate, toDate);
+    Interaction totals = summaries.stream().map(UserEventDailyStats::totals)
+        .reduce(Interaction.ZERO, Interaction::plus);
     LocalDateTime from = fromDate.atStartOfDay();
     LocalDateTime to = toDate.plusDays(1).atStartOfDay().minusNanos(1);
-    long views = events.countByEventTypeAndCreatedAtBetween("PAGE_VIEW", from, to);
-    long clicks = events.countByEventTypeAndCreatedAtBetween("PRODUCT_CLICK", from, to);
-    long cartAdds = events.countByEventTypeAndCreatedAtBetween("ADD_TO_CART", from, to);
     long chatbotMessages = events.countByEventTypeAndCreatedAtBetween("CHAT_MESSAGE", from, to);
-    double conversionRate = clicks == 0 ? 0 : (double) cartAdds * 100 / clicks;
+    double conversionRate = totals.clicks() == 0 ? 0 : (double) totals.cartAdds() * 100 / totals.clicks();
 
     return new Report(
-        views,
+        totals.views(),
         conversionRate,
         orders.countByOrderDateBetween(from, to),
         countNewVisitors(from, to),
         chatbotMessages,
-        dailyViews(fromDate, toDate),
-        topProducts(from, to),
-        topKeywords(from, to));
+        dailyViews(fromDate, toDate, summaries),
+        topProducts(summaries, categoryId),
+        topKeywords(summaries));
   }
 
   private long countNewVisitors(LocalDateTime from, LocalDateTime to) {
@@ -131,109 +128,45 @@ public class AnalyticsService {
     return count == null ? 0 : count.getCount();
   }
 
-  private List<DailyView> dailyViews(LocalDate fromDate, LocalDate toDate) {
-    LocalDateTime from = fromDate.atStartOfDay();
-    LocalDateTime to = toDate.plusDays(1).atStartOfDay().minusNanos(1);
-    Aggregation aggregation =
-        Aggregation.newAggregation(
-            Aggregation.match(
-                Criteria.where("eventType").is("PAGE_VIEW").and("createdAt").gte(from).lte(to)),
-            Aggregation.project()
-                .and(
-                    DateOperators.DateToString.dateOf("createdAt")
-                        .toString("%Y-%m-%d")
-                        .withTimezone(DateOperators.Timezone.fromZone(BUSINESS_TIME_ZONE)))
-                .as("day"),
-            Aggregation.group("day").count().as("count"),
-            Aggregation.sort(Sort.Direction.ASC, "_id"));
-    AggregationResults<DailyViewRow> result =
-        mongo.aggregate(aggregation, "user_events", DailyViewRow.class);
-    Map<LocalDate, Long> counts =
-        result.getMappedResults().stream()
-            .collect(
-                Collectors.toMap(
-                    row -> LocalDate.parse(row.getId()), DailyViewRow::getCount, Long::sum));
-
-    List<DailyView> rows = new ArrayList<>();
-    for (LocalDate day = fromDate; !day.isAfter(toDate); day = day.plusDays(1)) {
-      rows.add(new DailyView(day, counts.getOrDefault(day, 0L)));
-    }
-    return rows;
+  private List<DailyView> dailyViews(
+      LocalDate from, LocalDate to, List<UserEventDailyStats> summaries) {
+    Map<LocalDate, Long> counts = summaries.stream().collect(Collectors.toMap(
+        row -> LocalDate.parse(row.day()), row -> row.totals().views()));
+    return from.datesUntil(to.plusDays(1))
+        .map(day -> new DailyView(day, counts.getOrDefault(day, 0L))).toList();
   }
 
-  private List<TopProduct> topProducts(LocalDateTime from, LocalDateTime to) {
-    var pageViews =
-        ConditionalOperators.when(Criteria.where("eventType").is("PAGE_VIEW"))
-            .then(1)
-            .otherwise(0);
-    var productClicks =
-        ConditionalOperators.when(Criteria.where("eventType").is("PRODUCT_CLICK"))
-            .then(1)
-            .otherwise(0);
-    var addToCarts =
-        ConditionalOperators.when(Criteria.where("eventType").is("ADD_TO_CART"))
-            .then(1)
-            .otherwise(0);
-    Aggregation aggregation =
-        Aggregation.newAggregation(
-            Aggregation.match(
-                Criteria.where("eventType")
-                    .in("PAGE_VIEW", "PRODUCT_CLICK", "ADD_TO_CART")
-                    .and("productId")
-                    .ne(null)
-                    .and("createdAt")
-                    .gte(from)
-                    .lte(to)),
-            Aggregation.group("productId")
-                .sum(pageViews)
-                .as("views")
-                .sum(productClicks)
-                .as("clicks")
-                .sum(addToCarts)
-                .as("cartAdds"),
-            Aggregation.sort(Sort.Direction.DESC, "views"),
-            Aggregation.limit(10));
+  private List<TopProduct> topProducts(List<UserEventDailyStats> summaries, Long categoryId) {
+    Map<Long, Interaction> counts = new HashMap<>();
+    summaries.stream().flatMap(day -> day.products().stream())
+        .filter(row -> categoryId == null || categoryId.equals(row.categoryId()))
+        .forEach(row -> counts.merge(row.productId(), row.interaction(), Interaction::plus));
 
-    AggregationResults<TopProductRow> result =
-        mongo.aggregate(aggregation, "user_events", TopProductRow.class);
-    List<TopProductRow> rows = result.getMappedResults();
-    List<Long> productIds = rows.stream().map(TopProductRow::getId).toList();
-    Map<Long, Product> productById =
-        products.findAllById(productIds).stream()
-            .collect(Collectors.toMap(Product::getId, Function.identity()));
-
-    return rows.stream()
-        .map(
-            row -> {
-              long clicks = row.getClicks();
-              double conversionRate = clicks == 0 ? 0 : (double) row.getCartAdds() * 100 / clicks;
-              Product product = productById.get(row.getId());
-              String name = product == null ? "Sản phẩm #" + row.getId() : product.getName();
-              return new TopProduct(
-                  row.getId(), name, row.getViews(), clicks, row.getCartAdds(), conversionRate);
-            })
-        .toList();
+    var ranked = counts.entrySet().stream()
+        .sorted(Map.Entry.<Long, Interaction>comparingByValue(
+            Comparator.comparingLong(Interaction::views).reversed())
+            .thenComparing(Map.Entry.comparingByKey()))
+        .limit(10).toList();
+    var names = products.findAllById(ranked.stream().map(Map.Entry::getKey).toList())
+        .stream().collect(Collectors.toMap(Product::getId, Product::getName));
+    return ranked.stream().map(entry -> {
+      long productId = entry.getKey();
+      Interaction row = entry.getValue();
+      double rate = row.clicks() == 0 ? 0 : (double) row.cartAdds() * 100 / row.clicks();
+      return new TopProduct(productId, names.getOrDefault(productId, "Sản phẩm #" + productId),
+          row.views(), row.clicks(), row.cartAdds(), rate);
+    }).toList();
   }
 
-  private List<TopKeyword> topKeywords(LocalDateTime from, LocalDateTime to) {
-    Aggregation aggregation =
-        Aggregation.newAggregation(
-            Aggregation.match(
-                Criteria.where("eventType")
-                    .is("SEARCH")
-                    .and("keyword")
-                    .nin(null, "")
-                    .and("createdAt")
-                    .gte(from)
-                    .lte(to)),
-            Aggregation.group("keyword").count().as("count"),
-            Aggregation.sort(Sort.Direction.DESC, "count"),
-            Aggregation.limit(10));
-    AggregationResults<TopKeywordRow> result =
-        mongo.aggregate(aggregation, "user_events", TopKeywordRow.class);
-    return result.getMappedResults().stream()
-        .map(row -> new TopKeyword(row.getId(), row.getCount()))
-        .toList();
+  private List<TopKeyword> topKeywords(List<UserEventDailyStats> summaries) {
+    Map<String, Long> counts = new HashMap<>();
+    summaries.stream().flatMap(day -> day.keywords().stream())
+        .forEach(row -> counts.merge(row.keyword(), row.count(), Long::sum));
+    return counts.entrySet().stream()
+        .sorted(Map.Entry.<String, Long>comparingByValue().reversed()
+            .thenComparing(Map.Entry.comparingByKey()))
+        .limit(10)
+        .map(entry -> new TopKeyword(entry.getKey(), entry.getValue())).toList();
   }
 
   // ─── CHỨC NĂNG 5: DỰ BÁO NHU CẦU & CẢNH BÁO NGUY CƠ CHÁY HÀNG ───────────────
@@ -342,15 +275,6 @@ public class AnalyticsService {
     long hours = mins / 60;
     if (hours < 24) return hours + " giờ trước";
     return (hours / 24) + " ngày trước";
-  }
-
-  public static class DailyViewRow {
-    private String id;
-    private long count;
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public long getCount() { return count; }
-    public void setCount(long count) { this.count = count; }
   }
 
   public static class TopProductRow {

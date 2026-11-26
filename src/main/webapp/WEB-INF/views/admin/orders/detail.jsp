@@ -8,7 +8,7 @@
           <span class="eyebrow">THEO DÕI ĐƠN HÀNG</span>
           <h1>Đơn hàng #${order.id}</h1>
           <p>
-            <c:out value="${order.status}" />
+            <ui:adminOrderStatus value="${order.status}" />
           </p>
         </div>
         <strong class="price">

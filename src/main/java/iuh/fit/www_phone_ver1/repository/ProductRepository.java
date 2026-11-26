@@ -17,9 +17,21 @@ public interface ProductRepository
         org.springframework.data.jpa.repository.JpaSpecificationExecutor<Product> {
   java.util.Optional<Product> findBySku(String sku);
 
+  interface TrackingCategory {
+    Long getProductId();
+    Long getCategoryId();
+  }
+
+  @Query("select p.id as productId, c.id as categoryId from Product p "
+      + "left join p.category c where p.id in :ids")
+  List<TrackingCategory> findTrackingCategories(@Param("ids") java.util.Collection<Long> ids);
+
   List<Product> findTop4ByCategory_IdAndStatusAndIdNot(Long categoryId, Integer status, Long id);
 
   List<Product> findByStatus(Integer status);
+
+  List<Product> findByNameContainingIgnoreCase(String name, org.springframework.data.domain.Sort sort);
+
 
   Page<Product> findByStatus(Integer status, Pageable pageable);
 

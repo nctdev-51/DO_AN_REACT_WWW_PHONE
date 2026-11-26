@@ -30,8 +30,12 @@ public class AdminCategoryController {
   }
 
   @GetMapping
-  public String list(Model model) {
-    model.addAttribute("categories", categories.findAll(Sort.by("name")));
+  public String list(@RequestParam(defaultValue = "") String q, Model model) {
+    String keyword = q.trim();
+    model.addAttribute("q", keyword);
+    model.addAttribute("usedCategoryIds", new java.util.HashSet<>(categories.findIdsWithProducts()));
+    model.addAttribute("categories", keyword.isEmpty() ? categories.findAll(Sort.by("name"))
+        : categories.findByNameContainingIgnoreCase(keyword, Sort.by("name")));
     return "admin/categories/list";
   }
 
@@ -73,6 +77,22 @@ public class AdminCategoryController {
       flash.addFlashAttribute("successMsg", "Đã xóa danh mục.");
     } catch (IllegalArgumentException error) {
       flash.addFlashAttribute("errorMsg", error.getMessage());
+    }
+    return "redirect:/admin/categories";
+  }
+
+  @PostMapping("/batch")
+  public String batch(@RequestParam(required = false) java.util.List<Long> ids,
+      @RequestParam String action, @RequestParam(defaultValue = "") String description,
+      RedirectAttributes flash) {
+    if (!java.util.Set.of("description", "delete").contains(action)) {
+      flash.addFlashAttribute("errorMsg", "Chọn thao tác hợp lệ.");
+    } else {
+      AdminBatch.run(ids, id -> {
+        if ("delete".equals(action)) catalog.deleteCategory(id);
+        else catalog.updateCategoryDescription(id, description.trim());
+        return null;
+      }, flash);
     }
     return "redirect:/admin/categories";
   }

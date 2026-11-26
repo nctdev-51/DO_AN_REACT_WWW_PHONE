@@ -95,6 +95,10 @@
               required="required" />
           </div>
           <label class="d-block mb-3">
+            <form:checkbox path="combinableWithPoints" />
+            Cho phép dùng cùng điểm thưởng
+          </label>
+          <label class="d-block mb-3">
             <form:checkbox path="active" />
             Cho phép sử dụng
           </label>

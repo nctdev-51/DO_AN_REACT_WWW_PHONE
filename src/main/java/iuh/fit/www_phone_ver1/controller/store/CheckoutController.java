@@ -87,6 +87,7 @@ public class CheckoutController {
       result = pricing.preview(cart.getTotalAmount(), null, userId, cart.getItemList());
     }
     try {
+      result.validatePointsCombination(form.getRedeemPoints());
       pointsDiscount =
           loyalty.preview(
               userId, form.getRedeemPoints(), result.getSubtotal().subtract(result.getDiscount()));

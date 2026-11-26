@@ -84,7 +84,8 @@
                   <h2>Chào mừng trở lại</h2>
                   <p>Nhập thông tin tài khoản để tiếp tục mua sắm.</p>
                 </div>
-                <form action="${pageContext.request.contextPath}/login" method="post">
+                <form action="${pageContext.request.contextPath}/login" method="post" data-account-memory
+                  data-context="${pageContext.request.contextPath}">
                   <ui:csrf />
                   <c:if test="${not empty redirectTarget}">
                     <input type="hidden" name="redirect" value="<c:out value='${redirectTarget}'/>">
@@ -96,9 +97,15 @@
                   </div>
                   <div class="field">
                     <label for="password">Mật khẩu</label>
-                    <input id="password" name="password" type="password" class="form-control" required
-                      autocomplete="current-password" placeholder="••••••••">
+                    <div class="login-password-control">
+                      <input id="password" name="password" type="password" class="form-control" required
+                        autocomplete="current-password" placeholder="••••••••">
+                      <button class="login-password-toggle" type="button" data-password-toggle aria-controls="password"
+                        aria-pressed="false" hidden>Hiện</button>
+                    </div>
                   </div>
+                  <label class="login-remember"><input type="checkbox" data-remember-account> Nhớ tên tài khoản trên
+                    thiết bị này</label>
                   <button class="btn btn-brand">Đăng nhập</button>
                 </form>
 
@@ -156,6 +163,7 @@
           </div>
         </div>
 
+        <script src="${pageContext.request.contextPath}/js/login-account.js" defer></script>
         <script>
           function switchAuthTab(tab) {
             var loginSec = document.getElementById('section-login');

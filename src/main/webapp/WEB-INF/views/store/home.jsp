@@ -6,20 +6,6 @@
         <div class="home-page">
           <c:set var="budgetFirst"
             value="${not empty budgetProducts and (homeInterest == 'GAMING' or homeInterest == 'BUDGET')}" />
-          <c:if test="${not empty interestProducts}">
-            <div class="section-heading">
-              <h2>${homeInterest == 'CAMERA' ? 'Điện thoại chụp ảnh' : 'Điện thoại chơi game'}</h2>
-              <a href="${pageContext.request.contextPath}/products?purpose=${homeInterest}">Khám phá →</a>
-            </div>
-            <div class="product-grid">
-              <c:forEach var="product" items="${interestProducts}">
-                <ui:productCard product="${product}" />
-              </c:forEach>
-            </div>
-          </c:if>
-          <c:if test="${budgetFirst}">
-            <ui:homeBudget products="${budgetProducts}" variants="${budgetVariants}" />
-          </c:if>
           <section class="store-hero-overlay" data-reveal>
             <div class="store-hero-bg">
               <img
@@ -71,6 +57,20 @@
               <ui:campaignBanner banner="${b}" />
             </c:forEach>
           </div>
+          <c:if test="${not empty interestProducts}">
+            <div class="section-heading">
+              <h2>${homeInterest == 'CAMERA' ? 'Điện thoại chụp ảnh' : 'Điện thoại chơi game'}</h2>
+              <a href="${pageContext.request.contextPath}/products?purpose=${homeInterest}">Khám phá →</a>
+            </div>
+            <div class="product-grid">
+              <c:forEach var="product" items="${interestProducts}">
+                <ui:productCard product="${product}" />
+              </c:forEach>
+            </div>
+          </c:if>
+          <c:if test="${budgetFirst}">
+            <ui:homeBudget products="${budgetProducts}" variants="${budgetVariants}" />
+          </c:if>
           <c:if test="${not empty personalizedProducts}">
             <section class="collection-section mb-4" data-reveal>
               <div class="section-heading">

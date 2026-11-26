@@ -6,6 +6,12 @@
                     <jsp:include page="/WEB-INF/views/shared/admin/header.jsp" />
                     <section class="panel form-panel">
                         <h2>${empty bannerId ? 'Thêm chiến dịch' : 'Sửa chiến dịch'}</h2>
+                        <c:if test="${not empty draftNote}">
+                            <p class="alert alert-info">
+                                <c:out value="${draftNote}" /> Chọn “Cho phép hiển thị theo lịch” nếu muốn phát banner
+                                sau khi lưu.
+                            </p>
+                        </c:if>
                         <form:form modelAttribute="bannerForm"
                             action="${pageContext.request.contextPath}/admin/banners/save" method="post"
                             enctype="multipart/form-data">
@@ -30,7 +36,13 @@
                                     <form:option value="PRODUCT">Chi tiết sản phẩm</form:option>
                                     <form:option value="OFFERS">Trang ưu đãi</form:option>
                                     <form:option value="CHOOSE">Chọn theo nhu cầu</form:option>
+                                    <form:option value="SEARCH">Kết quả tìm kiếm</form:option>
                                 </form:select>
+                            </div>
+                            <div class="field"><label for="searchKeyword">Từ khóa đích (khi chọn kết quả tìm
+                                    kiếm)</label>
+                                <form:input path="searchKeyword" id="searchKeyword" cssClass="form-control"
+                                    maxlength="120" />
                             </div>
                             <div class="field"><label for="placement">Vị trí</label>
                                 <form:select path="placement" id="placement" cssClass="form-select">

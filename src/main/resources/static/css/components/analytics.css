@@ -75,7 +75,8 @@
   font-size: .82rem;
 }
 
-.insights-dates input {
+.insights-dates input,
+.insights-dates select {
   min-height: 36px;
   min-width: 0;
   padding: 5px 8px;
@@ -360,6 +361,16 @@
 .insights-keywords {
   display: grid;
   gap: 11px;
+}
+
+.insights .insights-campaign-link {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--accent);
+  font-size: .8rem;
+  font-weight: 650;
+  text-underline-offset: 3px;
+  white-space: nowrap;
 }
 
 .insights-keywords li>div {

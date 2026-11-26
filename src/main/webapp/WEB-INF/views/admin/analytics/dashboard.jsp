@@ -8,24 +8,50 @@
         <c:url var="exportUrl" value="/admin/analytics/export">
           <c:param name="from" value="${from}" />
           <c:param name="to" value="${to}" />
+          <c:if test="${not empty categoryId}">
+            <c:param name="categoryId" value="${categoryId}" />
+          </c:if>
+        </c:url>
+        <c:url var="weekUrl" value="/admin/analytics">
+          <c:param name="days" value="7" />
+          <c:if test="${not empty categoryId}">
+            <c:param name="categoryId" value="${categoryId}" />
+          </c:if>
+        </c:url>
+        <c:url var="monthUrl" value="/admin/analytics">
+          <c:param name="days" value="30" />
+          <c:if test="${not empty categoryId}">
+            <c:param name="categoryId" value="${categoryId}" />
+          </c:if>
         </c:url>
 
         <div class="insights">
           <section class="insights-toolbar" aria-label="Bộ lọc thống kê">
             <nav class="insights-segment" aria-label="Khoảng thời gian nhanh">
-              <a href="${analyticsUrl}?days=7" aria-current="${selectedPreset == '7' ? 'page' : 'false'}">7 ngày</a>
-              <a href="${analyticsUrl}?days=30" aria-current="${selectedPreset == '30' ? 'page' : 'false'}">30 ngày</a>
+              <a href="<c:out value='${weekUrl}'/>" aria-current="${selectedPreset == '7' ? 'page' : 'false'}">7
+                ngày</a>
+              <a href="<c:out value='${monthUrl}'/>" aria-current="${selectedPreset == '30' ? 'page' : 'false'}">30
+                ngày</a>
             </nav>
             <form method="get" action="${analyticsUrl}" class="insights-dates">
               <label for="analytics-from">Từ ngày</label>
               <input id="analytics-from" name="from" type="date" value="${from}" required>
               <label for="analytics-to">Đến ngày</label>
               <input id="analytics-to" name="to" type="date" value="${to}" required>
+              <label for="analytics-category">Danh mục tương tác</label>
+              <select id="analytics-category" name="categoryId">
+                <option value="">Tất cả danh mục</option>
+                <c:forEach var="category" items="${categories}">
+                  <option value="${category.id}" ${category.id eq categoryId ? 'selected' : '' }>
+                    <c:out value="${category.name}" />
+                  </option>
+                </c:forEach>
+              </select>
               <button class="insights-action insights-action-primary" type="submit">
                 <ui:icon name="filter" />Áp dụng
               </button>
             </form>
-            <a class="insights-action" href="${exportUrl}">
+            <a class="insights-action" href="<c:out value='${exportUrl}'/>">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                 <path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" />
               </svg>
@@ -158,8 +184,14 @@
               <header class="insights-card-head">
                 <div>
                   <h2 id="analytics-products-title">Tương tác sản phẩm</h2>
-                  <p>So sánh 5 sản phẩm có nhiều lượt xem nhất</p>
+                  <p>So sánh 5 sản phẩm có nhiều lượt xem nhất trong danh mục đã chọn.</p>
                 </div>
+                <c:if test="${not empty report.topProducts}">
+                  <c:url var="leadBanner" value="/admin/banners/new">
+                    <c:param name="productId" value="${report.topProducts[0].productId}" />
+                  </c:url>
+                  <a class="insights-action" href="<c:out value='${leadBanner}'/>">Tạo banner dẫn đầu</a>
+                </c:if>
               </header>
               <c:choose>
                 <c:when test="${not empty report.topProducts}">
@@ -182,6 +214,7 @@
                             <th scope="col">Nhấp</th>
                             <th scope="col">Thêm giỏ</th>
                             <th scope="col">Tỷ lệ</th>
+                            <th scope="col">Chiến dịch</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -203,6 +236,13 @@
                               </td>
                               <td>
                                 <fmt:formatNumber value="${product.conversionRate}" maxFractionDigits="1" />%
+                              </td>
+                              <td>
+                                <c:url var="productBanner" value="/admin/banners/new">
+                                  <c:param name="productId" value="${product.productId}" />
+                                </c:url>
+                                <a class="insights-campaign-link" href="<c:out value='${productBanner}'/>">Tạo
+                                  banner</a>
                               </td>
                             </tr>
                           </c:forEach>
@@ -236,6 +276,11 @@
                           </strong></div>
                         <meter min="0" max="${report.topKeywords[0].count}" value="${keyword.count}"
                           aria-hidden="true"></meter>
+                        <c:url var="keywordBanner" value="/admin/banners/new">
+                          <c:param name="keyword" value="${keyword.keyword}" />
+                        </c:url>
+                        <a class="insights-campaign-link" href="<c:out value='${keywordBanner}'/>"
+                          aria-label="Tạo banner từ từ khóa <c:out value='${keyword.keyword}'/>">Tạo banner</a>
                       </li>
                     </c:forEach>
                   </ol>
