@@ -81,6 +81,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
   long countByStatus(String status);
 
+  @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"user"})
   List<Order> findTop5ByOrderByOrderDateDesc();
 
   List<Order> findByStatusAndOrderDateGreaterThanEqual(String status, LocalDateTime start);

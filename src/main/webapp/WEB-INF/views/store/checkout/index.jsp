@@ -73,8 +73,8 @@
       <h3 class="mt-4">3. Mã giảm giá, điểm thưởng &amp; Thanh toán</h3>
       <div class="field">
         <label for="promotionCode">Mã giảm giá</label>
-        <div class="d-flex gap-2">
-          <form:input path="promotionCode" id="promotionCode" cssClass="form-control" maxlength="40" placeholder="Nhập mã giảm giá"/>
+        <div class="d-flex flex-wrap gap-2">
+          <form:input path="promotionCode" id="promotionCode" cssClass="form-control flex-grow-1" style="min-width:180px" maxlength="40" placeholder="Nhập mã giảm giá"/>
           <button class="btn btn-outline-dark" type="submit" formaction="${pageContext.request.contextPath}/checkout/quote" formnovalidate>Áp dụng</button>
         </div>
         <a class="small" href="${pageContext.request.contextPath}/offers" target="_blank" rel="noopener">Xem mã ưu đãi đang có →</a>

@@ -1261,6 +1261,11 @@ textarea.form-control{
   .checkout-layout{
     grid-template-columns:1.3fr 1fr
   }
+  @media(max-width:767px){
+    .checkout-layout{
+      grid-template-columns:1fr
+    }
+  }
   .filter-grid{
     grid-template-columns:repeat(3,minmax(0,1fr))
   }
