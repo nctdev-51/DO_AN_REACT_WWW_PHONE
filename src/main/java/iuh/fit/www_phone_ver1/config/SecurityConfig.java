@@ -83,9 +83,7 @@ public class SecurityConfig {
     http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/ai/chat", "/api/tracking"));
     http.authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info")
-                    .permitAll()
-                    .requestMatchers("/admin/**", "/actuator", "/actuator/**")
+                auth.requestMatchers("/admin/**")
                     .hasRole("ADMIN")
                     .requestMatchers(
                         "/checkout/**", "/orders/**", "/account/**", "/payments/vnpay/return")

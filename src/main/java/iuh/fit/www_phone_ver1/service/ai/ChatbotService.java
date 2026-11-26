@@ -70,7 +70,6 @@ public class ChatbotService {
   /**
    * Xử lý tin nhắn chatbot từ người dùng (alias theo task spec).
    */
-  @io.micrometer.core.annotation.Timed(value = "ptv.chatbot.reply", histogram = true)
   public ChatResponseDTO answer(String userMessage, String sessionId) {
     return chat(userMessage, sessionId);
   }
@@ -78,7 +77,6 @@ public class ChatbotService {
   /**
    * Xử lý tin nhắn chatbot từ người dùng.
    */
-  @io.micrometer.core.annotation.Timed(value = "ptv.chatbot.reply", histogram = true)
   public ChatResponseDTO chat(String userMessage, String sessionId) {
     if (!isAiEnabled()) {
       return fallbackChat(userMessage);

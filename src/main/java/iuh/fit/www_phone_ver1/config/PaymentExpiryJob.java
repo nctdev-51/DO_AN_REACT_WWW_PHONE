@@ -6,7 +6,6 @@ import org.springframework.scheduling.annotation.*;
 import org.springframework.stereotype.Component;
 
 @Component
-@org.springframework.context.annotation.Lazy(false)
 @ConditionalOnProperty(
     name = "app.payments.expiry-enabled",
     havingValue = "true",
@@ -18,7 +17,6 @@ public class PaymentExpiryJob {
     this.orders = orders;
   }
 
-  @io.micrometer.core.annotation.Timed("ptv.payments.expiry")
   @Scheduled(fixedDelay = 60000, initialDelay = 60000)
   public void expire() {
     orders.expireUnpaidOrders();

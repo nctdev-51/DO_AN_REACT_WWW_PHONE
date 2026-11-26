@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.model.ChatModel;
@@ -12,7 +13,6 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +28,9 @@ public class ProductDescriptionService {
     private String apiKey;
 
     // In-memory cache: productId -> description
-    private final ConcurrentMapCache descriptionCache = new ConcurrentMapCache("productAiDescriptions", false);
+    private final ConcurrentHashMap<Long, String> descriptionCache = new ConcurrentHashMap<>();
     // In-memory cache: productId -> key features list
-    private final ConcurrentMapCache featuresCache = new ConcurrentMapCache("productAiFeatures", false);
-
-    public List<ConcurrentMapCache> caches() {
-        return List.of(descriptionCache, featuresCache);
-    }
+    private final ConcurrentHashMap<Long, List<String>> featuresCache = new ConcurrentHashMap<>();
 
     private boolean isAiEnabled() {
         return chatModel != null
@@ -49,7 +45,7 @@ public class ProductDescriptionService {
      * Nếu AI không khả dụng, trả về mô tả fallback từ dữ liệu sản phẩm.
      */
     public String generateDescription(Product p) {
-        return descriptionCache.get(p.getId(), () -> doGenerateDescription(p));
+        return descriptionCache.computeIfAbsent(p.getId(), id -> doGenerateDescription(p));
     }
 
     /**
@@ -65,7 +61,7 @@ public class ProductDescriptionService {
      * Sinh danh sách điểm nổi bật (có cache).
      */
     public List<String> generateKeyFeatures(Product p) {
-        return featuresCache.get(p.getId(), () -> doGenerateKeyFeatures(p));
+        return featuresCache.computeIfAbsent(p.getId(), id -> doGenerateKeyFeatures(p));
     }
 
     /**
@@ -82,8 +78,8 @@ public class ProductDescriptionService {
      */
     public void clearCache(Long productId) {
         if (productId != null) {
-            descriptionCache.evict(productId);
-            featuresCache.evict(productId);
+            descriptionCache.remove(productId);
+            featuresCache.remove(productId);
         } else {
             descriptionCache.clear();
             featuresCache.clear();
