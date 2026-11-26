@@ -51,6 +51,7 @@ public class OrderService {
     this.orderDetails = orderDetails;
   }
 
+  @io.micrometer.core.annotation.Timed(value = "ptv.orders.place", histogram = true)
   @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
   public Order placeOrder(Cart cart, String email, CheckoutForm form) {
     if (cart == null || cart.getItemList().isEmpty())
