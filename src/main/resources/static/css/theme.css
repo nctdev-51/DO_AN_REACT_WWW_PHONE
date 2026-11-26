@@ -3,6 +3,7 @@ body {
   background: var(--color-canvas);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   color: var(--color-text);
   font-family: var(--font-family-stack);
   font-size: var(--font-size-md);
@@ -19,6 +20,8 @@ h3 {
 }
 
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
   color: var(--text-primary);
@@ -51,6 +54,9 @@ h3 {
   letter-spacing: -0.01em;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -60,7 +66,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -70,6 +79,7 @@ h3 {
   outline-offset: var(--space-2);
   box-shadow: none;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 
@@ -102,12 +112,17 @@ h3 {
 =======
 =======
 >>>>>>> origin/taidev
+=======
+>>>>>>> origin/taidev
 .skip-link { background: var(--color-text); color: var(--color-text-on-dark); }
 .eyebrow { color: var(--color-text-muted); letter-spacing: .06em; font-size: var(--font-size-xs); }
 .brand { font-size: var(--font-size-xl); letter-spacing: -.045em; }
 .brand::before { background: var(--color-text); box-shadow: none; border-radius: var(--radius-small); }
 .brand span { font-weight: var(--font-weight-base); }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -118,7 +133,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -135,7 +153,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -147,7 +168,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -161,7 +185,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -172,7 +199,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -185,11 +215,17 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 .store-header .container {
   max-width: 1540px !important;
 }
 
+=======
+.store-header .container {
+  max-width: 1540px !important;
+}
+>>>>>>> origin/taidev
 =======
 .store-header .container {
   max-width: 1540px !important;
@@ -206,7 +242,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -219,7 +258,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -238,7 +280,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -249,7 +294,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -262,7 +310,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -279,7 +330,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -291,11 +345,15 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 .header-search input:focus-visible {
   outline: 0;
 }
 
+=======
+.header-search input:focus-visible { outline: 0; }
+>>>>>>> origin/taidev
 =======
 .header-search input:focus-visible { outline: 0; }
 >>>>>>> origin/taidev
@@ -316,7 +374,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -327,7 +388,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -338,7 +402,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -348,6 +415,7 @@ h3 {
   font-size: 14.5px !important;
   flex-shrink: 0 !important;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 
@@ -374,6 +442,8 @@ h3 {
 }
 
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 .store-nav a,
@@ -430,6 +500,9 @@ h3 {
   opacity: 1 !important;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -439,7 +512,10 @@ h3 {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -451,6 +527,7 @@ h3 {
   padding: 8px 0 !important;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 .dropdown-item {
@@ -466,6 +543,8 @@ h3 {
 }
 
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 /* Store Header Hover Dropdown Bridge & Smooth Transition */
@@ -519,6 +598,9 @@ h3 {
   box-shadow: none !important;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -530,6 +612,7 @@ h3 {
   background: #EFF6FF !important;
   color: #2563EB !important;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 
@@ -602,6 +685,8 @@ h3 {
 =======
 =======
 >>>>>>> origin/taidev
+=======
+>>>>>>> origin/taidev
 .store-main { padding-top: var(--space-14); padding-bottom: var(--space-17); }
 .page-heading { margin: var(--space-11) 0 var(--space-14); }
 .page-heading .eyebrow { color: var(--color-text-muted); }
@@ -631,6 +716,9 @@ h3 {
 .btn {
   font-family: var(--font-apple-text);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -638,6 +726,7 @@ h3 {
   min-height: var(--space-15);
   padding: var(--space-9) var(--space-12);
   font-size: var(--font-size-sm);
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
   font-weight: var(--font-weight-medium);
@@ -840,6 +929,8 @@ button[aria-disabled=true] {
 =======
 =======
 >>>>>>> origin/taidev
+=======
+>>>>>>> origin/taidev
   font-weight: 500;
   line-height: 1.35;
   letter-spacing: 0em;
@@ -882,6 +973,9 @@ button[aria-disabled=true] {
 .catalog-sort a.is-active { color: var(--color-action); border-color: var(--color-action); }
 .product-grid { gap: var(--space-11); }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -901,8 +995,13 @@ button[aria-disabled=true] {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.25s ease !important;
+=======
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease !important;
+>>>>>>> origin/taidev
 =======
               box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               border-color 0.25s ease !important;
@@ -971,6 +1070,7 @@ button[aria-disabled=true] {
 .product-card h3 {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   font-size: var(--font-size-md, 15px);
   line-height: var(--line-height-body, 1.45);
   min-height: 2.6rem;
@@ -981,6 +1081,8 @@ button[aria-disabled=true] {
 .product-card h3 a {
   color: #1E293B;
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
   font-family: var(--font-apple-display);
@@ -995,6 +1097,9 @@ button[aria-disabled=true] {
 .product-card h3 a {
   color: var(--text-primary);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -1005,12 +1110,15 @@ button[aria-disabled=true] {
 .product-card h3 a:hover {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   color: #2563EB;
 }
 
 .product-card .compact-spec {
   color: #64748B;
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
   color: var(--link-blue);
@@ -1020,6 +1128,9 @@ button[aria-disabled=true] {
   font-family: var(--font-apple-text);
   color: var(--text-secondary);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -1031,6 +1142,10 @@ button[aria-disabled=true] {
   min-height: 18px;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+  letter-spacing: -0.01em;
+>>>>>>> origin/taidev
 =======
   letter-spacing: -0.01em;
 >>>>>>> origin/taidev
@@ -1043,11 +1158,14 @@ button[aria-disabled=true] {
 .product-card .price {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   font-weight: 700 !important;
   color: #111827 !important;
   font-size: 1.15rem !important;
   letter-spacing: -0.02em;
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
   font-family: var(--font-apple-text);
@@ -1057,6 +1175,9 @@ button[aria-disabled=true] {
   letter-spacing: 0 !important;
   line-height: 1.35;
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -1123,7 +1244,11 @@ button[aria-disabled=true] {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 .product-card .card-bottom>a {
+=======
+.product-card .card-bottom > a {
+>>>>>>> origin/taidev
 =======
 .product-card .card-bottom > a {
 >>>>>>> origin/taidev
@@ -1137,7 +1262,11 @@ button[aria-disabled=true] {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 .product-card:hover .card-bottom>a {
+=======
+.product-card:hover .card-bottom > a {
+>>>>>>> origin/taidev
 =======
 .product-card:hover .card-bottom > a {
 >>>>>>> origin/taidev
@@ -1206,6 +1335,7 @@ button[aria-disabled=true] {
   scroll-behavior: smooth !important;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   scrollbar-width: none !important;
   /* Firefox */
   -ms-overflow-style: none !important;
@@ -1218,6 +1348,8 @@ button[aria-disabled=true] {
 =======
 =======
 >>>>>>> origin/taidev
+=======
+>>>>>>> origin/taidev
   scrollbar-width: none !important; /* Firefox */
   -ms-overflow-style: none !important; /* IE/Edge */
 }
@@ -1225,6 +1357,9 @@ button[aria-disabled=true] {
 .product-rail::-webkit-scrollbar {
   display: none !important; /* Chrome, Safari, Opera */
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -1292,7 +1427,10 @@ button[aria-disabled=true] {
   }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -1304,7 +1442,11 @@ button[aria-disabled=true] {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 .home-page>.benefits>div {
+=======
+.home-page > .benefits > div {
+>>>>>>> origin/taidev
 =======
 .home-page > .benefits > div {
 >>>>>>> origin/taidev
@@ -1316,6 +1458,7 @@ button[aria-disabled=true] {
   background: #FFFFFF;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 
@@ -1417,6 +1560,8 @@ button[aria-disabled=true] {
 =======
 =======
 >>>>>>> origin/taidev
+=======
+>>>>>>> origin/taidev
 .product-info h1 { font-size: var(--font-heading-product); font-weight: var(--font-weight-semibold); }
 .product-info > .price { font-size: var(--font-size-3xl); }
 .breadcrumb-line { color: var(--color-text-muted); font-size: var(--font-size-xs); margin-bottom: var(--space-13); }
@@ -1437,6 +1582,9 @@ button[aria-disabled=true] {
 .empty-state h2 { font-size: var(--font-size-3xl); }
 .order-summary { border-radius: var(--radius-card); }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -1448,7 +1596,10 @@ button[aria-disabled=true] {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -1462,7 +1613,10 @@ button[aria-disabled=true] {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -1478,7 +1632,10 @@ button[aria-disabled=true] {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -1489,7 +1646,10 @@ button[aria-disabled=true] {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -1502,7 +1662,10 @@ button[aria-disabled=true] {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -1517,7 +1680,10 @@ button[aria-disabled=true] {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -1527,6 +1693,7 @@ button[aria-disabled=true] {
   text-decoration: none;
   transition: color 0.15s ease;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 
@@ -1690,6 +1857,8 @@ button[aria-disabled=true] {
 =======
 =======
 >>>>>>> origin/taidev
+=======
+>>>>>>> origin/taidev
 .footer-bottom a:hover {
   color: #2563EB;
 }
@@ -1736,6 +1905,9 @@ button[aria-disabled=true] {
   .product-grid { gap: var(--space-9); }
   .product-card { border-radius: 16px !important; }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -1746,6 +1918,7 @@ button[aria-disabled=true] {
     height: 190px !important;
     padding: 16px 12px 10px !important;
   }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 
@@ -1791,6 +1964,8 @@ button[aria-disabled=true] {
   }
 }
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
   .product-card-body { padding: 10px 12px 14px !important; }
@@ -1861,6 +2036,9 @@ button[aria-disabled=true] {
   text-decoration: underline;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev

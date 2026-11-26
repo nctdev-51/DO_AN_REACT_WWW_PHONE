@@ -55,7 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 
@@ -171,6 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev

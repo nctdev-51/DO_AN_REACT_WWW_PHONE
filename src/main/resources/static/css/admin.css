@@ -237,6 +237,7 @@ a.btn-brand:focus {
 .admin-main .page-heading h1{
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   font-size:var(--font-heading-section)
 }
 .campaign-admin-table { min-inline-size: 52rem; }
@@ -246,6 +247,8 @@ a.btn-brand:focus {
   object-fit: cover;
   border: 1px solid var(--color-divider);
   border-radius: var(--radius-small);
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
 =======
@@ -413,6 +416,12 @@ a.btn-brand:focus {
   }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+  .admin-main .page-heading h1{
+    font-size:1.55rem
+  }
+>>>>>>> origin/taidev
 =======
   .admin-main .page-heading h1{
     font-size:1.55rem

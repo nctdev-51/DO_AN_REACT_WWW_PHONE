@@ -7,7 +7,11 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     document.addEventListener('DOMContentLoaded', function () {
+=======
+    function initChatbot() {
+>>>>>>> origin/taidev
 =======
     function initChatbot() {
 >>>>>>> origin/taidev
@@ -31,6 +35,7 @@
         // ── Toggle Panel ──────────────────────────────────────────
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         fabBtn.addEventListener('click', function () {
             const isHidden = chatPanel.hidden;
             chatPanel.hidden = !isHidden;
@@ -45,6 +50,8 @@
             closeBtn.addEventListener('click', function () {
                 chatPanel.hidden = true;
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
         function toggleChatPanel() {
@@ -72,6 +79,9 @@
                 chatPanel.hidden = true;
                 chatPanel.style.display = 'none';
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -140,9 +150,12 @@
             if (!raw) return '';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             // 1. Escape HTML an toàn
             let s = raw
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
             // 0. Loại bỏ triệt để các mã SUGGEST (kể cả chứa khoảng trắng unicode)
@@ -151,6 +164,9 @@
             // 1. Escape HTML an toàn
             s = s
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -212,7 +228,11 @@
         // ── Helper: Safe Product Card Builder (anti-XSS) ──────────
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         function createSuggestionCardElement(productId, titleText, priceText) {
+=======
+        function createSuggestionCardElement(productId, titleText, priceText, imageUrl) {
+>>>>>>> origin/taidev
 =======
         function createSuggestionCardElement(productId, titleText, priceText, imageUrl) {
 >>>>>>> origin/taidev
@@ -232,10 +252,13 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             const icon = document.createElement('div');
             icon.className = 'chatbot-card-icon';
             icon.textContent = '📱';
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
             // Media: Ảnh sản phẩm thật từ hệ thống kèm fallback
@@ -266,6 +289,9 @@
             };
             mediaWrap.appendChild(img);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
@@ -296,7 +322,11 @@
             info.appendChild(metaEl);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             a.appendChild(icon);
+=======
+            a.appendChild(mediaWrap);
+>>>>>>> origin/taidev
 =======
             a.appendChild(mediaWrap);
 >>>>>>> origin/taidev
@@ -330,7 +360,12 @@
                 const price = p && p.price != null ? String(p.price) : '';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                 const card = createSuggestionCardElement(p && p.id, name, price);
+=======
+                const imageUrl = p && p.imageUrl != null ? String(p.imageUrl) : '';
+                const card = createSuggestionCardElement(p && p.id, name, price, imageUrl);
+>>>>>>> origin/taidev
 =======
                 const imageUrl = p && p.imageUrl != null ? String(p.imageUrl) : '';
                 const card = createSuggestionCardElement(p && p.id, name, price, imageUrl);
@@ -357,7 +392,11 @@
             ids.slice(0, 3).forEach(function (id) {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                 const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '');
+=======
+                const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '', null);
+>>>>>>> origin/taidev
 =======
                 const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '', null);
 >>>>>>> origin/taidev
@@ -394,8 +433,11 @@
         }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     });
 =======
+=======
+>>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
     }
@@ -406,6 +448,9 @@
         initChatbot();
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/taidev
+=======
 >>>>>>> origin/taidev
 =======
 >>>>>>> origin/taidev
