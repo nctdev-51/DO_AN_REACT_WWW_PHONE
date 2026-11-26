@@ -65,6 +65,4 @@ public class PromotionForm {
   private int usageLimit = 100;
 
   private boolean active = true;
-
-  private boolean combinableWithPoints = true;
 }

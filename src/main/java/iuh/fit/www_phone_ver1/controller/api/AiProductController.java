@@ -5,10 +5,7 @@ import iuh.fit.www_phone_ver1.entity.Product;
 import iuh.fit.www_phone_ver1.repository.ProductRepository;
 import iuh.fit.www_phone_ver1.service.ai.ChatbotService;
 import iuh.fit.www_phone_ver1.service.ai.ProductDescriptionService;
-import iuh.fit.www_phone_ver1.service.tracking.TrackingService;
-import iuh.fit.www_phone_ver1.service.tracking.TrackingSession;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -47,9 +44,6 @@ public class AiProductController {
 
     @Autowired
     private ProductRepository productRepository;
-
-    @Autowired
-    private TrackingService trackingService;
 
     @GetMapping("/description/{productId}")
     public ResponseEntity<?> getDescription(@PathVariable Long productId) {
@@ -122,8 +116,7 @@ public class AiProductController {
     @PostMapping("/chat")
     public ResponseEntity<?> chat(
             @RequestBody Map<String, String> body,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+            HttpServletRequest request) {
         if (!allowAiRequest(request)) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of(
                     "error", "Bạn đang nhắn quá nhanh. Vui lòng thử lại sau ít phút."
@@ -143,24 +136,10 @@ public class AiProductController {
             ));
         }
 
-        request.getSession(true);
-        String conversationId = TrackingSession.getOrCreateId(request, response);
-        long startedAt = System.nanoTime();
-        try {
-            ChatResponseDTO chatResponse = chatbotService.chat(trimmed, conversationId);
-            return ResponseEntity.ok(chatResponse);
-        } finally {
-            long durationMs = (System.nanoTime() - startedAt) / 1_000_000L;
-            trackingService.track(
-                    conversationId,
-                    "CHAT_MESSAGE",
-                    null,
-                    null,
-                    request.getRequestURI(),
-                    Map.of("durationMs", durationMs, "topic",
-                            iuh.fit.www_phone_ver1.service.ai.ChatTopic.classify(trimmed)),
-                    request);
-        }
+        HttpSession httpSession = request != null ? request.getSession(true) : null;
+        String sessionId = httpSession != null ? httpSession.getId() : clientKey(request);
+        ChatResponseDTO response = chatbotService.chat(trimmed, sessionId);
+        return ResponseEntity.ok(response);
     }
 
     private Optional<Product> findActiveProduct(Long productId) {

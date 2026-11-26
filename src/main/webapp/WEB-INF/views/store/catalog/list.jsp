@@ -77,7 +77,7 @@
                         </select>
                       </div>
                       <div class="filter-group">
-                        <label>Khoảng giá nhanh</label>
+                        <label>Khoảng giá</label>
                         <div class="price-presets">
                           <button type="button" class="price-preset-btn" data-price-preset data-min=""
                             data-max="10000000">Dưới 10tr</button>
@@ -85,6 +85,13 @@
                             data-max="20000000">10 – 20tr</button>
                           <button type="button" class="price-preset-btn" data-price-preset data-min="20000000"
                             data-max="">Trên 20tr</button>
+                        </div>
+                        <div class="price-slider-wrapper">
+                          <div id="priceSlider" class="price-slider"></div>
+                          <div class="price-slider-values">
+                            <span id="priceSliderMinLabel">0 ₫</span>
+                            <span id="priceSliderMaxLabel">50.000.000 ₫</span>
+                          </div>
                         </div>
                         <div class="price-range-inputs">
                           <div>

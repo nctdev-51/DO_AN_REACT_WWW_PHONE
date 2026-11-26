@@ -7,36 +7,18 @@
         <a class="btn btn-brand" href="${pageContext.request.contextPath}/admin/categories/new">+ Thêm danh mục</a>
       </div>
       <section class="panel">
-        <ui:adminNameSearch action="/admin/categories" label="Tên danh mục" query="${q}" />
-        <ui:adminBatchForm action="/admin/categories/batch">
-          <jsp:attribute name="fields">
-            <div data-batch-field="description">
-              <label class="form-label" for="bulk-description">Mô tả mới</label>
-              <input id="bulk-description" class="form-control" name="description">
-            </div>
-          </jsp:attribute>
-          <jsp:body>
-            <option value="description">Cập nhật mô tả</option>
-            <option value="delete" data-destructive>Xóa danh mục</option>
-          </jsp:body>
-        </ui:adminBatchForm>
         <div class="table-responsive">
           <table class="table">
             <thead>
               <tr>
-                <th scope="col"><input type="checkbox" data-batch-all aria-label="Chọn tất cả kết quả"></th>
                 <th>Tên danh mục</th>
                 <th>Mô tả</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
-            <tbody id="admin-name-results">
+            <tbody>
               <c:forEach var="category" items="${categories}">
                 <tr>
-                  <td><input type="checkbox" name="ids" value="${category.id}" form="admin-batch"
-                      data-batch-label="<c:out value='${category.name}'/>"
-                      data-batch-actions="${usedCategoryIds.contains(category.id) ? 'description' : 'description|delete'}"
-                      aria-label="Chọn mục ${category.id}"></td>
                   <td>
                     <c:out value="${category.name}" />
                   </td>
@@ -56,11 +38,6 @@
                   </td>
                 </tr>
               </c:forEach>
-              <c:if test="${empty categories}">
-                <tr>
-                  <td colspan="4">Không tìm thấy danh mục phù hợp.</td>
-                </tr>
-              </c:if>
             </tbody>
           </table>
         </div>

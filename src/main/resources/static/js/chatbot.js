@@ -20,6 +20,15 @@
             || (document.querySelector('[data-context]')?.dataset.context)
             || '';
 
+        // ── Session ID ────────────────────────────────────────────
+        let sessionId = sessionStorage.getItem('ptvChatSessionId');
+        if (!sessionId) {
+            sessionId = typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+            sessionStorage.setItem('ptvChatSessionId', sessionId);
+        }
+
         // ── Toggle Panel ──────────────────────────────────────────
         fabBtn.addEventListener('click', function () {
             const isHidden = chatPanel.hidden;
@@ -54,7 +63,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'same-origin',
-                body: JSON.stringify({ message: text })
+                body: JSON.stringify({ message: text, sessionId: sessionId })
             })
                 .then(function (res) {
                     if (!res.ok) throw new Error('HTTP ' + res.status);

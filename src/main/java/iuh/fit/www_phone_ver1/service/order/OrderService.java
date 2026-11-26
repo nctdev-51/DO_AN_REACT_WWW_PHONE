@@ -62,8 +62,15 @@ public class OrderService {
     if (user.getStatus() != 1) throw new IllegalArgumentException("Tài khoản đã bị khóa.");
     Collection<CartItem> items = cart.getItemList();
     Map<Long, ProductVariant> locked = new HashMap<>();
+    List<Long> variantIds =
+        items.stream()
+            .map(CartItem::getVariantId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .sorted()
+            .toList();
     variants
-        .lockAll(items.stream().map(CartItem::getVariantId).toList())
+        .lockAll(variantIds)
         .forEach(v -> locked.put(v.getId(), v));
     // Validate every item before reserving stock; sorted row locks prevent overselling.
     for (CartItem item : items) {
@@ -111,6 +118,15 @@ public class OrderService {
             .paymentStatus("UNPAID")
             .paymentReference(UUID.randomUUID().toString().replace("-", ""))
             .build();
+    if ("QR".equals(form.getPaymentMethod())) {
+      order.setPaymentMethod("QR");
+      order.setPaymentChannel(
+          form.getPaymentChannel() == null ? "VIETQR" : form.getPaymentChannel().trim());
+      order.setPaymentExpiresAt(LocalDateTime.now().plusMinutes(5));
+      order.setQrToken(UUID.randomUUID().toString().replace("-", ""));
+    } else if ("VNPAY".equals(form.getPaymentMethod())) {
+      order.setPaymentExpiresAt(LocalDateTime.now().plusMinutes(15));
+    }
     BigDecimal total = BigDecimal.ZERO;
     for (CartItem item : items) {
       ProductVariant variant = locked.get(item.getVariantId());
@@ -131,7 +147,6 @@ public class OrderService {
       total = total.add(detail.getSubTotal());
     }
     var quote = pricing.reserve(total, form.getPromotionCode(), user.getId(), items);
-    quote.validatePointsCombination(form.getRedeemPoints());
     if ("VNPAY".equals(form.getPaymentMethod()) && quote.getTotal().signum() == 0)
       throw new IllegalArgumentException("Đơn 0 đồng vui lòng chọn thanh toán khi nhận hàng.");
     order.setSubtotal(total);
@@ -215,6 +230,7 @@ public class OrderService {
     }
     order.setPaymentStatus("UNPAID");
     order.setPaymentReference(UUID.randomUUID().toString().replace("-", ""));
+    order.setPaymentExpiresAt(LocalDateTime.now().plusMinutes(15));
     history.append(order, "Khách hàng", "Khách hàng yêu cầu thanh toán lại qua VNPay.");
     return orders.saveAndFlush(order);
   }
@@ -235,6 +251,9 @@ public class OrderService {
     }
     order.setPaymentMethod("COD");
     order.setPaymentStatus("UNPAID");
+    order.setPaymentExpiresAt(null);
+    order.setQrToken(null);
+    order.setPaymentChannel(null);
     history.append(order, "Khách hàng", "Chuyển phương thức thanh toán từ VNPay sang COD.");
     Order saved = orders.saveAndFlush(order);
     notifyAfterCommit(() -> mail.sendOrderConfirmation(email, saved));
@@ -242,8 +261,13 @@ public class OrderService {
   }
 
   public boolean isPaymentWindowExpired(Order order) {
-    return order.getOrderDate() != null
-        && LocalDateTime.now().isAfter(order.getOrderDate().plusMinutes(15));
+    LocalDateTime expiresAt =
+        order.getPaymentExpiresAt() != null
+            ? order.getPaymentExpiresAt()
+            : (order.getOrderDate() == null
+                ? null
+                : order.getOrderDate().plusMinutes("VNPAY".equals(order.getPaymentMethod()) ? 15 : 5));
+    return expiresAt != null && LocalDateTime.now().isAfter(expiresAt);
   }
 
   @Transactional
@@ -355,8 +379,8 @@ public class OrderService {
   @Transactional
   public void expireUnpaidOrders() {
     var expired =
-        orders.findByPaymentMethodAndPaymentStatusInAndStatusAndOrderDateBefore(
-            "VNPAY", List.of("UNPAID", "FAILED"), PENDING, LocalDateTime.now().minusMinutes(15));
+        orders.findExpiredUnpaidOrders(
+            LocalDateTime.now(), PENDING, List.of("UNPAID", "FAILED"));
     for (Order candidate : expired) {
       Order order = locked(candidate.getId());
       if (PENDING.equals(order.getStatus())

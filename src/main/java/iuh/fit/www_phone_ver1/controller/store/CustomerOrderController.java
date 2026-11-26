@@ -49,7 +49,13 @@ public class CustomerOrderController {
     model.addAttribute("refunds", refunds.findByOrder_IdOrderByIdDesc(id));
     model.addAttribute("vnpayAvailable", payments.isAvailable());
     model.addAttribute("paymentExpired", service.isPaymentWindowExpired(order));
-    model.addAttribute("paymentDeadlineIso", order.getOrderDate().plusMinutes(15).toString());
+    model.addAttribute(
+        "paymentDeadlineIso",
+        (order.getPaymentExpiresAt() != null
+                ? order.getPaymentExpiresAt()
+                : order.getOrderDate().plusMinutes(
+                    "VNPAY".equals(order.getPaymentMethod()) ? 15 : 5))
+            .toString());
     model.addAttribute("milestoneStep", resolveMilestoneStep(order));
     return "store/orders/detail";
   }

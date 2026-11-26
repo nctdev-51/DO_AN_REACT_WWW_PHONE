@@ -1,20 +1,18 @@
 package iuh.fit.www_phone_ver1.service.tracking;
 
 import iuh.fit.www_phone_ver1.entity.mongo.UserEvent;
+import iuh.fit.www_phone_ver1.repository.UserRepository;
+import iuh.fit.www_phone_ver1.repository.mongo.UserEventRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Locale;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.core.task.TaskRejectedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,10 +28,12 @@ public class TrackingService {
           "CHAT_MESSAGE",
           "AI_DESCRIPTION_VIEW");
 
-  private final TrackingPersistenceService persistence;
+  private final UserEventRepository events;
+  private final UserRepository users;
 
-  public TrackingService(TrackingPersistenceService persistence) {
-    this.persistence = persistence;
+  public TrackingService(UserEventRepository events, UserRepository users) {
+    this.events = events;
+    this.users = users;
   }
 
   public boolean track(
@@ -44,30 +44,31 @@ public class TrackingService {
       String pageUrl,
       Map<String, Object> meta,
       HttpServletRequest request) {
-    if (eventType == null || !EVENT_TYPES.contains(eventType.trim().toUpperCase(Locale.ROOT))) {
+    if (eventType == null || !EVENT_TYPES.contains(eventType.trim().toUpperCase())) {
       return false;
     }
 
-    UserEvent event = new UserEvent();
-    event.setSessionId(sessionId);
-    event.setEventType(eventType.trim().toUpperCase(Locale.ROOT));
-    event.setProductId(productId);
-    event.setKeyword(keyword);
-    event.setPageUrl(safePageUrl(pageUrl));
-    event.setMeta(safeMeta(meta));
-    event.setCreatedAt(LocalDateTime.now());
-    event.setIpHash(hashIp(clientIp(request)));
-    event.setUserAgent(request.getHeader("User-Agent"));
     try {
-      persistence.persist(event, authenticatedEmail());
+      UserEvent event = new UserEvent();
+      event.setSessionId(sessionId);
+      event.setUserId(currentUserId());
+      event.setEventType(eventType.trim().toUpperCase());
+      event.setProductId(productId);
+      event.setKeyword(keyword);
+      event.setPageUrl(pageUrl);
+      event.setMeta(meta);
+      event.setCreatedAt(LocalDateTime.now());
+      event.setIpHash(hashIp(clientIp(request)));
+      event.setUserAgent(request.getHeader("User-Agent"));
+      events.save(event);
       return true;
-    } catch (TaskRejectedException ex) {
-      log.warn("Tracking executor rejected event {}: {}", eventType, ex.getMessage());
+    } catch (Exception ex) {
+      log.warn("Could not persist tracking event {}: {}", eventType, ex.getMessage());
       return false;
     }
   }
 
-  private String authenticatedEmail() {
+  private Long currentUserId() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null || !authentication.isAuthenticated()) {
       return null;
@@ -76,36 +77,7 @@ public class TrackingService {
     if ("anonymousUser".equals(principal)) {
       return null;
     }
-    return principal;
-  }
-
-  private String safePageUrl(String pageUrl) {
-    if (pageUrl == null || !pageUrl.startsWith("/")) {
-      return null;
-    }
-    int queryStart = pageUrl.indexOf('?');
-    int fragmentStart = pageUrl.indexOf('#');
-    int end = pageUrl.length();
-    if (queryStart >= 0) end = Math.min(end, queryStart);
-    if (fragmentStart >= 0) end = Math.min(end, fragmentStart);
-    return pageUrl.substring(0, Math.min(end, 512));
-  }
-
-  private Map<String, Object> safeMeta(Map<String, Object> meta) {
-    if (meta == null || meta.isEmpty()) {
-      return null;
-    }
-    Map<String, Object> safe = new HashMap<>();
-    for (String key : Set.of("durationMs", "quantity")) {
-      Object value = meta.get(key);
-      if (value instanceof Number) {
-        safe.put(key, value);
-      }
-    }
-    if (meta.get("topic") instanceof iuh.fit.www_phone_ver1.service.ai.ChatTopic topic) {
-      safe.put("topic", topic.label());
-    }
-    return safe.isEmpty() ? null : Map.copyOf(safe);
+    return users.findByEmail(principal).map(user -> user.getId()).orElse(null);
   }
 
   private String clientIp(HttpServletRequest request) {
@@ -125,8 +97,7 @@ public class TrackingService {
         result.append(String.format("%02x", value));
       }
       return result.toString();
-    } catch (NoSuchAlgorithmException ex) {
-      log.error("SHA-256 is unavailable; tracking IP cannot be hashed.", ex);
+    } catch (Exception ex) {
       return "unavailable";
     }
   }

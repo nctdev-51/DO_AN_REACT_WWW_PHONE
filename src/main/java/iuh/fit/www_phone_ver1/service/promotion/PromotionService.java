@@ -87,23 +87,4 @@ public class PromotionService {
                             iuh.fit.www_phone_ver1.service.order.OrderStatuses.CANCELLED))));
     return result;
   }
-
-  @Transactional
-  public String updateBatch(Long id, String action) {
-    var current = promotions.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khuyến mãi."));
-    var promotion = promotions.lockByCode(current.getCode())
-        .filter(p -> p.getId().equals(id))
-        .orElseThrow(() -> new IllegalArgumentException("Khuyến mãi vừa thay đổi."));
-    if ("delete".equals(action)) {
-      if (orders.existsByPromotion_Id(id)) {
-        promotion.setActive(false);
-        return "được tắt vì đã có đơn hàng sử dụng.";
-      }
-      promotions.delete(promotion);
-    } else {
-      promotion.setActive("enable".equals(action));
-    }
-    return null;
-  }
 }

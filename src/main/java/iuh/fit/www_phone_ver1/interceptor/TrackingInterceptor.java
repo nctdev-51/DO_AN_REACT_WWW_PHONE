@@ -1,7 +1,7 @@
 package iuh.fit.www_phone_ver1.interceptor;
 
+import iuh.fit.www_phone_ver1.controller.api.TrackingController;
 import iuh.fit.www_phone_ver1.service.tracking.TrackingService;
-import iuh.fit.www_phone_ver1.service.tracking.TrackingSession;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.regex.Matcher;
@@ -28,7 +28,7 @@ public class TrackingInterceptor implements HandlerInterceptor {
     if ("GET".equalsIgnoreCase(request.getMethod())
         && (isUnder(path, "/products") || isUnder(path, "/store"))) {
       tracking.track(
-          TrackingSession.getOrCreateId(request, response),
+          TrackingController.sessionId(request, response),
           "PAGE_VIEW",
           productId(path),
           null,

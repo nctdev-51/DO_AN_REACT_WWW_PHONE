@@ -43,8 +43,7 @@
                     <c:out value="${item.caption}" />
                   </p>
                 </c:when>
-                <c:otherwise>
-                  <ui:adminProductImage path="${item.path}" />
+                <c:otherwise><img src="${pageContext.request.contextPath}${item.path}" alt="" loading="lazy">
                 </c:otherwise>
               </c:choose>
               <p>

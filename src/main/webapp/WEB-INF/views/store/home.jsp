@@ -4,8 +4,6 @@
       <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
         <jsp:include page="/WEB-INF/views/shared/store/header.jsp" />
         <div class="home-page">
-          <c:set var="budgetFirst"
-            value="${not empty budgetProducts and (homeInterest == 'GAMING' or homeInterest == 'BUDGET')}" />
           <section class="store-hero-overlay" data-reveal>
             <div class="store-hero-bg">
               <img
@@ -57,39 +55,6 @@
               <ui:campaignBanner banner="${b}" />
             </c:forEach>
           </div>
-          <c:if test="${not empty interestProducts}">
-            <div class="section-heading">
-              <h2>${homeInterest == 'CAMERA' ? 'Điện thoại chụp ảnh' : 'Điện thoại chơi game'}</h2>
-              <a href="${pageContext.request.contextPath}/products?purpose=${homeInterest}">Khám phá →</a>
-            </div>
-            <div class="product-grid">
-              <c:forEach var="product" items="${interestProducts}">
-                <ui:productCard product="${product}" />
-              </c:forEach>
-            </div>
-          </c:if>
-          <c:if test="${budgetFirst}">
-            <ui:homeBudget products="${budgetProducts}" variants="${budgetVariants}" />
-          </c:if>
-          <c:if test="${not empty personalizedProducts}">
-            <section class="collection-section mb-4" data-reveal>
-              <div class="section-heading">
-                <div>
-                  <span class="eyebrow" style="color: var(--ana-primary, #2563eb);">✨ DÀNH RIÊNG CHO BẠN</span>
-                  <h2>Gợi ý dựa trên
-                    <c:out value="${personalizedAnchorName}" />
-                  </h2>
-                </div>
-                <a href="${pageContext.request.contextPath}/recently-viewed">Đã xem gần đây →</a>
-              </div>
-              <div class="product-grid">
-                <c:forEach var="product" items="${personalizedProducts}">
-                  <ui:productCard product="${product}" />
-                </c:forEach>
-              </div>
-            </section>
-          </c:if>
-
           <div class="section-heading">
             <div><span class="eyebrow">KHÁM PHÁ PTV MOBILE</span>
               <h2>Tìm chiếc điện thoại<br>hợp với bạn.</h2>
@@ -100,9 +65,34 @@
               <ui:productCard product="${product}" />
             </c:forEach>
           </div>
-          <c:if test="${not budgetFirst}">
-            <ui:homeBudget products="${budgetProducts}" variants="${budgetVariants}" />
-          </c:if>
+          <section class="collection-section">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">NGÂN SÁCH DƯỚI 10 TRIỆU</span>
+                <h2>Vừa đủ cho mỗi ngày.</h2>
+              </div>
+              <a href="${pageContext.request.contextPath}/products?maxPrice=10000000&amp;inStock=true">Xem tất cả →</a>
+            </div>
+            <div class="product-rail-wrapper">
+              <button type="button" class="rail-nav-btn rail-prev" aria-label="Cuộn sang trái" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <div class="product-rail" tabindex="0" aria-label="Điện thoại dưới 10 triệu, cuộn ngang để xem thêm">
+                <c:forEach var="p" items="${budgetProducts}">
+                  <ui:productCard product="${p}" selectedVariant="${budgetVariants[p.id]}" />
+                </c:forEach>
+              </div>
+              <button type="button" class="rail-nav-btn rail-next" aria-label="Cuộn sang phải">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </section>
           <section class="journey-grid"><a href="${pageContext.request.contextPath}/choose"><span class="eyebrow">TÌM
                 LỰA CHỌN PHÙ HỢP</span>
               <h2>Bắt đầu từ ngân sách.</h2><span>Chọn hãng và mức chi →</span>

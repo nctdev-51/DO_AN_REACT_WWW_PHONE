@@ -1,6 +1,8 @@
 # PTV Mobile
 
-Java 17, Spring Boot, Spring MVC/JSP, Spring Security và MariaDB.
+Java 17, Spring Boot, Spring MVC/JSP, Spring Security, MariaDB và MongoDB.
+
+> 📖 **Xem tài liệu chi tiết:** [HUONG_DAN_CHAY_DU_AN.md](HUONG_DAN_CHAY_DU_AN.md) để biết các bước cài đặt và chạy chi tiết bằng Docker, MariaDB cục bộ hoặc chế độ Demo H2.
 
 ## Chạy local
 
@@ -10,7 +12,7 @@ Mặc định ứng dụng dùng profile `dev` (MariaDB + Flyway). Sao chép `.e
 
 ```powershell
 Copy-Item .env.example .env
-docker compose up -d mariadb
+docker compose up -d mariadb mongodb
 ./mvnw.cmd spring-boot:run
 ```
 

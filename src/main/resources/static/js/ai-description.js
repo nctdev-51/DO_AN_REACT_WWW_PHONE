@@ -16,7 +16,7 @@
             || (document.querySelector('[data-context]')?.dataset.context)
             || '';
 
-        const descEl     = document.getElementById('ai-description-text');
+        const descEl = document.getElementById('ai-description-text');
         const featuresWrap = document.getElementById('ai-key-features-wrap');
         const featuresList = document.getElementById('ai-key-features');
         const refreshBtn = document.getElementById('btn-refresh-ai');
@@ -50,9 +50,6 @@
                     return res.json();
                 })
                 .then(function (data) {
-                    if (!refresh && typeof window.trackEvent === 'function') {
-                        window.trackEvent('AI_DESCRIPTION_VIEW', {productId: Number(productId)});
-                    }
                     // Render description
                     if (descEl) {
                         const p = document.createElement('p');

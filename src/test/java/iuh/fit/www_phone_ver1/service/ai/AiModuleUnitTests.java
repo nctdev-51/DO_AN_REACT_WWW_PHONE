@@ -14,8 +14,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
@@ -34,9 +32,6 @@ class AiModuleUnitTests {
 
     @Mock
     private ProductRepository productRepository;
-
-    @Mock
-    private ChatMemory chatMemory;
 
     private Product samplePhone;
 
@@ -124,10 +119,6 @@ class AiModuleUnitTests {
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getReply());
         Assertions.assertTrue(response.getReply().toLowerCase().contains("giá"));
-        Mockito.verify(chatMemory)
-                .add(
-                        Mockito.eq("session-test-1"),
-                        Mockito.<List<Message>>argThat(messages -> messages.size() == 2));
     }
 
     @Test
@@ -158,7 +149,6 @@ class AiModuleUnitTests {
 
         Mockito.when(productRepository.findByStatus(Mockito.eq(1), Mockito.any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(activeProduct)));
-        Mockito.when(chatMemory.get("session-active-only", 20)).thenReturn(List.of());
         Mockito.when(productRepository.findById(10L)).thenReturn(java.util.Optional.of(activeProduct));
         Mockito.when(productRepository.findById(99L)).thenReturn(java.util.Optional.of(inactiveProduct));
         Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
@@ -172,10 +162,5 @@ class AiModuleUnitTests {
 
         Assertions.assertEquals(1, response.getProductCards().size());
         Assertions.assertEquals(10L, response.getProductCards().get(0).getId());
-        Mockito.verify(chatMemory).get("session-active-only", 20);
-        Mockito.verify(chatMemory)
-                .add(
-                        Mockito.eq("session-active-only"),
-                        Mockito.<List<Message>>argThat(messages -> messages.size() == 2));
     }
 }

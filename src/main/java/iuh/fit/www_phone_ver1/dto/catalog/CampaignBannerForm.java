@@ -21,11 +21,8 @@ public class CampaignBannerForm {
   private String actionLabel = "Khám phá sản phẩm";
 
   @NotBlank
-  @Pattern(regexp = "PRODUCT|OFFERS|CHOOSE|SEARCH")
+  @Pattern(regexp = "PRODUCT|OFFERS|CHOOSE")
   private String target = "PRODUCT";
-
-  @Size(max = 120)
-  private String searchKeyword;
 
   private Long productId;
 

@@ -11,33 +11,8 @@
       <h2 class="my-4">
         <c:out value="${product.name}" />
       </h2>
-      <ui:adminBatchForm action="/admin/products/${product.id}/variants/batch">
-        <jsp:attribute name="fields">
-          <div data-batch-field="stock">
-            <label class="form-label" for="bulk-stock">Tồn kho mới mỗi phiên bản</label>
-            <input id="bulk-stock" class="form-control" name="stock" type="number" min="0" max="1000000">
-          </div>
-        </jsp:attribute>
-        <jsp:body>
-          <option value="stock">Cập nhật tồn kho</option>
-          <option value="enable">Bật bán</option>
-          <option value="disable" data-destructive>Tạm ngưng bán</option>
-        </jsp:body>
-      </ui:adminBatchForm>
-      <label class="d-inline-flex align-items-center gap-2 mb-3">
-        <input type="checkbox" data-batch-all> Chọn tất cả phiên bản
-      </label>
       <c:forEach var="variant" items="${variants}">
-        <article class="panel mb-3" data-batch-row>
-          <label class="d-inline-flex align-items-center gap-2 mb-2">
-            <input type="checkbox" name="ids" value="${variant.id}" form="admin-batch"
-              data-batch-label="<c:out value='${variant.sku}'/>"
-              data-batch-actions="${variant.active ? 'disable' : 'enable'}|stock">
-            Chọn
-            <c:out value="${variant.sku}" />
-          </label>
-          <span class="status-badge ${variant.active ? 'status-success' : 'status-danger'}">${variant.active ? 'Đang
-            bán' : 'Ngừng bán'}</span>
+        <article class="panel mb-3">
           <form action="${pageContext.request.contextPath}/admin/products/${product.id}/variants" method="post">
             <ui:csrf />
             <input type="hidden" name="id" value="${variant.id}">

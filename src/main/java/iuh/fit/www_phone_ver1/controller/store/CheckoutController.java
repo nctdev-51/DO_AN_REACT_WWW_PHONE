@@ -9,8 +9,6 @@ import iuh.fit.www_phone_ver1.repository.*;
 import iuh.fit.www_phone_ver1.service.order.OrderService;
 import iuh.fit.www_phone_ver1.service.order.PricingService;
 import iuh.fit.www_phone_ver1.service.payment.VnPayService;
-import iuh.fit.www_phone_ver1.service.tracking.TrackingService;
-import iuh.fit.www_phone_ver1.service.tracking.TrackingSession;
 import iuh.fit.www_phone_ver1.service.user.AccountService;
 import jakarta.servlet.http.*;
 import jakarta.validation.Valid;
@@ -23,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.dao.PessimisticLockingFailureException;
 
 @Controller
 @RequestMapping("/checkout")
@@ -43,7 +42,6 @@ public class CheckoutController {
   private final iuh.fit.www_phone_ver1.service.catalog.StoreExperienceService experience;
   private final StorePolicyRepository policies;
   private final AccountService accountService;
-  private final TrackingService trackingService;
 
   public CheckoutController(
       OrderService service,
@@ -57,8 +55,7 @@ public class CheckoutController {
       iuh.fit.www_phone_ver1.service.order.LoyaltyService loyalty,
       iuh.fit.www_phone_ver1.service.catalog.StoreExperienceService experience,
       StorePolicyRepository policies,
-      AccountService accountService,
-      TrackingService trackingService) {
+      AccountService accountService) {
     this.service = service;
     this.users = users;
     this.orders = orders;
@@ -71,7 +68,6 @@ public class CheckoutController {
     this.experience = experience;
     this.policies = policies;
     this.accountService = accountService;
-    this.trackingService = trackingService;
   }
 
   private void quote(Model model, Cart cart, CheckoutForm form, String email) {
@@ -87,7 +83,6 @@ public class CheckoutController {
       result = pricing.preview(cart.getTotalAmount(), null, userId, cart.getItemList());
     }
     try {
-      result.validatePointsCombination(form.getRedeemPoints());
       pointsDiscount =
           loyalty.preview(
               userId, form.getRedeemPoints(), result.getSubtotal().subtract(result.getDiscount()));
@@ -226,8 +221,7 @@ public class CheckoutController {
       HttpSession session,
       Model model,
       Principal principal,
-      HttpServletRequest request,
-      HttpServletResponse response) {
+      HttpServletRequest request) {
     synchronized (session) {
       Object lastToken = session.getAttribute(LAST_CHECKOUT_TOKEN);
       if (checkoutToken != null && checkoutToken.equals(lastToken)) {
@@ -255,18 +249,6 @@ public class CheckoutController {
       if (errors.hasErrors()) return "store/checkout/index";
       try {
         var order = service.placeOrder(cart, principal.getName(), form);
-        String trackingSessionId = TrackingSession.getOrCreateId(request, response);
-        for (var item : order.getOrderDetails()) {
-          Long productId = item.getProduct() == null ? null : item.getProduct().getId();
-          trackingService.track(
-              trackingSessionId,
-              "PURCHASE",
-              productId,
-              null,
-              request.getRequestURI(),
-              Map.of("quantity", item.getQuantity()),
-              request);
-        }
         session.removeAttribute("cart");
         session.removeAttribute("selectedPromotion");
         session.removeAttribute(CHECKOUT_TOKEN);
@@ -274,9 +256,11 @@ public class CheckoutController {
           session.setAttribute(LAST_CHECKOUT_TOKEN, checkoutToken);
           session.setAttribute(LAST_ORDER_ID, order.getId());
         }
-        return "VNPAY".equals(order.getPaymentMethod())
-            ? "redirect:" + payments.createUrl(order, request.getRemoteAddr())
-            : "redirect:/checkout/success/" + order.getId();
+        if ("VNPAY".equals(order.getPaymentMethod()))
+          return "redirect:" + payments.createUrl(order, request.getRemoteAddr());
+        if ("QR".equals(order.getPaymentMethod()))
+          return "redirect:/payments/qr/" + order.getId();
+        return "redirect:/checkout/success/" + order.getId();
       } catch (IllegalArgumentException error) {
         quote(model, cart, form, principal.getName());
         model.addAttribute("errorMsg", error.getMessage());
@@ -285,6 +269,11 @@ public class CheckoutController {
         quote(model, cart, form, principal.getName());
         model.addAttribute("errorMsg",
             "Tồn kho vừa thay đổi, vui lòng kiểm tra lại giỏ hàng và đặt lại.");
+        return "store/checkout/index";
+      } catch (PessimisticLockingFailureException error) {
+        quote(model, cart, form, principal.getName());
+        model.addAttribute("errorMsg",
+            "Hệ thống đang xử lý nhiều đơn cùng lúc. Vui lòng thử lại sau ít giây.");
         return "store/checkout/index";
       }
     }
