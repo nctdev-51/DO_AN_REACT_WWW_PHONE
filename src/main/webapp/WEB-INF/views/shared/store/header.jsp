@@ -12,7 +12,9 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
-          navigator.serviceWorker.register('${pageContext.request.contextPath}/sw.js').catch(function () {});
+          navigator.serviceWorker.register('${pageContext.request.contextPath}/sw.js').then(function (reg) {
+            reg.update();
+          }).catch(function () {});
         });
       }
     </script>
@@ -21,16 +23,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/nouislider/nouislider.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/store.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/tokens.css?v=20261126b">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/store.css?v=20261126b">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/catalog-filter.css">
     <c:if test="${comparison != null}"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/comparison.css"></c:if>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/tokens.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css?v=20261126b">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/showcase.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/motion.css"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/retail.css">
     <%-- Module AI (Tài) --%>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/ai-panel.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/chatbot.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/chatbot.css?v=20261126b">
     <%-- Module Recommendation & Vector DB (Vĩ) --%>
     <c:if test="${includeRecommendationCarousel}">
       <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/swiper/swiper-bundle.min.css">
@@ -96,19 +98,7 @@
           </a>
           <c:choose>
             <c:when test="${pageContext.request.userPrincipal != null}">
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-              <div class="dropdown">
-=======
               <div class="dropdown nav-group-dropdown">
->>>>>>> origin/taidev
-=======
-              <div class="dropdown nav-group-dropdown">
->>>>>>> origin/taidev
-=======
-              <div class="dropdown nav-group-dropdown">
->>>>>>> origin/taidev
                 <button class="nav-account dropdown-toggle" data-bs-toggle="dropdown" type="button" aria-expanded="false"><ui:icon name="user"/> Tài khoản</button>
                 <ul class="dropdown-menu dropdown-menu-end">
                   <li>

@@ -378,65 +378,122 @@ a.btn-brand:focus {
 .admin-main .form-control,.admin-main .form-select{
   font-size:.83rem
 }
-@media (max-width: 991.98px) {
-  .admin-main {
-    margin-left: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden;
-    padding: 0 16px 35px;
+/* ============================================================
+   ADMIN DESKTOP-ONLY POLICY (Screen width >= 1024px required)
+   ============================================================ */
+.admin-unsupported-screen {
+  display: none;
+}
+
+@media (max-width: 1023.98px) {
+  /* Ẩn hoàn toàn toàn bộ nội dung Admin Dashboard */
+  .admin-sidebar,
+  .admin-main,
+  .admin-body > *:not(.admin-unsupported-screen) {
+    display: none !important;
   }
-  .admin-topbar {
-    min-height: 56px;
-    margin-bottom: 20px;
+
+  /* Hiển thị màn hình thông báo chặn toàn trang phong cách Apple Store */
+  .admin-unsupported-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    width: 100vw;
+    height: 100vh;
+    min-height: 100dvh;
+    background: #f5f5f7;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+    font-family: var(--font-apple-text, -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  .admin-main .page-heading h1 {
-    font-size: 1.55rem;
+
+  .admin-unsupported-card {
+    background: #ffffff;
+    border: 1px solid #e5e5ea;
+    border-radius: 20px;
+    padding: 44px 32px 36px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03);
+    animation: adminFadeIn 0.3s ease-out;
   }
-  .admin-main .panel {
-    padding: 18px;
+
+  .admin-unsupported-icon {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 20px;
+    border-radius: 18px;
+    background: #f0f4f8;
+    color: #0071e3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .stat-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+
+  .admin-unsupported-icon svg {
+    width: 36px;
+    height: 36px;
+    stroke-width: 1.6;
   }
-  .stat-grid article strong {
-    font-size: clamp(1.2rem, 2.5vw, 1.45rem);
-    margin-top: 12px;
-    overflow-wrap: anywhere;
-    word-break: break-word;
+
+  .admin-unsupported-title {
+    font-family: var(--font-apple-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+    color: #1d1d1f;
+    margin: 0 0 12px;
   }
-  .form-grid, .variant-form-grid {
-    grid-template-columns: 1fr;
+
+  .admin-unsupported-desc {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: #6e6e73;
+    margin: 0 0 28px;
+    font-weight: 400;
   }
-  .chart-box {
-    height: 240px;
+
+  .admin-unsupported-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 26px;
+    background: #0071e3;
+    color: #ffffff !important;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    border-radius: 980px;
+    text-decoration: none !important;
+    transition: background 0.18s ease, transform 0.15s ease;
   }
-  .admin-topbar > span {
-    font-size: .75rem;
+
+  .admin-unsupported-btn:hover {
+    background: #0077ed;
+    transform: scale(1.02);
+    color: #ffffff !important;
   }
-  .admin-main .btn,
-  .admin-main .form-control,
-  .admin-main .form-select {
-    min-height: 44px;
-  }
-  .admin-main .btn-sm {
-    min-height: 40px;
-    padding: 6px 12px;
-    font-size: 0.8rem;
+
+  .admin-unsupported-btn:active {
+    transform: scale(0.98);
   }
 }
 
-@media (max-width: 576px) {
-  .stat-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
+@keyframes adminFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
   }
-  .stat-grid article strong {
-    font-size: clamp(1.25rem, 4.5vw, 1.55rem);
-  }
-  .admin-main .table-responsive {
-    margin-bottom: 12px;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

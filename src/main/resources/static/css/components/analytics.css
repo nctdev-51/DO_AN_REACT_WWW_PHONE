@@ -247,24 +247,3 @@
   .insights-toolbar > a { margin-left: auto; }
   .insights-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
-@media (max-width: 800px) {
-  .insights-grid { grid-template-columns: minmax(0, 1fr); }
-  .insights-topic-list { max-height: none; }
-}
-@media (max-width: 540px) {
-  .insights { gap: 12px; }
-  .insights-grid { gap: 12px; }
-  .insights-card { padding: 14px; }
-  .insights-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  .insights-metric { padding: 12px; }
-  .insights-metric dd { font-size: clamp(1.2rem, 4.5vw, 1.65rem); }
-  .insights-toolbar { display: grid; grid-template-columns: auto auto; }
-  .insights-toolbar > a { grid-row: 1; grid-column: 2; }
-  .insights-dates { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .insights-dates label[for="analytics-from"] { grid-column: 1; grid-row: 1; }
-  .insights-dates label[for="analytics-to"] { grid-column: 2; grid-row: 1; }
-  .insights-dates button { grid-column: 1 / -1; }
-  .insights-card-head { flex-wrap: wrap; }
-  .insights-trend-plot { height: 213px; }
-  .insights-questions { grid-template-columns: minmax(0, 1fr); }
-}

@@ -13,22 +13,37 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/bootstrap/bootstrap.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/store.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css?v=20261126admin">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/tokens.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/motion.css"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/retail.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/inter/inter.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/admin-sidebar.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/admin-sidebar.css?v=20261126admin">
         <c:if test="${currentPage == 'analytics'}">
           <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/analytics.css">
         </c:if>
       </head>
       <body class="admin-body">
-        <aside class="admin-sidebar offcanvas-lg offcanvas-start" id="adminSidebarOffcanvas" tabindex="-1" aria-labelledby="adminSidebarLabel">
-          <div class="offcanvas-header d-lg-none d-flex justify-content-between align-items-center w-100 pb-3 border-bottom mb-2">
-            <span class="fs-6 fw-bold" id="adminSidebarLabel">Menu quản trị</span>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#adminSidebarOffcanvas" aria-label="Đóng menu"></button>
+        <%-- Màn hình thông báo chặn thiết bị màn hình nhỏ (< 1024px) phong cách tối giản kiểu Apple Store --%>
+        <div class="admin-unsupported-screen" aria-live="polite">
+          <div class="admin-unsupported-card">
+            <div class="admin-unsupported-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <h2 class="admin-unsupported-title">Trang quản trị chỉ hỗ trợ màn hình máy tính</h2>
+            <p class="admin-unsupported-desc">
+              Vui lòng truy cập Admin Dashboard bằng máy tính hoặc thiết bị có chiều rộng màn hình từ 1024px trở lên để có trải nghiệm tốt nhất.
+            </p>
+            <a href="${pageContext.request.contextPath}/" class="admin-unsupported-btn">
+              Về trang chủ cửa hàng
+            </a>
           </div>
+        </div>
+        <aside class="admin-sidebar" aria-label="Menu quản trị">
           <a class="admin-sidebar-brand" href="${pageContext.request.contextPath}/admin">
             <span class="admin-sidebar-mark" aria-hidden="true">P</span>
             <span>PTV <strong>Mobile</strong></span>
@@ -78,18 +93,7 @@
         </aside>
         <main class="admin-main">
           <div class="admin-topbar">
-            <div class="d-flex align-items-center gap-2">
-              <button class="btn btn-outline-secondary d-lg-none d-inline-flex align-items-center justify-content-center p-0"
-                      type="button"
-                      data-bs-toggle="offcanvas"
-                      data-bs-target="#adminSidebarOffcanvas"
-                      aria-controls="adminSidebarOffcanvas"
-                      aria-label="Mở menu quản trị"
-                      style="width: 44px; height: 44px; min-width: 44px; border-radius: 8px;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-              </button>
-              <span>PTV Mobile <span aria-hidden="true">/</span> <strong>Quản trị cửa hàng</strong></span>
-            </div>
+            <span>PTV Mobile <span aria-hidden="true">/</span> <strong>Quản trị cửa hàng</strong></span>
             <a href="${pageContext.request.contextPath}/" target="_blank" rel="noopener">Xem cửa hàng <ui:icon name="arrow"/></a>
           </div>
           <div class="page-heading">

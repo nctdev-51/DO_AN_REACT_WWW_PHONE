@@ -1,7 +1,24 @@
 /* Reference palette and semantic roles shared by every PTV Mobile screen. */
 :root {
-  --font-family-primary: "SF Pro Text";
-  --font-family-stack: "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* Apple Store Typography standard font stacks */
+  --font-apple-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-apple-text: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Bảng màu chữ chuẩn Apple Store */
+  --text-primary: #1d1d1f;     /* Đen than chì dịu mắt */
+  --text-secondary: #6e6e73;   /* Xám trung tính cho mô tả phụ */
+  --text-tertiary: #86868b;    /* Xám nhạt cho chú thích, bản quyền */
+  --link-blue: #0066cc;        /* Xanh đặc trưng cho liên kết "Tìm hiểu thêm >" */
+
+  --font-family-primary: var(--font-apple-text);
+  --font-family-stack: var(--font-apple-text);
+
+  /* Apple Typography Utility Styles */
+  --letter-spacing-hero: -0.025em;
+  --letter-spacing-section: -0.02em;
+  --letter-spacing-card: -0.01em;
+  --letter-spacing-body: -0.01em;
+  --letter-spacing-normal: 0em;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-md: 17px;
@@ -114,4 +131,59 @@
   :root {
     --header-offset: 164px;
   }
+}
+
+/* ============================================================
+   Apple Store Typography Utility Classes
+   ============================================================ */
+/* Tiêu đề chính trên Banner */
+.apple-hero-title {
+  font-family: var(--font-apple-display);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+
+/* Tiêu đề từng khu vực sản phẩm */
+.apple-section-title {
+  font-family: var(--font-apple-display);
+  font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+/* Tên điện thoại trên thẻ sản phẩm */
+.apple-card-title {
+  font-family: var(--font-apple-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+/* Mô tả ngắn thông số */
+.apple-card-subtitle {
+  font-family: var(--font-apple-text);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+/* Liên kết hành động chuẩn Apple */
+.apple-link {
+  font-family: var(--font-apple-text);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--link-blue);
+  text-decoration: none;
+}
+
+.apple-link:hover {
+  text-decoration: underline;
 }

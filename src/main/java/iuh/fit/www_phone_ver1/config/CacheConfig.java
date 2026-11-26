@@ -4,15 +4,17 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
 import java.util.List;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 @EnableCaching
-public class CacheConfig {
+public class CacheConfig implements CachingConfigurer {
 
   public static final String CACHE_BRANDS = "brands";
   public static final String CACHE_COLORS = "colors";
@@ -22,7 +24,9 @@ public class CacheConfig {
   public static final String CACHE_STORE_POLICY = "storePolicy";
   public static final String CACHE_PROMOTIONS = "promotions";
 
-  @Bean
+  @Override
+  @Primary
+  @Bean(name = "cacheManager")
   public CacheManager cacheManager() {
     SimpleCacheManager manager = new SimpleCacheManager();
     manager.setCaches(

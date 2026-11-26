@@ -286,6 +286,9 @@ public class ChatbotService {
             if ((imgUrl == null || imgUrl.isBlank()) && p.getDefaultVariant() != null) {
               imgUrl = p.getDefaultVariant().getImage();
             }
+            if ((imgUrl == null || imgUrl.isBlank()) && p.getMedia() != null && !p.getMedia().isEmpty()) {
+              imgUrl = p.getMedia().get(0).getPath();
+            }
             cards.add(new ChatResponseDTO.ProductCardDTO(
               p.getId(),
               p.getName() != null ? p.getName() : ("Sản phẩm #" + p.getId()),

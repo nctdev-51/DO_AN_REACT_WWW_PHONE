@@ -1,5 +1,5 @@
-const CACHE_STATIC = 'ptv-static-v1';
-const CACHE_PAGES = 'ptv-pages-v1';
+const CACHE_STATIC = 'ptv-static-v2';
+const CACHE_PAGES = 'ptv-pages-v2';
 
 const PRECACHE_URLS = [
   '/vendor/bootstrap/bootstrap.min.css',
@@ -61,23 +61,23 @@ self.addEventListener('fetch', (event) => {
 
   if (isStaticAsset(url.pathname)) {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request)
-          .then((response) => {
-            if (response && response.ok) {
-              const copy = response.clone();
-              caches.open(CACHE_STATIC).then((cache) => cache.put(request, copy));
-            }
-            return response;
-          })
-          .catch(() => {
+      fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_STATIC).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() =>
+          caches.match(request).then((cached) => {
+            if (cached) return cached;
             if (url.pathname.startsWith('/images/') || url.pathname.startsWith('/uploads/')) {
               return caches.match('/images/offline-placeholder.svg');
             }
             return new Response('', { status: 503, statusText: 'Offline' });
-          });
-      })
+          })
+        )
     );
     return;
   }
