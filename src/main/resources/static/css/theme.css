@@ -10,10 +10,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
-h1, h2, h3, h4, h5, h6 { 
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-apple-display);
-  color: var(--text-primary); 
-  overflow-wrap: anywhere; 
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
 }
 h1 {
   font-weight: 700;
@@ -157,8 +157,8 @@ h3 {
   font-size: 14.5px !important;
   flex-shrink: 0 !important;
 }
-.store-nav a, 
-.store-nav button, 
+.store-nav a,
+.store-nav button,
 .store-nav .nav-link-btn,
 .store-nav .nav-account {
   font-size: 14.5px !important;
@@ -174,8 +174,8 @@ h3 {
 }
 
 /* Khi hover: làm chữ hơi nhạt lại một chút (phong cách Apple tinh tế), tuyệt đối không viền xanh */
-.store-nav a:hover, 
-.store-nav button:hover, 
+.store-nav a:hover,
+.store-nav button:hover,
 .store-nav .nav-link-btn:hover,
 .store-nav .nav-account:hover,
 .store-nav .dropdown:hover > button,
@@ -205,10 +205,10 @@ h3 {
   border: none !important;
 }
 
-.store-nav a[aria-current=page] { 
-  color: var(--text-primary, #1d1d1f) !important; 
+.store-nav a[aria-current=page] {
+  color: var(--text-primary, #1d1d1f) !important;
   font-weight: 600 !important;
-  opacity: 1 !important; 
+  opacity: 1 !important;
 }
 .store-nav .icon {
   width: 20px;
@@ -281,21 +281,21 @@ h3 {
 }
 .store-main { padding-top: var(--space-14); padding-bottom: var(--space-17); }
 .page-heading { margin: var(--space-11) 0 var(--space-14); }
-.page-heading h1 { font-size: var(--font-heading-page); font-weight: var(--font-weight-semibold); }
 .page-heading .eyebrow { color: var(--color-text-muted); }
 .page-heading p { font-size: var(--font-size-md); }
 .section-heading { margin: var(--space-16) 0 var(--space-13); align-items: end; }
-.section-heading h2 { 
+.section-heading h2 {
   font-family: var(--font-apple-display);
-  font-size: clamp(var(--font-size-3xl), 3vw, var(--font-size-4xl)); 
-  font-weight: 600; 
+  font-size: clamp(var(--font-size-3xl), 3vw, var(--font-size-4xl));
+  font-weight: 600;
   line-height: 1.12;
   letter-spacing: -0.02em;
 }
-.section-heading a { 
+.section-heading a {
   font-family: var(--font-apple-text);
-  color: var(--link-blue); 
-  font-size: var(--font-size-sm); 
+  color: var(--link-blue);
+  font-size: var(--font-size-sm);
+.page-heading h1 { font-size: var(--font-heading-page); font-weight: var(--font-weight-semibold); }
   letter-spacing: -0.01em;
 }
 .section-heading a:hover { text-decoration: underline; }
