@@ -235,7 +235,15 @@ a.btn-brand:focus {
   margin:0 0 26px
 }
 .admin-main .page-heading h1{
-  font-size:1.8rem
+  font-size:var(--font-heading-section)
+}
+.campaign-admin-table { min-inline-size: 52rem; }
+.campaign-admin-thumbnail {
+  inline-size: 5rem;
+  aspect-ratio: 8 / 5;
+  object-fit: cover;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-small);
 }
 .admin-main .page-heading .eyebrow{
   font-size:.62rem
@@ -396,9 +404,6 @@ a.btn-brand:focus {
   .admin-topbar{
     min-height:56px;
     margin-bottom:25px
-  }
-  .admin-main .page-heading h1{
-    font-size:1.55rem
   }
   .admin-main .panel{
     padding:18px

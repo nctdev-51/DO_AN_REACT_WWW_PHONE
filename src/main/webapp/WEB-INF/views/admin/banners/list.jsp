@@ -7,7 +7,7 @@
 <c:if test="${not empty param.error}"><div class="alert alert-danger alert-dismissible fade show" role="alert"><c:out value="${param.error}"/><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div></c:if>
 <div class="section-heading">
   <p class="mb-0">Lịch hiển thị theo giờ Việt Nam. Thứ tự nhỏ hơn được ưu tiên trước.</p>
-  <div class="d-flex align-items-center gap-2">
+  <div class="d-flex flex-wrap align-items-center gap-2">
     <form method="post" action="${pageContext.request.contextPath}/admin/system/migrate-cloudinary" class="m-0" data-confirm="Đồng bộ toàn bộ ảnh cũ từ hệ thống lên Cloudinary?">
       <ui:csrf/>
       <button type="submit" class="btn btn-outline-primary" style="min-height: 44px; display: inline-flex; align-items: center; gap: 6px;">
@@ -54,8 +54,8 @@
     <option value="disable">Tắt</option>
     <option value="delete" data-destructive>Xóa mục đã chọn</option>
   </ui:adminBatchForm>
-  <div class="table-responsive">
-  <table class="table align-middle">
+  <div class="table-responsive" tabindex="0" role="region" aria-label="Danh sách banner">
+  <table class="table align-middle campaign-admin-table">
     <thead>
       <tr>
           <th scope="col"><input type="checkbox" data-batch-all aria-label="Chọn tất cả kết quả"></th>
@@ -65,7 +65,7 @@
         <th style="min-width: 180px;">Lịch phát (GMT+7)</th>
         <th style="min-width: 110px;">Thứ tự</th>
         <th style="min-width: 130px;">Trạng thái</th>
-        <th style="min-width: 150px; text-align: right;">Thao tác</th>
+        <th class="text-end" style="min-width: 150px;">Thao tác</th>
       </tr>
     </thead>
     <tbody id="admin-name-results">
@@ -78,7 +78,7 @@
             <c:choose>
               <c:when test="${not empty b.imagePath}">
                 <c:set var="resolvedImg" value="${fn:startsWith(b.imagePath, 'http') ? b.imagePath : pageContext.request.contextPath.concat(b.imagePath)}" />
-                <img src="${resolvedImg}" alt="<c:out value='${b.imageLabel}'/>" style="width: 80px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;">
+                <img src="${resolvedImg}" alt="<c:out value='${b.imageLabel}'/>" class="campaign-admin-thumbnail">
               </c:when>
               <c:otherwise>
                 <span class="text-muted small">Mặc định</span>
