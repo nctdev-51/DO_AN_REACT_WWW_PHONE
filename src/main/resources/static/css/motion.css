@@ -1,0 +1,27 @@
+/* Content is visible by default. JavaScript opts eligible blocks into motion. */
+html { scroll-padding-top: var(--header-offset); }
+html.motion-ready [data-motion="pending"] {
+  opacity: 0;
+  transform: translate3d(0, var(--motion-distance), 0);
+}
+html.motion-ready [data-motion="visible"] {
+  animation: ptv-rise var(--motion-duration-slower) var(--motion-ease-reveal) backwards;
+  animation-delay: calc(var(--reveal-index, 0) * var(--motion-stagger));
+}
+@keyframes ptv-rise {
+  from { opacity: 0; transform: translate3d(0, var(--motion-distance), 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  html.motion-ready [data-motion] { opacity: 1; transform: none; animation: none; }
+}
+@media print {
+  html.motion-ready [data-motion] { opacity: 1; transform: none; animation: none; }
+}

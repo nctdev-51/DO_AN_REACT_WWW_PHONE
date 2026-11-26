@@ -1,0 +1,115 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
+</main>
+<footer class="store-footer">
+  <div class="container footer-inner">
+    <div>
+      <a class="brand" href="${pageContext.request.contextPath}/">PTV <span>Mobile</span>
+      </a>
+      <p>Điện thoại, đúng với nhu cầu của bạn.</p>
+    </div>
+    <nav aria-label="Mua sắm"><h2>Khám phá cửa hàng</h2>
+      <a href="${pageContext.request.contextPath}/products">Tất cả điện thoại</a>
+      <a href="${pageContext.request.contextPath}/offers">Ưu đãi & mã giảm giá</a>
+      <a href="${pageContext.request.contextPath}/compare">So sánh sản phẩm</a>
+      <a href="${pageContext.request.contextPath}/account/wishlist">Sản phẩm yêu thích</a>
+    </nav>
+    <nav aria-label="Hỗ trợ mua hàng"><h2>Hỗ trợ mua hàng</h2>
+      <a href="${pageContext.request.contextPath}/orders">Tra cứu & hủy đơn hàng</a>
+      <a href="${pageContext.request.contextPath}/account/support">Yêu cầu đổi trả, bảo hành</a>
+      <a href="${pageContext.request.contextPath}/account/addresses">Quản lý địa chỉ nhận hàng</a>
+      <p>Gửi yêu cầu trong tài khoản để theo dõi tiến trình xử lý.</p>
+    </nav>
+    <nav aria-label="Chính sách"><h2>Thông tin cần biết</h2><a href="${pageContext.request.contextPath}/policies/shipping">Giao hàng & phí vận chuyển</a><a href="${pageContext.request.contextPath}/policies/returns">Chính sách đổi trả</a><a href="${pageContext.request.contextPath}/policies/warranty">Bảo hành</a><a href="${pageContext.request.contextPath}/policies/payment">Thanh toán</a><a href="${pageContext.request.contextPath}/policies/faq">Câu hỏi thường gặp</a><a href="${pageContext.request.contextPath}/policies/contact">Liên hệ cửa hàng</a></nav><nav aria-label="Tài khoản"><h2>Tài khoản của bạn</h2>
+      <a href="${pageContext.request.contextPath}/account">Thông tin cá nhân</a>
+      <a href="${pageContext.request.contextPath}/register">Đăng ký thành viên</a>
+      <a href="${pageContext.request.contextPath}/forgot-password">Lấy lại mật khẩu</a>
+      <a href="${pageContext.request.contextPath}/resend-verification">Xác minh email</a>
+    </nav>
+  </div>
+  <div class="container footer-bottom"><span>PTV Mobile</span><span>Xem kỹ thông số. Chọn đúng phiên bản.</span><a href="#main-content">Lên đầu trang ↑</a></div>
+</footer>
+<aside class="compare-tray panel" data-compare-tray data-context="${pageContext.request.contextPath}" data-csrf-name="${_csrf.parameterName}" data-csrf-value="${_csrf.token}" ${empty comparisonTrayItems ? 'hidden' : ''} aria-label="Khay so sánh nhanh">
+  <div class="compare-tray-head">
+    <strong>So sánh nhanh (<span data-compare-tray-count>${empty comparisonTrayItems ? 0 : comparisonTrayItems.size()}</span>/3)</strong>
+    <div class="compare-tray-actions">
+      <a class="btn btn-brand btn-sm" href="${pageContext.request.contextPath}/compare">Xem bảng so sánh →</a>
+      <button type="button" class="btn btn-light btn-sm" data-compare-tray-clear>Xóa hết</button>
+    </div>
+  </div>
+  <div class="compare-tray-items" data-compare-tray-items>
+    <c:forEach var="item" items="${comparisonTrayItems}">
+      <div class="compare-tray-item" data-tray-variant-id="${item.id}">
+        <img src="${pageContext.request.contextPath}${empty item.image ? item.product.image : item.image}" alt="" loading="lazy">
+        <div class="compare-tray-meta">
+          <span><c:out value="${item.product.name}"/></span>
+          <small class="muted"><c:out value="${item.label}"/></small>
+        </div>
+        <button type="button" class="compare-tray-remove" data-compare-tray-remove="${item.id}" aria-label="Bỏ <c:out value='${item.product.name}'/> khỏi so sánh">×</button>
+      </div>
+    </c:forEach>
+  </div>
+</aside>
+<nav class="mobile-bottom-nav" aria-label="Điều hướng nhanh trên di động">
+  <a href="${pageContext.request.contextPath}/"><ui:icon name="home"/><span>Trang chủ</span></a>
+  <a href="${pageContext.request.contextPath}/products"><ui:icon name="phone"/><span>Sản phẩm</span></a>
+  <button type="button" class="mobile-bottom-btn" data-mobile-search-trigger><ui:icon name="search"/><span>Tìm kiếm</span></button>
+  <a href="${pageContext.request.contextPath}/cart">
+    <span class="mobile-nav-icon"><ui:icon name="cart"/><c:if test="${not empty sessionScope.cart and sessionScope.cart.totalQuantity > 0}"><em class="mobile-nav-badge">${sessionScope.cart.totalQuantity}</em></c:if></span>
+    <span>Giỏ hàng</span>
+  </a>
+  <c:choose>
+    <c:when test="${pageContext.request.userPrincipal != null}">
+      <a href="${pageContext.request.contextPath}/account"><ui:icon name="user"/><span>Tài khoản</span></a>
+    </c:when>
+    <c:otherwise>
+      <a href="${pageContext.request.contextPath}/login"><ui:icon name="user"/><span>Tài khoản</span></a>
+    </c:otherwise>
+  </c:choose>
+</nav>
+
+<%-- ============================================================ --%>
+<%-- Module AI (Tài) — Chatbot Widget (FAB)                      --%>
+<%-- ============================================================ --%>
+<button class="chatbot-fab" id="chatbot-fab-btn" type="button"
+        aria-label="Mở chat tư vấn AI" aria-expanded="false" title="💬 Tư vấn AI">
+  <span class="chatbot-fab-icon" aria-hidden="true">💬</span>
+</button>
+
+<div class="chatbot-panel" id="chatbot-panel" hidden role="dialog" aria-label="Chat tư vấn AI PTV Mobile">
+  <div class="chatbot-header">
+    <span>🤖 PTV Tư vấn AI</span>
+    <button class="chatbot-close" id="chatbot-close-btn" type="button" aria-label="Đóng cửa sổ chat">×</button>
+  </div>
+  <div class="chatbot-messages" id="chatbot-messages" aria-live="polite" aria-relevant="additions">
+    <div class="chatbot-bubble-bot">
+      Xin chào! Tôi là trợ lý PTV Mobile. Bạn đang tìm kiếm điện thoại như thế nào? 📱
+    </div>
+  </div>
+  <div class="chatbot-input-row">
+    <input type="text" class="form-control" id="chatbot-input"
+           placeholder="Hỏi về điện thoại, tầm giá..." autocomplete="off" maxlength="500">
+    <button class="chatbot-send" id="chatbot-send-btn" type="button">Gửi</button>
+  </div>
+</div>
+<%-- /Module AI --%>
+
+<script src="${pageContext.request.contextPath}/vendor/bootstrap/bootstrap.bundle.min.js" defer>
+</script>
+<script src="${pageContext.request.contextPath}/js/store.js" defer>
+</script>
+<script src="${pageContext.request.contextPath}/js/offline-db.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/offline-sync.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/catalog-cards.js" defer></script>
+<%-- Step 3: Live search autocomplete — only active when #keyword input is present (catalog list page) --%>
+<script src="${pageContext.request.contextPath}/js/catalog-search.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/motion.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/retail.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/addresses.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/tracking.js" defer></script>
+<%-- Module AI Scripts (Tài) --%>
+<script src="${pageContext.request.contextPath}/js/ai-description.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/chatbot.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
+<jsp:include page="/WEB-INF/views/shared/store/header.jsp"/><jsp:include page="/WEB-INF/views/shared/store/account-nav.jsp"/>
+<div class="page-heading"><div><span class="eyebrow">THÀNH VIÊN PTV MOBILE</span><h1>Điểm thưởng của bạn.</h1><p>Tích lũy từ những đơn hàng đã giao thành công.</p></div><a href="${pageContext.request.contextPath}/account">Về tài khoản →</a></div>
+<section class="rewards-hero"><div><span>Số dư hiện tại</span><strong>${balance} <small>điểm</small></strong></div><div><p>Mỗi <ui:money value="${experience.earnEvery}"/> tiền hàng thực trả nhận 1 điểm.</p><p>1 điểm giảm <ui:money value="${experience.pointValue}"/>. Đổi tối đa ${experience.redeemPercent}% tiền hàng sau mã giảm giá.</p><p>Quy tắc demo của cửa hàng, có thể thay đổi cho đơn mới. <c:if test="${not experience.loyaltyEnabled}">Chương trình đang tạm dừng.</c:if></p><c:if test="${balance lt 0}"><p>Điểm đã dùng vượt số điểm còn lại sau hoàn tiền. Điểm tích lũy tiếp theo sẽ bù số dư này trước khi đổi tiếp.</p></c:if></div></section>
+<section class="panel"><h2>Lịch sử gần đây</h2><c:if test="${empty entries}"><p class="muted">Chưa có giao dịch điểm. Điểm sẽ được cộng khi đơn đủ điều kiện giao thành công.</p></c:if><c:forEach var="e" items="${entries}"><div class="summary-line"><span><c:out value="${e.description}"/><small><a href="${pageContext.request.contextPath}/orders/${e.order.id}">Đơn #${e.order.id}</a> · <c:out value="${e.createdAtLabel}"/></small></span><strong>${e.points gt 0 ? '+' : ''}${e.points} điểm</strong></div></c:forEach></section>
+<jsp:include page="/WEB-INF/views/shared/store/footer.jsp"/>

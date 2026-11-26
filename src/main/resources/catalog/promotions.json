@@ -1,0 +1,46 @@
+[
+  {
+    "code": "PTV200",
+    "description": "Giảm 200.000đ cho đơn từ 5 triệu",
+    "discountType": "FIXED",
+    "amount": 200000,
+    "minimumSubtotal": 5000000,
+    "maximumDiscount": null,
+    "usageLimit": 200,
+    "validDays": 365
+  },
+  {
+    "code": "PTV5",
+    "description": "Giảm 5%, tối đa 300.000đ",
+    "discountType": "PERCENT",
+    "amount": 5,
+    "minimumSubtotal": 3000000,
+    "maximumDiscount": 300000,
+    "usageLimit": 200,
+    "validDays": 365
+  },
+  {
+    "code": "PTVCOMBO",
+    "description": "Mua iPhone 15 kèm EarPods USB-C: giảm 100.000đ phụ kiện",
+    "discountType": "FIXED",
+    "amount": 100000,
+    "minimumSubtotal": 0,
+    "maximumDiscount": 100000,
+    "usageLimit": 100,
+    "validDays": 90,
+    "scopeSkus": "ACC-APPLE-EARPODS-USBC",
+    "requiredSkus": "PS-IPHONE-15"
+  },
+  {
+    "code": "PTVQUATANG",
+    "description": "Mua iPhone 17 Pro Max kèm EarPods USB-C: giảm tối đa 539.000đ phụ kiện",
+    "discountType": "FIXED",
+    "amount": 539000,
+    "minimumSubtotal": 0,
+    "maximumDiscount": 539000,
+    "usageLimit": 100,
+    "validDays": 90,
+    "scopeSkus": "ACC-APPLE-EARPODS-USBC",
+    "requiredSkus": "PS-IPHONE-17-PRO-MAX"
+  }
+]

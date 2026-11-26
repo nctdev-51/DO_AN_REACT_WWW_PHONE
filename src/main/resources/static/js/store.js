@@ -1,0 +1,293 @@
+'use strict';
+
+window.ptvResolveColor = function ptvResolveColor(name) {
+  const raw = (name || '').trim();
+  const key = raw.toLowerCase();
+  const exact = {
+    'đen tuyền': { bg: '#111113', light: false },
+    'đen không gian': { bg: '#1d1e22', light: false },
+    'đen - chỉ có tại cps': { bg: '#1c1c1e', light: false },
+    'đen': { bg: '#222226', light: false },
+    'đen tím': { bg: 'linear-gradient(135deg, #272233 0%, #4a3d63 100%)', light: false },
+    'titan đen': { bg: 'linear-gradient(135deg, #2b2b2f 0%, #48484f 100%)', light: false },
+    'titan trắng': { bg: 'linear-gradient(135deg, #f7f6f2 0%, #e4e2db 100%)', light: true },
+    'titan tự nhiên': { bg: 'linear-gradient(135deg, #d0ccc4 0%, #a8a399 100%)', light: true },
+    'titan sa mạc': { bg: 'linear-gradient(135deg, #d7bfa9 0%, #b59479 100%)', light: false },
+    'trắng': { bg: '#f7f7f5', light: true },
+    'trắng mây': { bg: 'linear-gradient(135deg, #f3f6fa 0%, #dfe7f0 100%)', light: true },
+    'bạc': { bg: 'linear-gradient(135deg, #e5e7eb 0%, #c6c9cf 100%)', light: true },
+    'xám bạc': { bg: 'linear-gradient(135deg, #c9cdd3 0%, #9fa5ad 100%)', light: false },
+    'xám': { bg: '#757980', light: false },
+    'cam vũ trụ': { bg: 'linear-gradient(135deg, #ea7845 0%, #c85224 100%)', light: false },
+    'hồng': { bg: '#f1c4d3', light: true },
+    'tím': { bg: '#8c73b8', light: false },
+    'vàng': { bg: 'linear-gradient(135deg, #efe09b 0%, #d4ba5b 100%)', light: true },
+    'nâu': { bg: '#6e5243', light: false },
+    'nâu đồng': { bg: 'linear-gradient(135deg, #9b7356 0%, #745139 100%)', light: false },
+    'xanh navy': { bg: '#1d2f4e', light: false },
+    'xanh đậm': { bg: '#1b3d46', light: false },
+    'xanh dương': { bg: '#2b63b0', light: false },
+    'xanh da trời': { bg: '#7ab6e8', light: false },
+    'xanh bóng': { bg: 'linear-gradient(135deg, #4b8c9a 0%, #2b6470 100%)', light: false },
+    'xanh lá': { bg: '#4c8266', light: false },
+    'xanh': { bg: '#467b9b', light: false }
+  };
+  if (exact[key]) return exact[key];
+  if (key.includes('trắng')) return { bg: '#f5f5f3', light: true };
+  if (key.includes('bạc')) return { bg: '#d2d5da', light: true };
+  if (key.includes('đen')) return { bg: '#222226', light: false };
+  if (key.includes('xám') || key.includes('titan')) return { bg: '#7c8087', light: false };
+  if (key.includes('xanh lá') || key.includes('rêu')) return { bg: '#4c8266', light: false };
+  if (key.includes('xanh')) return { bg: '#346fa8', light: false };
+  if (key.includes('tím')) return { bg: '#8c73b8', light: false };
+  if (key.includes('hồng')) return { bg: '#f1c4d3', light: true };
+  if (key.includes('đỏ')) return { bg: '#b92d2d', light: false };
+  if (key.includes('cam')) return { bg: '#d96b38', light: false };
+  if (key.includes('vàng')) return { bg: '#e0c66c', light: true };
+  if (key.includes('nâu') || key.includes('đồng')) return { bg: '#7f5e48', light: false };
+  return { bg: '#8e949b', light: false };
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.account-nav a, .store-nav > a, .mobile-bottom-nav a').forEach(link => {
+    const pathname = new URL(link.href, window.location.origin).pathname;
+    if (pathname === window.location.pathname) link.setAttribute('aria-current', 'page');
+  });
+
+  // ── Store Header Dropdowns: Hover, Safe Bridge & Multi-Device Accessibility ──
+  const navDropdowns = document.querySelectorAll('.store-nav .dropdown');
+  let activeNavDropdown = null;
+  let navCloseTimer = null;
+
+  navDropdowns.forEach(dropdown => {
+    const toggleBtn = dropdown.querySelector('[data-bs-toggle="dropdown"]');
+    const menu = dropdown.querySelector('.dropdown-menu');
+    if (!toggleBtn || !menu) return;
+
+    const showDropdown = () => {
+      if (navCloseTimer) {
+        clearTimeout(navCloseTimer);
+        navCloseTimer = null;
+      }
+      // Đóng dropdown khác nếu đang mở để đảm bảo chỉ có 1 dropdown mở cùng lúc
+      if (activeNavDropdown && activeNavDropdown !== dropdown) {
+        activeNavDropdown.classList.remove('show');
+        const otherBtn = activeNavDropdown.querySelector('[data-bs-toggle="dropdown"]');
+        if (otherBtn) {
+          otherBtn.classList.remove('show');
+          otherBtn.setAttribute('aria-expanded', 'false');
+        }
+        const otherMenu = activeNavDropdown.querySelector('.dropdown-menu');
+        if (otherMenu) otherMenu.classList.remove('show');
+      }
+      activeNavDropdown = dropdown;
+
+      // Kích hoạt hiển thị bằng class, tuyệt đối không gọi bs.show() hay focus() để tránh browser tự cuộn/trượt trang
+      dropdown.classList.add('show');
+      toggleBtn.classList.add('show');
+      toggleBtn.setAttribute('aria-expanded', 'true');
+      menu.classList.add('show');
+    };
+
+    const hideDropdown = (delay = 140) => {
+      if (navCloseTimer) clearTimeout(navCloseTimer);
+      navCloseTimer = setTimeout(() => {
+        dropdown.classList.remove('show');
+        toggleBtn.classList.remove('show');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        menu.classList.remove('show');
+        if (activeNavDropdown === dropdown) activeNavDropdown = null;
+      }, delay);
+    };
+
+    // Kích hoạt hover cho thiết bị hỗ trợ hover (desktop / laptop)
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      dropdown.addEventListener('mouseenter', () => {
+        showDropdown();
+      });
+
+      dropdown.addEventListener('mouseleave', () => {
+        hideDropdown(140);
+      });
+    }
+
+    // Hỗ trợ bàn phím (focus-within): khi tab vào mở, khi tab ra ngoài đóng
+    dropdown.addEventListener('focusin', () => {
+      showDropdown();
+    });
+
+    dropdown.addEventListener('focusout', (e) => {
+      if (!dropdown.contains(e.relatedTarget)) {
+        hideDropdown(80);
+      }
+    });
+
+    // Bàn phím: phím Escape đóng dropdown ngay lập tức và focus lại vào nút không cuộn trang
+    dropdown.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        hideDropdown(0);
+        if (toggleBtn.focus) {
+          toggleBtn.focus({ preventScroll: true });
+        }
+        if (activeNavDropdown === dropdown) activeNavDropdown = null;
+      }
+    });
+
+    // Hỗ trợ click/tap (ngăn chặn browser scroll nhảy trang)
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (navCloseTimer) {
+        clearTimeout(navCloseTimer);
+        navCloseTimer = null;
+      }
+      const isOpen = dropdown.classList.contains('show');
+      if (isOpen) {
+        hideDropdown(0);
+      } else {
+        showDropdown();
+      }
+    });
+  });
+
+  // Đóng khi click ngoài menu
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.store-nav .dropdown')) {
+      if (activeNavDropdown) {
+        activeNavDropdown.classList.remove('show');
+        const otherBtn = activeNavDropdown.querySelector('[data-bs-toggle="dropdown"]');
+        if (otherBtn) {
+          otherBtn.classList.remove('show');
+          otherBtn.setAttribute('aria-expanded', 'false');
+        }
+        const otherMenu = activeNavDropdown.querySelector('.dropdown-menu');
+        if (otherMenu) otherMenu.classList.remove('show');
+        activeNavDropdown = null;
+      }
+    }
+  });
+  document.addEventListener('submit', event => {
+    const form = event.target;
+    if (form instanceof HTMLFormElement && form.hasAttribute('data-confirm')
+        && !window.confirm(form.dataset.confirm)) event.preventDefault();
+  }, true);
+
+  const syncStepper = (input, clampEmpty = true) => {
+    const stepper = input?.closest('[data-qty-stepper]');
+    if (!stepper) return;
+    const min = input.min === '' ? 0 : Number(input.min);
+    const max = input.max === '' ? 99 : Number(input.max);
+    const dec = stepper.querySelector('[data-qty-dec]');
+    const inc = stepper.querySelector('[data-qty-inc]');
+    if (!clampEmpty && input.value.trim() === '') {
+      if (dec) dec.disabled = input.disabled || true;
+      if (inc) inc.disabled = input.disabled || false;
+      return;
+    }
+    const val = Number(input.value);
+    const clamped = Number.isNaN(val) ? min : Math.max(min, Math.min(max, Math.trunc(val)));
+    if (String(clamped) !== input.value) input.value = String(clamped);
+    if (dec) dec.disabled = input.disabled || clamped <= min;
+    if (inc) inc.disabled = input.disabled || clamped >= max;
+  };
+  document.querySelectorAll('[data-qty-stepper]').forEach(stepper => {
+    const input = stepper.querySelector('input[type="number"]');
+    const dec = stepper.querySelector('[data-qty-dec]');
+    const inc = stepper.querySelector('[data-qty-inc]');
+    if (!input) return;
+    dec?.addEventListener('click', () => {
+      const min = input.min === '' ? 0 : Number(input.min);
+      const cur = Number(input.value) || min;
+      input.value = String(Math.max(min, cur - 1));
+      syncStepper(input, true);
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    inc?.addEventListener('click', () => {
+      const max = input.max === '' ? 99 : Number(input.max);
+      const cur = Number(input.value) || 0;
+      input.value = String(Math.min(max, cur + 1));
+      syncStepper(input, true);
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    input.addEventListener('input', () => syncStepper(input, false));
+    input.addEventListener('change', () => syncStepper(input, true));
+    input.addEventListener('blur', () => syncStepper(input, true));
+    syncStepper(input, true);
+  });
+
+  const variants = document.getElementById('variant-select');
+  if (variants) {
+    const price = document.getElementById('product-price');
+    const stock = document.getElementById('variant-stock');
+    const quantity = document.getElementById('buy-quantity');
+    const button = document.getElementById('buy-button');
+    const refreshVariant = () => {
+      const selected = variants.selectedOptions[0];
+      const comparison = document.querySelector('[data-comparison-variant]');
+      if (comparison && selected) comparison.value = selected.value;
+      const available = selected ? Number(selected.dataset.stock) : 0;
+      const numericPrice = selected ? Number(selected.dataset.price) : 0;
+      if (selected) price.textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(numericPrice);
+      const installmentSummary = document.querySelector('[data-installment-summary]');
+      if (installmentSummary && numericPrice > 0) {
+        const moneyFmt = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+        const per12 = moneyFmt.format(Math.round(numericPrice / 12));
+        const per6 = moneyFmt.format(Math.round(numericPrice / 6));
+        installmentSummary.replaceChildren(
+          document.createTextNode('Trả góp 0% tham khảo từ '),
+          Object.assign(document.createElement('strong'), { textContent: `${per12}/tháng` }),
+          document.createTextNode(' (12 kỳ) hoặc '),
+          Object.assign(document.createElement('strong'), { textContent: `${per6}/tháng` }),
+          document.createTextNode(' (6 kỳ). '),
+          Object.assign(document.createElement('span'), { className: 'muted d-block small', textContent: 'Tạm tính theo giá phiên bản; điều kiện duyệt hồ sơ xác nhận khi tư vấn.' })
+        );
+      }
+      const original = document.getElementById('product-original-price');
+      if (original && selected) original.hidden = Number(original.dataset.originalPrice) <= numericPrice;
+      stock.classList.toggle('text-danger', available === 0);
+      stock.textContent = available === 0
+        ? 'Phiên bản này tạm hết hàng'
+        : available <= 3
+          ? `Sắp hết hàng (chỉ còn ${available} sản phẩm)`
+          : `Còn ${available} sản phẩm`;
+      quantity.max = Math.min(99, available);
+      quantity.disabled = available === 0;
+      quantity.value = available ? Math.max(1, Math.min(Number(quantity.value) || 1, available)) : 1;
+      syncStepper(quantity);
+      button.disabled = available === 0;
+    };
+    variants.addEventListener('change', refreshVariant);
+    refreshVariant();
+  }
+
+  const savedAddress = document.getElementById('saved-address');
+  if (savedAddress) {
+    savedAddress.addEventListener('change', () => {
+      const address = savedAddress.selectedOptions[0];
+      if (!address.value) return;
+      document.getElementById('recipientName').value = address.dataset.recipient;
+      document.getElementById('phone').value = address.dataset.phone;
+      document.getElementById('shippingAddress').value = address.dataset.address;
+      document.querySelector('[data-address-picker]')?.dispatchEvent(new CustomEvent('ptv:set-address', { detail: { provinceCode: address.dataset.provinceCode, wardCode: address.dataset.wardCode } }));
+    });
+  }
+
+  const filterDetails = document.querySelector('.catalog-sidebar .catalog-filters');
+  if (filterDetails) {
+    const syncFilterSidebar = () => {
+      if (window.matchMedia('(min-width: 992px)').matches) filterDetails.setAttribute('open', '');
+    };
+    syncFilterSidebar();
+    window.addEventListener('resize', syncFilterSidebar);
+  }
+  document.querySelectorAll('[data-price-preset]').forEach(button => {
+    button.addEventListener('click', () => {
+      const form = button.closest('form');
+      if (!form) return;
+      const minInput = form.querySelector('#minPrice');
+      const maxInput = form.querySelector('#maxPrice');
+      if (minInput) minInput.value = button.dataset.min || '';
+      if (maxInput) maxInput.value = button.dataset.max || '';
+      form.submit();
+    });
+  });
+});
