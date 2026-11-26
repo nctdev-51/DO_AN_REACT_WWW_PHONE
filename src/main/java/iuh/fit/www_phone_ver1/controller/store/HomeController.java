@@ -141,4 +141,9 @@ public class HomeController {
     model.addAttribute("budgetVariants", selected);
     return "store/home";
   }
+
+  @GetMapping("/offline")
+  public String offline() {
+    return "store/offline";
+  }
 }

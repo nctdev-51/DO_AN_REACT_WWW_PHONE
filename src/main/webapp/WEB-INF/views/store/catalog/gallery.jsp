@@ -8,7 +8,7 @@
   <div data-photo-panel>
     <div class="gallery-stage" data-gallery-stage data-reveal>
       <c:set var="resolvedGalleryMain" value="${fn:startsWith(product.image, 'http') ? product.image : pageContext.request.contextPath.concat(product.image)}" />
-      <button type="button" class="gallery-main" data-gallery-zoom aria-label="Phóng to ảnh sản phẩm"><img data-gallery-image src="${resolvedGalleryMain}" alt="<c:out value='${product.name}'/>" fetchpriority="high"></button>
+      <button type="button" class="gallery-main" data-gallery-zoom aria-label="Phóng to ảnh sản phẩm"><img data-gallery-image src="${resolvedGalleryMain}" alt="<c:out value='${product.name}'/>" fetchpriority="high" onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/images/offline-placeholder.svg'"></button>
       <button type="button" class="gallery-arrow gallery-prev" data-gallery-prev aria-label="Ảnh trước">‹</button>
       <button type="button" class="gallery-arrow gallery-next" data-gallery-next aria-label="Ảnh tiếp theo">›</button>
       <span class="gallery-counter" data-gallery-counter>1 / 1</span>

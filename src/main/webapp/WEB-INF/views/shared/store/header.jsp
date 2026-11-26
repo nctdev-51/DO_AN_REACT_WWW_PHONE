@@ -8,6 +8,14 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>PTV Mobile — Điện thoại & công nghệ</title>
     <meta name="theme-color" content="#ffffff">
+    <link rel="manifest" href="${pageContext.request.contextPath}/manifest.json">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('${pageContext.request.contextPath}/sw.js').catch(function () {});
+        });
+      }
+    </script>
 <<<<<<< HEAD
 =======
     <link rel="preconnect" href="https://fonts.googleapis.com">

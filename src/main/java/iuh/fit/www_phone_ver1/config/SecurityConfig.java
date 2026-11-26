@@ -84,12 +84,23 @@ public class SecurityConfig {
         "/api/ai/chat", "/api/tracking", "/payments/qr/**", "/api/payments/qr/**"));
     http.authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info")
+                auth.requestMatchers(
+                        "/actuator/health",
+                        "/actuator/health/**",
+                        "/actuator/info",
+                        "/sw.js",
+                        "/manifest.json",
+                        "/offline",
+                        "/images/**")
                     .permitAll()
                     .requestMatchers("/admin/**", "/actuator", "/actuator/**")
                     .hasRole("ADMIN")
                     .requestMatchers(
-                        "/checkout/**", "/orders/**", "/account/**", "/payments/vnpay/return")
+                        "/checkout/**",
+                        "/orders/**",
+                        "/account/**",
+                        "/payments/vnpay/return",
+                        "/api/sync/**")
                     .authenticated()
                     .requestMatchers("/payments/qr/{orderId}", "/payments/qr/{orderId}/**")
                     .authenticated()

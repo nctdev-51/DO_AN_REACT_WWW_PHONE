@@ -26,13 +26,10 @@ public class ChatResponseDTO {
         private String name;
         private String price;
         private String brand;
-<<<<<<< HEAD
-=======
         private String imageUrl;
 
         public ProductCardDTO(Long id, String name, String price, String brand) {
             this(id, name, price, brand, null);
         }
->>>>>>> origin/taidev
     }
 }
