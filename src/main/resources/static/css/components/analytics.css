@@ -55,7 +55,8 @@
 }
 .insights-dates { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .insights-dates label { color: var(--muted); font-size: .82rem; }
-.insights-dates input {
+.insights-dates input,
+.insights-dates select {
   min-height: 36px;
   min-width: 0;
   padding: 5px 8px;
