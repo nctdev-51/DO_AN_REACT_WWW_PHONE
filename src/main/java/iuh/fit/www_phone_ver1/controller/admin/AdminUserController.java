@@ -93,19 +93,4 @@ public class AdminUserController {
     }
     return "redirect:/admin/users";
   }
-
-  @PostMapping("/batch")
-  public String batch(@RequestParam(required = false) java.util.List<Long> ids,
-      @RequestParam String action, Principal actor, RedirectAttributes flash) {
-    if (!java.util.Set.of("enable", "disable", "delete").contains(action)) {
-      flash.addFlashAttribute("errorMsg", "Chọn thao tác hợp lệ.");
-    } else {
-      AdminBatch.run(ids, id -> {
-        if ("delete".equals(action)) admin.deleteUser(id, actor.getName());
-        else admin.setUserStatus(id, "enable".equals(action) ? 1 : 0, actor.getName());
-        return null;
-      }, flash);
-    }
-    return "redirect:/admin/users";
-  }
 }

@@ -161,14 +161,6 @@ public class Order {
   @Column(length = 100)
   private String gatewayTransaction;
 
-  @Column(length = 30)
-  private String paymentChannel;
-
-  private LocalDateTime paymentExpiresAt;
-
-  @Column(length = 32)
-  private String qrToken;
-
   @Column(length = 100)
   private String recipientName;
 

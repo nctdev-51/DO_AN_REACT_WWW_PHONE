@@ -1,6 +1,5 @@
 package iuh.fit.www_phone_ver1.controller.admin;
 
-import iuh.fit.www_phone_ver1.repository.CategoryRepository;
 import iuh.fit.www_phone_ver1.service.tracking.AnalyticsService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -8,7 +7,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -24,11 +22,9 @@ public class AdminAnalyticsController {
   private static final DateTimeFormatter FILE_DATE = DateTimeFormatter.BASIC_ISO_DATE;
 
   private final AnalyticsService analytics;
-  private final CategoryRepository categories;
 
-  public AdminAnalyticsController(AnalyticsService analytics, CategoryRepository categories) {
+  public AdminAnalyticsController(AnalyticsService analytics) {
     this.analytics = analytics;
-    this.categories = categories;
   }
 
   @GetMapping
@@ -36,18 +32,15 @@ public class AdminAnalyticsController {
       @RequestParam(required = false) Integer days,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-      @RequestParam(required = false) Long categoryId,
       Model model) {
     DateRange range = resolveRange(days, from, to);
-    var report = analytics.report(range.from(), range.to(), categoryId);
+    var report = analytics.report(range.from(), range.to());
     model.addAttribute("currentPage", "analytics");
     model.addAttribute("pageTitle", "Theo dõi & thống kê");
     model.addAttribute("report", report);
     model.addAttribute("from", range.from());
     model.addAttribute("to", range.to());
     model.addAttribute("selectedPreset", range.preset());
-    model.addAttribute("categories", categories.findAll(Sort.by("name")));
-    model.addAttribute("categoryId", categoryId);
     model.addAttribute(
         "dailyLabels",
         report.dailyViews().stream()
@@ -72,11 +65,10 @@ public class AdminAnalyticsController {
       @RequestParam(required = false) Integer days,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-      @RequestParam(required = false) Long categoryId,
       HttpServletResponse response)
       throws IOException {
     DateRange range = resolveRange(days, from, to);
-    var report = analytics.report(range.from(), range.to(), categoryId);
+    var report = analytics.report(range.from(), range.to());
     response.setContentType("text/csv;charset=UTF-8");
     response.setHeader(
         "Content-Disposition",
@@ -97,10 +89,6 @@ public class AdminAnalyticsController {
       csvRow(writer, "Đơn hàng", Long.toString(report.orderCount()));
       csvRow(writer, "Khách truy cập mới", Long.toString(report.newVisitors()));
       csvRow(writer, "Lượt hỏi chatbot", Long.toString(report.chatbotMessages()));
-      if (categoryId != null) {
-        csvRow(writer, "Danh mục tương tác sản phẩm", categories.findById(categoryId)
-            .map(category -> category.getName()).orElse("#" + categoryId));
-      }
       writer.println();
       csvRow(writer, "Sản phẩm", "Lượt xem", "Lượt nhấp", "Thêm giỏ", "Chuyển đổi (%)");
       for (var product : report.topProducts()) {

@@ -31,12 +31,9 @@ public class CheckoutForm {
   @Size(max = 100, message = "Tên người nhận tối đa 100 ký tự")
   private String recipientName;
 
-  @Pattern(regexp = "COD|VNPAY|QR", message = "Phương thức thanh toán không hợp lệ")
+  @Pattern(regexp = "COD|VNPAY", message = "Phương thức thanh toán không hợp lệ")
   @NotBlank
   private String paymentMethod = "COD";
-
-  @Size(max = 30)
-  private String paymentChannel = "VIETQR";
 
   @NotBlank(message = "Vui lòng nhập địa chỉ nhận hàng")
   @Size(max = 255, message = "Địa chỉ tối đa 255 ký tự")

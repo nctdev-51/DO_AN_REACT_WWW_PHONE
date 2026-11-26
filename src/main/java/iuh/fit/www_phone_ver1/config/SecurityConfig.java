@@ -80,8 +80,7 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http, AuthenticationSuccessHandler customSuccessHandler) throws Exception {
     // Disable CSRF only for stateless public JSON REST endpoints; admin mutations keep CSRF.
-    http.csrf(csrf -> csrf.ignoringRequestMatchers(
-        "/api/ai/chat", "/api/tracking", "/payments/qr/**", "/api/payments/qr/**"));
+    http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/ai/chat", "/api/tracking"));
     http.authorizeHttpRequests(
             auth ->
                 auth.requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info")
@@ -91,10 +90,6 @@ public class SecurityConfig {
                     .requestMatchers(
                         "/checkout/**", "/orders/**", "/account/**", "/payments/vnpay/return")
                     .authenticated()
-                    .requestMatchers("/payments/qr/{orderId}", "/payments/qr/{orderId}/**")
-                    .authenticated()
-                    .requestMatchers("/payments/qr/scan", "/payments/qr/scan/**")
-                    .permitAll()
                     .requestMatchers(
                         org.springframework.http.HttpMethod.POST, "/products/*/reviews")
                     .authenticated()

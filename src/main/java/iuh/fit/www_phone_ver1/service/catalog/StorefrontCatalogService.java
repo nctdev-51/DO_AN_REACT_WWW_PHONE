@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Step 4 — StorefrontCatalogService.
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>ProductController now delegates here instead of injecting repositories directly.
  */
 @Service
-@Transactional(readOnly = true)
 public class StorefrontCatalogService {
 
   private final ProductRepository products;
@@ -99,9 +97,9 @@ public class StorefrontCatalogService {
 
   // ── Product detail ──────────────────────────────────────────────────────────
 
-  /** Find a product by id only if it is active (status=1), eagerly fetching category & variants. */
+  /** Find a product by id only if it is active (status=1). */
   public Optional<Product> findActiveProduct(Long id) {
-    return products.findActiveDetailById(id);
+    return products.findById(id).filter(p -> p.getStatus() == 1);
   }
 
   /**

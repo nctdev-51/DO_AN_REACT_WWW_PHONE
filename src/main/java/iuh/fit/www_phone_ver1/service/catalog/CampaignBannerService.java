@@ -53,10 +53,6 @@ public class CampaignBannerService {
                     () -> new IllegalArgumentException("Sản phẩm chưa tồn tại hoặc đã ngừng bán."));
     if ("PRODUCT".equals(form.getTarget()) && product == null)
       throw new IllegalArgumentException("Chọn sản phẩm cho đích đến của banner.");
-    String keyword = "SEARCH".equals(form.getTarget())
-        ? Objects.toString(form.getSearchKeyword(), "").trim() : null;
-    if (keyword != null && (keyword.isBlank() || keyword.length() > 120))
-      throw new IllegalArgumentException("Nhập từ khóa từ 1 đến 120 ký tự cho đích tìm kiếm.");
     String previous = banner.getImage();
     String next;
     if (upload == null || upload.isEmpty()) {
@@ -69,7 +65,6 @@ public class CampaignBannerService {
     cleanup(next, previous);
     BeanUtils.copyProperties(form, banner, "version", "productId");
     banner.setProduct(product);
-    banner.setSearchKeyword(keyword);
     banner.setImage(next);
     banners.saveAndFlush(banner);
   }
@@ -84,16 +79,6 @@ public class CampaignBannerService {
       throw new IllegalArgumentException("Banner vừa thay đổi. Hãy tải lại.");
     cleanup(null, b.getImage());
     banners.delete(b);
-    banners.flush();
-  }
-
-  @Transactional
-  public void setBannerActive(Long id, long version, boolean active) {
-    var banner = banners.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy banner."));
-    if (banner.getVersion() != version)
-      throw new IllegalArgumentException("Banner vừa thay đổi. Hãy tải lại.");
-    banner.setActive(active);
     banners.flush();
   }
 

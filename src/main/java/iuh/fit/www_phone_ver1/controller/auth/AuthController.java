@@ -62,6 +62,6 @@ public class AuthController {
       return "auth/register";
     }
 
-    return "redirect:/login?registered";
+    return "redirect:/register?success";
   }
 }

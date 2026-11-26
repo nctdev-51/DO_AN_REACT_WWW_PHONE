@@ -18,22 +18,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
   long countByOrderDateBetween(LocalDateTime from, LocalDateTime to);
 
   @Query("""
-      select o from Order o left join fetch o.user u
-      where (:id is null or o.id = :id)
-        and (:from is null or o.orderDate >= :from)
-        and (:until is null or o.orderDate < :until)
-        and (:status = '' or o.status = :status)
-        and (:phone = '' or replace(replace(coalesce(nullif(trim(o.phone), ''), u.phone),
-          ' ', ''), '-', '') like concat('%', :phone, '%'))
-      order by o.orderDate desc, o.id desc
-      """)
-  List<Order> searchAdminOrders(
-      @Param("id") Long id, @Param("from") LocalDateTime from, @Param("until") LocalDateTime until,
-      @Param("status") String status, @Param("phone") String phone);
-
-  boolean existsByPromotion_Id(Long promotionId);
-
-  @Query("""
       select d.product.id as productId, sum(d.quantity) as units
       from OrderDetail d
       where d.order.orderDate >= :from and d.order.orderDate < :to
@@ -81,7 +65,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
   long countByStatus(String status);
 
-  @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"user"})
   List<Order> findTop5ByOrderByOrderDateDesc();
 
   List<Order> findByStatusAndOrderDateGreaterThanEqual(String status, LocalDateTime start);
@@ -108,14 +91,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
       java.util.Collection<String> paymentStatuses,
       String status,
       LocalDateTime cutoff);
-
-  @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @Query("select o from Order o where o.paymentExpiresAt is not null "
-      + "and o.paymentExpiresAt < :now "
-      + "and o.status = :status "
-      + "and o.paymentStatus in :paymentStatuses")
-  List<Order> findExpiredUnpaidOrders(
-      @Param("now") LocalDateTime now,
-      @Param("status") String status,
-      @Param("paymentStatuses") java.util.Collection<String> paymentStatuses);
 }

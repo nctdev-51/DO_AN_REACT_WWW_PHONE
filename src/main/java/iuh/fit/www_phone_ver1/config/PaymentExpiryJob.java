@@ -19,7 +19,7 @@ public class PaymentExpiryJob {
   }
 
   @io.micrometer.core.annotation.Timed("ptv.payments.expiry")
-  @Scheduled(fixedDelay = 15000, initialDelay = 15000)
+  @Scheduled(fixedDelay = 60000, initialDelay = 60000)
   public void expire() {
     orders.expireUnpaidOrders();
   }

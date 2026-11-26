@@ -5,13 +5,13 @@
 (function () {
     'use strict';
 
-    function initChatbot() {
-        const fabBtn      = document.getElementById('chatbot-fab-btn');
-        const chatPanel   = document.getElementById('chatbot-panel');
-        const closeBtn    = document.getElementById('chatbot-close-btn');
-        const messagesEl  = document.getElementById('chatbot-messages');
-        const inputEl     = document.getElementById('chatbot-input');
-        const sendBtn     = document.getElementById('chatbot-send-btn');
+    document.addEventListener('DOMContentLoaded', function () {
+        const fabBtn = document.getElementById('chatbot-fab-btn');
+        const chatPanel = document.getElementById('chatbot-panel');
+        const closeBtn = document.getElementById('chatbot-close-btn');
+        const messagesEl = document.getElementById('chatbot-messages');
+        const inputEl = document.getElementById('chatbot-input');
+        const sendBtn = document.getElementById('chatbot-send-btn');
 
         if (!fabBtn || !chatPanel || !messagesEl || !inputEl || !sendBtn) return;
 
@@ -21,30 +21,19 @@
             || '';
 
         // ── Toggle Panel ──────────────────────────────────────────
-        function toggleChatPanel() {
-            const isHidden = chatPanel.hasAttribute('hidden') || chatPanel.hidden || chatPanel.style.display === 'none';
+        fabBtn.addEventListener('click', function () {
+            const isHidden = chatPanel.hidden;
+            chatPanel.hidden = !isHidden;
+            fabBtn.setAttribute('aria-expanded', String(isHidden));
             if (isHidden) {
-                chatPanel.removeAttribute('hidden');
-                chatPanel.hidden = false;
-                chatPanel.style.display = 'flex';
-                fabBtn.setAttribute('aria-expanded', 'true');
                 setTimeout(function () { inputEl.focus(); }, 100);
                 scrollMessages();
-            } else {
-                chatPanel.setAttribute('hidden', '');
-                chatPanel.hidden = true;
-                chatPanel.style.display = 'none';
-                fabBtn.setAttribute('aria-expanded', 'false');
             }
-        }
-
-        fabBtn.addEventListener('click', toggleChatPanel);
+        });
 
         if (closeBtn) {
             closeBtn.addEventListener('click', function () {
-                chatPanel.setAttribute('hidden', '');
                 chatPanel.hidden = true;
-                chatPanel.style.display = 'none';
                 fabBtn.setAttribute('aria-expanded', 'false');
             });
         }
@@ -108,11 +97,8 @@
         // ── Markdown & Table Formatter ────────────────────────────
         function formatMessageHtml(raw) {
             if (!raw) return '';
-            // 0. Loại bỏ triệt để các mã SUGGEST (kể cả chứa khoảng trắng unicode)
-            let s = raw.replace(/\[[\s\S]*?(?:SUGGEST|GỢI Ý|PRODUCT|ID)\s*:?\s*\d+[\s\S]*?\]/gi, '');
-
             // 1. Escape HTML an toàn
-            s = s
+            let s = raw
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;');
@@ -169,7 +155,7 @@
         }
 
         // ── Helper: Safe Product Card Builder (anti-XSS) ──────────
-        function createSuggestionCardElement(productId, titleText, priceText, imageUrl) {
+        function createSuggestionCardElement(productId, titleText, priceText) {
             const safeId = Number(productId);
             if (!Number.isInteger(safeId) || safeId <= 0) {
                 return null;
@@ -181,33 +167,9 @@
             a.rel = 'noopener noreferrer';
             a.title = 'Xem chi tiết ' + titleText;
 
-            // Media: Ảnh sản phẩm thật từ hệ thống kèm fallback
-            const mediaWrap = document.createElement('div');
-            mediaWrap.className = 'chatbot-card-media';
-
-            const defaultImg = ctx + '/images/products/placeholder.svg';
-            const img = document.createElement('img');
-            img.className = 'chatbot-card-img';
-            img.alt = titleText || 'Sản phẩm';
-            img.loading = 'lazy';
-
-            let src = imageUrl;
-            if (src && typeof src === 'string' && src.trim().length > 0) {
-                src = src.trim();
-                if (!src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('//')) {
-                    src = ctx + (src.startsWith('/') ? src : '/' + src);
-                }
-            } else {
-                src = defaultImg;
-            }
-
-            img.src = src;
-            img.onerror = function () {
-                if (this.src !== defaultImg) {
-                    this.src = defaultImg;
-                }
-            };
-            mediaWrap.appendChild(img);
+            const icon = document.createElement('div');
+            icon.className = 'chatbot-card-icon';
+            icon.textContent = '📱';
 
             const info = document.createElement('div');
             info.className = 'chatbot-card-info';
@@ -233,7 +195,7 @@
 
             info.appendChild(nameEl);
             info.appendChild(metaEl);
-            a.appendChild(mediaWrap);
+            a.appendChild(icon);
             a.appendChild(info);
             return a;
         }
@@ -259,8 +221,7 @@
             cards.slice(0, 3).forEach(function (p) {
                 const name = p && p.name != null ? String(p.name) : ('Sản phẩm #' + (p && p.id ? p.id : ''));
                 const price = p && p.price != null ? String(p.price) : '';
-                const imageUrl = p && p.imageUrl != null ? String(p.imageUrl) : '';
-                const card = createSuggestionCardElement(p && p.id, name, price, imageUrl);
+                const card = createSuggestionCardElement(p && p.id, name, price);
                 if (card) {
                     wrap.appendChild(card);
                 }
@@ -277,7 +238,7 @@
             wrap.appendChild(createSuggestionRowHeader('Gợi ý xem chi tiết:'));
 
             ids.slice(0, 3).forEach(function (id) {
-                const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '', null);
+                const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '');
                 if (card) {
                     wrap.appendChild(card);
                 }
@@ -306,11 +267,5 @@
                 messagesEl.scrollTop = messagesEl.scrollHeight;
             }, 30);
         }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initChatbot);
-    } else {
-        initChatbot();
-    }
+    });
 })();

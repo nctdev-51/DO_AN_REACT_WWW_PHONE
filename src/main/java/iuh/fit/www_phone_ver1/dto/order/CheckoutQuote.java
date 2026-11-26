@@ -12,10 +12,4 @@ public class CheckoutQuote {
   private final BigDecimal shippingFee;
   private final BigDecimal total;
   private final Promotion promotion;
-
-  public void validatePointsCombination(long requestedPoints) {
-    if (requestedPoints > 0 && promotion != null && !promotion.isCombinableWithPoints()) {
-      throw new IllegalArgumentException("Mã này không áp dụng cùng điểm thưởng.");
-    }
-  }
 }

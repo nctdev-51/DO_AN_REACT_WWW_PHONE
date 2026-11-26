@@ -42,26 +42,11 @@ public class CartController {
       HttpSession session,
       RedirectAttributes flash) {
     try {
-      var variant =
-          variants
-              .findById(variantId)
-              .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiên bản."));
-      if (!variant.isActive() || variant.getProduct().getStatus() != 1)
-        throw new IllegalArgumentException("Sản phẩm đã ngừng kinh doanh.");
-      Cart existing = cart(session);
-      int inCart =
-          existing.getItemList().stream()
-              .filter(item -> variantId.equals(item.getVariantId()))
-              .mapToInt(item -> item.getQuantity())
-              .sum();
-      if (quantity < 1 || inCart + quantity > variant.getStock())
-        throw new IllegalArgumentException(
-            variant.getStock() <= 0
-                ? "Sản phẩm vừa hết hàng."
-                : "Chỉ còn " + variant.getStock() + " sản phẩm trong kho.");
       cart(session)
           .addItem(
-              variant,
+              variants
+                  .findById(variantId)
+                  .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiên bản.")),
               quantity);
       if (buyNow) return "redirect:/checkout";
     } catch (IllegalArgumentException error) {

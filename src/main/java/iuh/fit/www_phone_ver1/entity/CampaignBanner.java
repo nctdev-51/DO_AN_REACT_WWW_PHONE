@@ -28,9 +28,6 @@ public class CampaignBanner {
   @Column(nullable = false, length = 20)
   private String target = "PRODUCT";
 
-  @Column(length = 120)
-  private String searchKeyword;
-
   @ManyToOne(fetch = FetchType.LAZY)
   private Product product;
 
@@ -72,8 +69,6 @@ public class CampaignBanner {
     return switch (target) {
       case "OFFERS" -> "/offers";
       case "CHOOSE" -> "/choose";
-      case "SEARCH" -> "/products?keyword=" + java.net.URLEncoder.encode(
-          java.util.Objects.toString(searchKeyword, ""), java.nio.charset.StandardCharsets.UTF_8);
       default -> "/products/" + product.getId();
     };
   }
