@@ -1,11 +1,14 @@
 package iuh.fit.www_phone_ver1.controller.admin;
 
+import iuh.fit.www_phone_ver1.config.CacheConfig;
 import iuh.fit.www_phone_ver1.dto.catalog.*;
 import iuh.fit.www_phone_ver1.repository.*;
 import iuh.fit.www_phone_ver1.service.catalog.CatalogService;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -141,6 +144,10 @@ public class AdminProductController {
     return "redirect:/admin/products/" + productId + "/variants";
   }
 
+  @Caching(evict = {
+    @CacheEvict(value = CacheConfig.CACHE_BRANDS, allEntries = true),
+    @CacheEvict(value = CacheConfig.CACHE_CATEGORIES, allEntries = true)
+  })
   @PostMapping("/{id}/toggle")
   public String toggleProduct(@PathVariable Long id, RedirectAttributes flash) {
     var product = products.findById(id)

@@ -82,16 +82,19 @@
 </section>
 <section class="panel mt-4">
   <h2>Cập nhật trạng thái</h2>
-  <form action="${pageContext.request.contextPath}/admin/orders/${order.id}/status" method="post" class="d-flex gap-3">
+  <form action="${pageContext.request.contextPath}/admin/orders/${order.id}/status" method="post" class="d-flex flex-column flex-md-row align-items-stretch align-items-md-end gap-2">
     <ui:csrf/>
-    <select class="form-select" name="status">
-      <c:forEach var="status" items="${statuses}">
-        <option value="<c:out value='${status}'/>" ${status == order.status ? 'selected' : ''}>
-          <c:out value="${status}"/>
-        </option>
-      </c:forEach>
-    </select>
-    <button class="btn btn-brand text-nowrap">Cập nhật</button>
+    <div class="flex-grow-1">
+      <label class="form-label small text-muted mb-1" for="orderStatusSelect">Trạng thái đơn hàng</label>
+      <select id="orderStatusSelect" class="form-select" name="status" style="min-height: 44px;">
+        <c:forEach var="status" items="${statuses}">
+          <option value="<c:out value='${status}'/>" ${status == order.status ? 'selected' : ''}>
+            <c:out value="${status}"/>
+          </option>
+        </c:forEach>
+      </select>
+    </div>
+    <button class="btn btn-brand text-nowrap" style="min-height: 44px;">Cập nhật</button>
   </form>
   <p class="muted small mt-3">Đơn chờ xử lý có thể chuyển sang đang giao hoặc đã hủy. Đơn đang giao chỉ chuyển sang đã giao. Hủy đơn đã thanh toán sẽ trả tồn và điểm đã dùng; quản trị phải xử lý khoản hoàn và đối soát riêng.</p>
 </section>

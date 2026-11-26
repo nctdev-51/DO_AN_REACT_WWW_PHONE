@@ -257,6 +257,7 @@
   .insights-card { padding: 14px; }
   .insights-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .insights-metric { padding: 12px; }
+  .insights-metric dd { font-size: clamp(1.2rem, 4.5vw, 1.65rem); }
   .insights-toolbar { display: grid; grid-template-columns: auto auto; }
   .insights-toolbar > a { grid-row: 1; grid-column: 2; }
   .insights-dates { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }

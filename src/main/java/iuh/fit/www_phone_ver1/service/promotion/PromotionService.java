@@ -1,11 +1,13 @@
 package iuh.fit.www_phone_ver1.service.promotion;
 
+import iuh.fit.www_phone_ver1.config.CacheConfig;
 import iuh.fit.www_phone_ver1.dto.order.*;
 import iuh.fit.www_phone_ver1.entity.*;
 import iuh.fit.www_phone_ver1.repository.*;
 import java.math.BigDecimal;
 import java.util.*;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ public class PromotionService {
     this.products = products;
   }
 
+  @CacheEvict(value = CacheConfig.CACHE_PROMOTIONS, allEntries = true)
   @Transactional
   public void save(Long id, PromotionForm form) {
     if (!form.getEndsAt().isAfter(form.getStartsAt()))
@@ -61,6 +64,7 @@ public class PromotionService {
     promotions.saveAndFlush(promotion);
   }
 
+  @CacheEvict(value = CacheConfig.CACHE_STORE_POLICY, allEntries = true)
   @Transactional
   public void savePolicy(StorePolicyForm form) {
     StorePolicy policy = policies.findById(1L).orElseThrow();
@@ -88,6 +92,7 @@ public class PromotionService {
     return result;
   }
 
+  @CacheEvict(value = CacheConfig.CACHE_PROMOTIONS, allEntries = true)
   @Transactional
   public String updateBatch(Long id, String action) {
     var current = promotions.findById(id)

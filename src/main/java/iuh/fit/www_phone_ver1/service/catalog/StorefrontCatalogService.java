@@ -1,10 +1,12 @@
 package iuh.fit.www_phone_ver1.service.catalog;
 
+import iuh.fit.www_phone_ver1.config.CacheConfig;
 import iuh.fit.www_phone_ver1.entity.*;
 import iuh.fit.www_phone_ver1.repository.*;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.*;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
@@ -71,26 +73,31 @@ public class StorefrontCatalogService {
   }
 
   /** All distinct brands of active products. */
+  @Cacheable(value = CacheConfig.CACHE_BRANDS, key = "'all'")
   public List<String> availableBrands() {
     return products.findAvailableBrands();
   }
 
   /** All distinct colors from active variants. */
+  @Cacheable(value = CacheConfig.CACHE_COLORS, key = "'all'")
   public List<String> availableColors() {
     return variants.availableColors();
   }
 
   /** All distinct storage values from active variants. */
+  @Cacheable(value = CacheConfig.CACHE_STORAGE, key = "'all'")
   public List<String> availableStorage() {
     return variants.availableStorage();
   }
 
   /** All distinct RAM values from active variants. */
+  @Cacheable(value = CacheConfig.CACHE_RAM, key = "'all'")
   public List<String> availableRam() {
     return variants.availableRam();
   }
 
   /** All categories sorted by name. */
+  @Cacheable(value = CacheConfig.CACHE_CATEGORIES, key = "'all'")
   public List<Category> allCategories() {
     return categories.findAll(Sort.by("name"));
   }
@@ -130,12 +137,16 @@ public class StorefrontCatalogService {
         .toList();
   }
 
+  /** All currently active promotions. */
+  @Cacheable(value = CacheConfig.CACHE_PROMOTIONS, key = "'active'")
+  public List<Promotion> activePromotions() {
+    LocalDateTime now = LocalDateTime.now();
+    return promotions.findByActiveTrueAndStartsAtLessThanEqualAndEndsAtGreaterThanOrderByEndsAtAsc(now, now);
+  }
+
   /** Current active promotions applicable to a specific product. */
   public List<Promotion> applicablePromotions(Product product) {
-    LocalDateTime now = LocalDateTime.now();
-    return promotions
-        .findByActiveTrueAndStartsAtLessThanEqualAndEndsAtGreaterThanOrderByEndsAtAsc(now, now)
-        .stream()
+    return activePromotions().stream()
         .filter(
             promo -> {
               if (promo.getScopeSkus() != null && !promo.getScopeSkus().isBlank()) {
@@ -173,6 +184,7 @@ public class StorefrontCatalogService {
   }
 
   /** Store policy (singleton record, id=1). */
+  @Cacheable(value = CacheConfig.CACHE_STORE_POLICY, key = "'singleton'")
   public StorePolicy storePolicy() {
     return policies.findById(1L).orElseGet(StorePolicy::new);
   }
