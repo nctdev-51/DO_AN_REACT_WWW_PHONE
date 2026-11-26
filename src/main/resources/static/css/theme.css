@@ -177,11 +177,11 @@ h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: a
 }
 .store-main { padding-top: var(--space-14); padding-bottom: var(--space-17); }
 .page-heading { margin: var(--space-11) 0 var(--space-14); }
-.page-heading h1 { font-size: clamp(var(--font-size-3xl), 4vw, var(--font-size-5xl)); font-weight: var(--font-weight-semibold); }
+.page-heading h1 { font-size: var(--font-heading-page); font-weight: var(--font-weight-semibold); }
 .page-heading .eyebrow { color: var(--color-text-muted); }
 .page-heading p { font-size: var(--font-size-md); }
 .section-heading { margin: var(--space-16) 0 var(--space-13); align-items: end; }
-.section-heading h2 { font-size: clamp(var(--font-size-3xl), 3vw, var(--font-size-4xl)); font-weight: var(--font-weight-semibold); }
+.section-heading h2 { font-size: var(--font-heading-section); font-weight: var(--font-weight-semibold); }
 .section-heading a { color: var(--color-action); font-size: var(--font-size-sm); }
 .section-heading a:hover { text-decoration: underline; }
 .section-heading a.btn-brand,
@@ -548,7 +548,7 @@ h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: a
   background: #FFFFFF;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
-.product-info h1 { font-size: clamp(var(--font-size-3xl), 3vw, var(--font-size-5xl)); font-weight: var(--font-weight-semibold); }
+.product-info h1 { font-size: var(--font-heading-product); font-weight: var(--font-weight-semibold); }
 .product-info > .price { font-size: var(--font-size-3xl); }
 .breadcrumb-line { color: var(--color-text-muted); font-size: var(--font-size-xs); margin-bottom: var(--space-13); }
 .breadcrumb-line a { color: var(--color-action); }
@@ -626,7 +626,7 @@ h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: a
 .admin-sidebar nav a.active { color: var(--color-text); background: var(--color-card); }
 .admin-sidebar nav a.active::before { background: var(--color-action); }
 .admin-sidebar > form .btn { color: var(--color-text-on-dark); border-color: var(--color-control-border); }
-.admin-main .page-heading h1 { font-size: var(--font-size-4xl); }
+.admin-main .page-heading h1 { font-size: var(--font-heading-section); }
 .admin-main .panel { padding: var(--space-12); }
 .chart-empty { background: var(--color-canvas); }
 .stat-grid article { border-top: 0; }
@@ -634,17 +634,21 @@ h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: a
 .stat-grid article strong { font-size: clamp(1.2rem, 1.8vw, var(--font-size-3xl)); font-weight: var(--font-weight-semibold); overflow-wrap: anywhere; }
 .table { --bs-table-color: var(--color-text); --bs-table-border-color: var(--color-divider); }
 .table th { color: var(--color-text-muted); background: var(--color-canvas); }
+@media (min-width: 768px) and (max-width: 1499px) {
+  .header-inner { flex-wrap: wrap; }
+  .store-nav { flex-basis: 100%; flex-wrap: wrap; }
+}
+
 @media (max-width: 991px) {
   .header-inner { gap: var(--space-10); }
-  .header-search { max-width: none; }
+  .header-search { min-width: 0 !important; max-width: none !important; }
   .store-nav { gap: var(--space-10); }
 }
 @media (max-width: 767px) {
-  :root { --header-offset: 192px; }
+  .header-search { box-sizing: border-box; flex: 1 1 100% !important; width: 100%; max-width: 100% !important; }
   .container { padding-left: var(--space-11); padding-right: var(--space-11); }
   .store-main { padding-top: var(--space-12); padding-bottom: var(--space-15); }
   .section-heading { margin-top: var(--space-15); gap: var(--space-9); }
-  .section-heading h2 { font-size: var(--font-size-3xl); }
   .section-heading > a { font-size: var(--font-size-xs); }
   .panel, .auth-panel { padding: var(--space-12); }
   .product-grid { gap: var(--space-9); }
@@ -666,5 +670,4 @@ h1, h2, h3 { color: var(--color-text); letter-spacing: -.035em; overflow-wrap: a
   .brand-nav a { min-height: var(--space-15); }
   .auth-panel { padding: var(--space-12); }
   .auth-panel h1 { font-size: var(--font-size-3xl); }
-  .admin-main .page-heading h1 { font-size: var(--font-size-3xl); }
 }
