@@ -197,14 +197,26 @@ public class OrderService {
           order, "Hủy bởi quản trị viên; khoản đã thanh toán cần đối soát hoàn tiền", true);
       return;
     }
+    if (RETURN_REQUESTED.equals(order.getStatus()) && RETURN_RECEIVED.equals(next)) {
+      receiveReturnedItems(order);
+      order.setStatus(RETURN_RECEIVED);
+      history.append(order, "Quản trị viên", "Đã nhận hàng hoàn và nhập lại tồn kho; chờ đối soát hoàn tiền.");
+      return;
+    }
+    if (RETURN_REQUESTED.equals(order.getStatus()) && RETURN_REJECTED.equals(next)) {
+      order.setStatus(RETURN_REJECTED);
+      history.append(order, "Quản trị viên", "Từ chối yêu cầu trả hàng.");
+      return;
+    }
     boolean valid =
         (PENDING.equals(order.getStatus()) && SHIPPING.equals(next))
-            || (SHIPPING.equals(order.getStatus()) && DELIVERED.equals(next));
+            || (SHIPPING.equals(order.getStatus()) && DELIVERED.equals(next))
+            || (DELIVERED.equals(order.getStatus()) && RETURN_REQUESTED.equals(next));
     if (!valid)
       throw new IllegalArgumentException(
           "Không thể chuyển trạng thái đơn hàng từ " + order.getStatus() + " sang " + next + ".");
-    if ("VNPAY".equals(order.getPaymentMethod()) && !"PAID".equals(order.getPaymentStatus()))
-      throw new IllegalArgumentException("Đơn VNPay chưa được thanh toán.");
+    if (SHIPPING.equals(next) && isOnlinePayment(order) && !"PAID".equals(order.getPaymentStatus()))
+      throw new IllegalArgumentException("Đơn thanh toán trực tuyến chưa được xác nhận thanh toán.");
     order.setStatus(next);
     if (DELIVERED.equals(next) && "COD".equals(order.getPaymentMethod()))
       order.setPaymentStatus("PAID");
@@ -312,6 +324,9 @@ public class OrderService {
     }
     loyalty.cancelled(order);
     order.setStatus(CANCELLED);
+    if (adminRefund && isOnlinePayment(order) && "PAID".equals(order.getPaymentStatus())) {
+      order.setPaymentStatus("REFUND_REQUIRED");
+    }
     order.setCancellationReason(reason);
     history.append(order, "Hệ thống", "Hủy đơn: " + reason);
     notifyAfterCommit(
@@ -331,6 +346,13 @@ public class OrderService {
     Order order = locked(orderId);
     if (!PENDING.equals(order.getStatus()))
       throw new IllegalArgumentException("Chỉ có thể sửa đơn đang chờ xử lý.");
+    if (order.getPromotion() != null
+        || order.getPointsSpent() > 0
+        || order.getPointsDiscount().signum() > 0) {
+      throw new IllegalArgumentException(
+          "Đơn đã dùng mã giảm giá hoặc điểm không thể sửa số lượng trực tiếp. "
+              + "Hãy hủy đơn và tạo lại để hệ thống tính đúng ưu đãi.");
+    }
     OrderDetail detail = orderDetails.findForUpdate(detailId, orderId)
         .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dòng đơn hàng."));
     int oldQty = detail.getQuantity();
@@ -344,16 +366,16 @@ public class OrderService {
       variant.setStock(variant.getStock() - delta);
     }
     detail.setQuantity(newQty);
-    // Tính lại tổng tiền đơn hàng (subtotal + shippingFee - discount - pointsDiscount)
+    // Giá khuyến mãi/điểm được chặn ở trên. Với đơn thường, tính lại cả phí giao hàng
+    // để không giữ nhầm ưu đãi freeship khi giá trị đơn thay đổi.
     BigDecimal newSubtotal = order.getOrderDetails().stream()
         .map(d -> d.getPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
         .reduce(BigDecimal.ZERO, BigDecimal::add);
     order.setSubtotal(newSubtotal);
-    BigDecimal newTotal = newSubtotal
-        .subtract(order.getDiscountAmount())
-        .subtract(order.getPointsDiscount())
-        .add(order.getShippingFee());
-    order.setTotalAmount(newTotal.max(BigDecimal.ZERO));
+    var quote = pricing.preview(newSubtotal, null, order.getUser() == null ? null : order.getUser().getId());
+    order.setDiscountAmount(quote.getDiscount());
+    order.setShippingFee(quote.getShippingFee());
+    order.setTotalAmount(quote.getTotal());
     history.append(order, "Quản trị viên",
         String.format("Cập nhật số lượng dòng #%d: %d → %d.", detailId, oldQty, newQty));
   }
@@ -387,7 +409,46 @@ public class OrderService {
       Order order = locked(candidate.getId());
       if (PENDING.equals(order.getStatus())
           && Set.of("UNPAID", "FAILED").contains(order.getPaymentStatus()))
-        cancelLocked(order, "Quá thời hạn thanh toán VNPay");
+        cancelLocked(
+            order,
+            "Quá thời hạn thanh toán "
+                + ("QR".equals(order.getPaymentMethod()) ? "QR" : "VNPay"));
     }
+  }
+
+  @Transactional
+  public void requestReturn(Long id, String email, String reason) {
+    Order order = locked(id);
+    if (order.getUser() == null || !order.getUser().getEmail().equals(email))
+      throw new IllegalArgumentException("Không tìm thấy đơn hàng.");
+    if (!DELIVERED.equals(order.getStatus()))
+      throw new IllegalArgumentException("Chỉ có thể yêu cầu trả hàng sau khi đơn đã giao.");
+    if (!"PAID".equals(order.getPaymentStatus()))
+      throw new IllegalArgumentException("Đơn chưa có khoản thanh toán cần đối soát trả hàng.");
+    if (reason == null || reason.isBlank() || reason.length() > 500)
+      throw new IllegalArgumentException("Lý do trả hàng phải từ 1 đến 500 ký tự.");
+    order.setStatus(RETURN_REQUESTED);
+    history.append(order, "Khách hàng", "Yêu cầu trả hàng: " + reason.trim());
+  }
+
+  private void receiveReturnedItems(Order order) {
+    List<Long> ids =
+        order.getOrderDetails().stream()
+            .filter(d -> d.getVariant() != null)
+            .map(d -> d.getVariant().getId())
+            .sorted()
+            .toList();
+    Map<Long, ProductVariant> stock = new HashMap<>();
+    if (!ids.isEmpty()) variants.lockAll(ids).forEach(v -> stock.put(v.getId(), v));
+    for (OrderDetail detail : order.getOrderDetails()) {
+      if (detail.getVariant() != null) {
+        ProductVariant variant = stock.get(detail.getVariant().getId());
+        if (variant != null) variant.setStock(variant.getStock() + detail.getQuantity());
+      }
+    }
+  }
+
+  private static boolean isOnlinePayment(Order order) {
+    return Set.of("VNPAY", "QR").contains(order.getPaymentMethod());
   }
 }

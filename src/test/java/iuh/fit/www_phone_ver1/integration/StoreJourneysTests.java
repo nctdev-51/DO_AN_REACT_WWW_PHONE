@@ -261,6 +261,8 @@ class StoreJourneysTests {
   @Test
   void partialAndFullRefundAdjustPointsAndCannotExceedPaidAmount() {
     var o = delivered();
+    checkout.updateStatus(o.getId(), RETURN_REQUESTED);
+    checkout.updateStatus(o.getId(), RETURN_RECEIVED);
     var half = o.getTotalAmount().divide(BigDecimal.valueOf(2));
     refunds.request(o.getId(), half, "Trả hàng đã kiểm tra");
     var r = refundRows.findByOrder_IdOrderByIdDesc(o.getId()).get(0);
@@ -283,6 +285,8 @@ class StoreJourneysTests {
   @Test
   void rejectedRefundReleasesReservedAmount() {
     var o = delivered();
+    checkout.updateStatus(o.getId(), RETURN_REQUESTED);
+    checkout.updateStatus(o.getId(), RETURN_RECEIVED);
     refunds.request(o.getId(), money(1000000), "Kiểm tra giao dịch");
     var r = refundRows.findByOrder_IdOrderByIdDesc(o.getId()).get(0);
     refunds.settle(r.getId(), "REJECTED", "Sai yêu cầu");

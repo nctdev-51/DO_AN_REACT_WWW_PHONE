@@ -50,9 +50,9 @@ public class RefundService {
     if (!Set.of("PAID", "PARTIALLY_REFUNDED", "REFUND_REQUIRED")
         .contains(Objects.toString(o.getPaymentStatus(), "")))
       throw new IllegalArgumentException("Đơn chưa có khoản thanh toán để hoàn tiền.");
-    if (!Set.of(OrderStatuses.DELIVERED, OrderStatuses.CANCELLED).contains(o.getStatus()))
+    if (!Set.of(OrderStatuses.RETURN_RECEIVED, OrderStatuses.CANCELLED).contains(o.getStatus()))
       throw new IllegalArgumentException(
-          "Hãy hủy đơn chưa giao trước khi hoàn tiền; đơn đang giao cần tiếp nhận hàng trả trước.");
+          "Chỉ hoàn tiền sau khi đã hủy đơn hoặc xác nhận đã nhận hàng hoàn.");
     if (amount == null
         || amount.signum() <= 0
         || amount.scale() > 0

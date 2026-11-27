@@ -150,6 +150,19 @@
   </section>
 </c:if>
 
+<c:if test="${order.status == 'Đã giao' and order.paymentStatus == 'PAID'}">
+  <section class="panel mt-4">
+    <h2>Yêu cầu trả hàng</h2>
+    <p class="muted small">Cửa hàng chỉ đối soát hoàn tiền sau khi đã nhận và kiểm tra hàng hoàn.</p>
+    <form action="${pageContext.request.contextPath}/orders/${order.id}/return-request" method="post" data-confirm="Gửi yêu cầu trả hàng cho đơn này?">
+      <ui:csrf/>
+      <label for="return-reason">Lý do trả hàng</label>
+      <input id="return-reason" class="form-control mb-3" name="reason" required maxlength="500" placeholder="Nhập lý do cần trả hàng">
+      <button class="btn btn-outline-danger">Gửi yêu cầu trả hàng</button>
+    </form>
+  </section>
+</c:if>
+
 <section class="panel mt-4">
   <h2>Chi tiết thanh toán</h2>
   <ui:orderAmounts order="${order}"/>
@@ -223,7 +236,7 @@
 <section class="panel mt-4">
   <h2>Quy tắc hủy đơn, đổi trả &amp; Cần hỗ trợ?</h2>
   <ul class="small muted mb-3">
-    <li>Khách có thể hủy đơn khi đơn ở trạng thái <strong>Chờ xử lý</strong> và <strong>chưa thanh toán VNPay</strong>. Nếu đã thanh toán qua VNPay, vui lòng liên hệ cửa hàng để hủy và tạo yêu cầu hoàn tiền đối soát.</li>
+    <li>Khách có thể hủy đơn khi đơn ở trạng thái <strong>Chờ xử lý</strong> và <strong>chưa thanh toán trực tuyến</strong>. Đơn đã thanh toán cần được cửa hàng đối soát hoàn tiền.</li>
     <li>Yêu cầu đổi/trả hàng áp dụng sau khi đơn giao thành công trong thời hạn chính sách cửa hàng; yêu cầu bảo hành hỗ trợ theo thời hạn từng thiết bị.</li>
   </ul>
   <div class="d-flex flex-wrap gap-2">

@@ -87,6 +87,9 @@ public class CustomerOrderController {
 
   private int resolveMilestoneStep(Order order) {
     if (OrderStatuses.CANCELLED.equals(order.getStatus())) return 0;
+    if (OrderStatuses.RETURN_REQUESTED.equals(order.getStatus())
+        || OrderStatuses.RETURN_RECEIVED.equals(order.getStatus())
+        || OrderStatuses.RETURN_REJECTED.equals(order.getStatus())) return 5;
     if (OrderStatuses.DELIVERED.equals(order.getStatus())) return 5;
     if (OrderStatuses.SHIPPING.equals(order.getStatus())) return 4;
     if (order.getTrackingCode() != null && !order.getTrackingCode().isBlank()) return 3;
@@ -103,6 +106,22 @@ public class CustomerOrderController {
     try {
       service.cancelByCustomer(id, user.getName(), reason);
       flash.addFlashAttribute("successMsg", "Đã hủy đơn và hoàn lại tồn kho.");
+    } catch (IllegalArgumentException error) {
+      flash.addFlashAttribute("errorMsg", error.getMessage());
+    }
+    return "redirect:/orders/" + id;
+  }
+
+  @PostMapping("/{id}/return-request")
+  public String requestReturn(
+    @PathVariable Long id,
+    @RequestParam String reason,
+    Principal user,
+    RedirectAttributes flash) {
+    try {
+      service.requestReturn(id, user.getName(), reason);
+      flash.addFlashAttribute(
+          "successMsg", "Đã ghi nhận yêu cầu trả hàng. Cửa hàng sẽ kiểm tra trước khi hoàn tiền.");
     } catch (IllegalArgumentException error) {
       flash.addFlashAttribute("errorMsg", error.getMessage());
     }

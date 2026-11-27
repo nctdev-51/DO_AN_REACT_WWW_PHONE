@@ -142,11 +142,9 @@ public class GhnShippingService {
             .findForUpdate(id)
             .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn."));
     if (!OrderStatuses.PENDING.equals(o.getStatus())
-        || !Set.of("UNPAID", "PAID").contains(o.getPaymentStatus()))
+        || !("COD".equals(o.getPaymentMethod()) || "PAID".equals(o.getPaymentStatus())))
       throw new IllegalArgumentException(
-          "Chỉ tạo vận đơn khi đơn còn chờ xử lý và chưa hoàn tiền.");
-    if ("VNPAY".equals(o.getPaymentMethod()) && !"PAID".equals(o.getPaymentStatus()))
-      throw new IllegalArgumentException("Đơn VNPay phải thanh toán trước khi giao vận.");
+          "Chỉ tạo vận đơn khi đơn COD còn chờ xử lý hoặc đơn thanh toán trực tuyến đã thanh toán.");
     if (o.getGhnEnvironment() != null && !ghn.environment().equals(o.getGhnEnvironment()))
       throw new IllegalArgumentException("Môi trường GHN của đơn khác cấu hình hiện tại.");
     if ("GHN".equals(o.getCarrier()) && o.getTrackingCode() != null)
