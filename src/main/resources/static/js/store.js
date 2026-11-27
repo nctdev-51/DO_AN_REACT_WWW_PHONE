@@ -53,11 +53,112 @@ document.addEventListener('DOMContentLoaded', () => {
     const pathname = new URL(link.href, window.location.origin).pathname;
     if (pathname === window.location.pathname) link.setAttribute('aria-current', 'page');
   });
-  document.querySelectorAll('form[data-confirm]').forEach(form => {
-    form.addEventListener('submit', event => {
-      if (!window.confirm(form.dataset.confirm)) event.preventDefault();
+
+  // ── Store Header Dropdowns: Hover, Safe Bridge & Multi-Device Accessibility ──
+  const navDropdowns = document.querySelectorAll('.store-nav .dropdown');
+  let activeNavDropdown = null;
+  let navCloseTimer = null;
+
+  navDropdowns.forEach(dropdown => {
+    const toggleBtn = dropdown.querySelector('.dropdown-toggle');
+    const menu = dropdown.querySelector('.dropdown-menu');
+    if (!toggleBtn || !menu) return;
+
+    const getBsDropdown = () => {
+      try {
+        if (window.bootstrap && window.bootstrap.Dropdown) {
+          return window.bootstrap.Dropdown.getOrCreateInstance(toggleBtn);
+        }
+      } catch (err) {}
+      return null;
+    };
+
+    const openDropdown = () => {
+      if (navCloseTimer) {
+        clearTimeout(navCloseTimer);
+        navCloseTimer = null;
+      }
+      if (activeNavDropdown && activeNavDropdown !== dropdown) {
+        const otherBtn = activeNavDropdown.querySelector('.dropdown-toggle');
+        const otherMenu = activeNavDropdown.querySelector('.dropdown-menu');
+        if (otherBtn && window.bootstrap && window.bootstrap.Dropdown) {
+          try {
+            const otherBs = window.bootstrap.Dropdown.getInstance(otherBtn);
+            if (otherBs) otherBs.hide();
+          } catch (e) {}
+        }
+        if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
+        if (otherMenu) otherMenu.classList.remove('show');
+      }
+      activeNavDropdown = dropdown;
+      toggleBtn.setAttribute('aria-expanded', 'true');
+      menu.classList.add('show');
+      const bs = getBsDropdown();
+      if (bs) {
+        try { bs.show(); } catch (e) {}
+      }
+    };
+
+    const closeDropdown = (delay = 180) => {
+      if (navCloseTimer) clearTimeout(navCloseTimer);
+      navCloseTimer = setTimeout(() => {
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        menu.classList.remove('show');
+        const bs = getBsDropdown();
+        if (bs) {
+          try { bs.hide(); } catch (e) {}
+        }
+        if (activeNavDropdown === dropdown) activeNavDropdown = null;
+      }, delay);
+    };
+
+    dropdown.addEventListener('mouseenter', openDropdown);
+    dropdown.addEventListener('mouseleave', () => closeDropdown(180));
+    toggleBtn.addEventListener('mouseenter', openDropdown);
+    menu.addEventListener('mouseenter', openDropdown);
+    menu.addEventListener('mouseleave', () => closeDropdown(180));
+
+    toggleBtn.addEventListener('click', e => {
+      e.preventDefault();
+      if (menu.classList.contains('show')) {
+        closeDropdown(0);
+      } else {
+        openDropdown();
+      }
+    });
+
+    dropdown.addEventListener('focusin', openDropdown);
+    dropdown.addEventListener('focusout', e => {
+      if (!dropdown.contains(e.relatedTarget)) {
+        closeDropdown(180);
+      }
     });
   });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && activeNavDropdown) {
+      const menu = activeNavDropdown.querySelector('.dropdown-menu');
+      const toggle = activeNavDropdown.querySelector('.dropdown-toggle');
+      if (menu) menu.classList.remove('show');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+      activeNavDropdown = null;
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (activeNavDropdown && !activeNavDropdown.contains(e.target)) {
+      const menu = activeNavDropdown.querySelector('.dropdown-menu');
+      const toggle = activeNavDropdown.querySelector('.dropdown-toggle');
+      if (menu) menu.classList.remove('show');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+      activeNavDropdown = null;
+    }
+  });
+  document.addEventListener('submit', event => {
+    const form = event.target;
+    if (form instanceof HTMLFormElement && form.hasAttribute('data-confirm')
+        && !window.confirm(form.dataset.confirm)) event.preventDefault();
+  }, true);
 
   const syncStepper = (input, clampEmpty = true) => {
     const stepper = input?.closest('[data-qty-stepper]');

@@ -5,18 +5,6 @@
 <jsp:include page="/WEB-INF/views/shared/store/header.jsp" />
 <div class="home-page">
   <c:set var="budgetFirst" value="${not empty budgetProducts and (homeInterest == 'GAMING' or homeInterest == 'BUDGET')}"/>
-  <c:if test="${not empty interestProducts}">
-    <div class="section-heading">
-      <h2>${homeInterest == 'CAMERA' ? 'Điện thoại chụp ảnh' : 'Điện thoại chơi game'}</h2>
-      <a href="${pageContext.request.contextPath}/products?purpose=${homeInterest}">Khám phá →</a>
-    </div>
-    <div class="product-grid">
-      <c:forEach var="product" items="${interestProducts}">
-        <ui:productCard product="${product}"/>
-      </c:forEach>
-    </div>
-  </c:if>
-  <c:if test="${budgetFirst}"><ui:homeBudget products="${budgetProducts}" variants="${budgetVariants}"/></c:if>
   <section class="store-hero-overlay" data-reveal>
     <div class="store-hero-bg">
       <img src="https://getjar.com/_next/image?url=https%3A%2F%2Fwww.platformocho.io%2Fassets%2F51d48807-070c-48a0-9eb1-82a0287cf8c6&w=1920&q=75" alt="PTV Mobile Hero Banner" fetchpriority="high" onerror="this.style.display='none'">
@@ -43,6 +31,7 @@
   </c:otherwise></c:choose></c:if>
   <c:if test="${empty heroBanners and not empty showcaseProduct}"><ui:showcase product="${showcaseProduct}" subtitle="Một góc nhìn khác. Một lựa chọn mới."/></c:if>
   <div class="campaign-tiles"><c:forEach var="b" items="${tileBanners}"><ui:campaignBanner banner="${b}"/></c:forEach></div>
+  <c:if test="${budgetFirst}"><ui:homeBudget products="${budgetProducts}" variants="${budgetVariants}"/></c:if>
   <c:if test="${not empty personalizedProducts}">
     <section class="collection-section mb-4" data-reveal>
       <div class="section-heading">
@@ -54,6 +43,22 @@
       </div>
       <div class="product-grid">
         <c:forEach var="product" items="${personalizedProducts}">
+          <ui:productCard product="${product}"/>
+        </c:forEach>
+      </div>
+    </section>
+  </c:if>
+  <c:if test="${not empty interestProducts}">
+    <section class="collection-section mb-4" data-reveal>
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow" style="color: var(--ana-primary, #2563eb);">✨ DÀNH CHO BẠN</span>
+          <h2>${homeInterest == 'CAMERA' ? 'Điện thoại chụp ảnh đỉnh cao' : 'Điện thoại chơi game mượt mà'}</h2>
+        </div>
+        <a href="${pageContext.request.contextPath}/products?purpose=${homeInterest}">Khám phá →</a>
+      </div>
+      <div class="product-grid">
+        <c:forEach var="product" items="${interestProducts}">
           <ui:productCard product="${product}"/>
         </c:forEach>
       </div>

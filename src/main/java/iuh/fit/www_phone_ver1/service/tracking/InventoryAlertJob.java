@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@org.springframework.context.annotation.Lazy(false)
 public class InventoryAlertJob {
   private final AnalyticsService analytics;
   private final MailService mail;

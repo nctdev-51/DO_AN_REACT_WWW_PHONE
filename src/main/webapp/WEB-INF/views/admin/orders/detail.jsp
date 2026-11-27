@@ -7,9 +7,12 @@
   <div>
     <span class="eyebrow">THEO DÕI ĐƠN HÀNG</span>
     <h1>Đơn hàng #${order.id}</h1>
-    <p>
-      <c:out value="${order.status}"/>
-    </p>
+    <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+      <ui:adminOrderStatus value="${order.status}"/>
+      <c:if test="${order.status != 'Đã hủy'}">
+        <a class="btn btn-outline-dark btn-sm" href="${pageContext.request.contextPath}/admin/orders/${order.id}/invoice.pdf">Xuất hóa đơn PDF</a>
+      </c:if>
+    </div>
   </div>
   <strong class="price">
     <ui:money value="${order.totalAmount}"/>
@@ -37,10 +40,9 @@
     </p>
     <ui:paymentStatus value="${order.paymentStatus}"/>
     <c:if test="${not empty order.cancellationReason}">
-      <p class="mt-3">Lý do hủy: <c:out value="${order.cancellationReason}"/>
-    </p>
-  </c:if>
-</section>
+      <p class="mt-3">Lý do hủy: <c:out value="${order.cancellationReason}"/></p>
+    </c:if>
+  </section>
 </div>
 <section class="panel">
   <h2>Sản phẩm đã đặt</h2>
@@ -80,16 +82,19 @@
 </section>
 <section class="panel mt-4">
   <h2>Cập nhật trạng thái</h2>
-  <form action="${pageContext.request.contextPath}/admin/orders/${order.id}/status" method="post" class="d-flex gap-3">
+  <form action="${pageContext.request.contextPath}/admin/orders/${order.id}/status" method="post" class="d-flex flex-column flex-md-row align-items-stretch align-items-md-end gap-2">
     <ui:csrf/>
-    <select class="form-select" name="status">
-      <c:forEach var="status" items="${statuses}">
-        <option value="<c:out value='${status}'/>" ${status == order.status ? 'selected' : ''}>
-          <c:out value="${status}"/>
-        </option>
-      </c:forEach>
-    </select>
-    <button class="btn btn-brand text-nowrap">Cập nhật</button>
+    <div class="flex-grow-1">
+      <label class="form-label small text-muted mb-1" for="orderStatusSelect">Trạng thái đơn hàng</label>
+      <select id="orderStatusSelect" class="form-select" name="status" style="min-height: 44px;">
+        <c:forEach var="status" items="${statuses}">
+          <option value="<c:out value='${status}'/>" ${status == order.status ? 'selected' : ''}>
+            <c:out value="${status}"/>
+          </option>
+        </c:forEach>
+      </select>
+    </div>
+    <button class="btn btn-brand text-nowrap" style="min-height: 44px;">Cập nhật</button>
   </form>
   <p class="muted small mt-3">Đơn chờ xử lý có thể chuyển sang đang giao hoặc đã hủy. Đơn đang giao chỉ chuyển sang đã giao. Hủy đơn đã thanh toán sẽ trả tồn và điểm đã dùng; quản trị phải xử lý khoản hoàn và đối soát riêng.</p>
 </section>

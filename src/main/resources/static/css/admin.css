@@ -133,7 +133,9 @@ a.btn-brand:focus {
 .table-actions {
   display: inline-flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 8px;
+  white-space: nowrap;
 }
 .table-actions form {
   margin: 0;
@@ -141,81 +143,72 @@ a.btn-brand:focus {
 .chart-empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; background: #f7f9f5; border-radius: 8px; }
 .chart-empty strong { font-size: .95rem; font-weight: 550; }
 .chart-empty p { font-size: .8rem; color: var(--muted); margin: 8px 0 0; }
+.admin-batch-selection {
+  margin: 0 0 16px;
+  padding: 12px;
+  border: 1px solid #dedfe1;
+  border-radius: 8px;
+  background: #fafaf9;
+}
+.admin-batch-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 128px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.admin-batch-items li {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  max-width: 100%;
+  padding: 2px 8px;
+  border: 1px solid #dae2ec;
+  border-radius: 6px;
+  color: #294467;
+  background: #edf2f8;
+  font-size: .85rem;
+}
+.admin-batch-items span { overflow-wrap: anywhere; }
+.admin-batch-items button {
+  flex: none;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font-size: 1.15rem;
+}
+.admin-batch-items button:hover { background: #dce6f3; }
+.admin-body .status-badge {
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #eceef1;
+  color: #465362;
+  font-size: .78rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.admin-body .status-badge::before {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+.admin-body .status-success { background: #e5f3e9; color: #216344; }
+.admin-body .status-danger { background: #fcebec; color: #982b37; }
+.admin-body .status-warning { background: #fbf0d7; color: #78510c; }
+.admin-body .status-info { background: #e8eef9; color: #305789; }
 .admin-body{
   background:#f3f5f2
 }
-.admin-sidebar{
-  position:fixed;
-  inset:0 auto 0 0;
-  width:244px;
-  background:#183c3c;
-  padding:30px 20px;
-  color:#dae7e1;
-  display:flex;
-  flex-direction:column;
-  overflow-y:auto;
-  z-index:101
-}
-.admin-sidebar .brand{
-  color:white;
-  margin:0 8px 32px;
-  font-size:1.4rem
-}
-.admin-sidebar .brand::before{
-  background:#f1f5ed;
-  color:#183c3c
-}
-.admin-sidebar .eyebrow{
-  font-size:.6rem;
-  color:#9bb4a9;
-  margin-left:12px;
-  margin-bottom:15px
-}
-.admin-sidebar nav{
-  display:grid;
-  gap:5px
-}
-.admin-sidebar nav a{
-  padding:12px 13px;
-  font-size:.8rem;
-  color:#c0d3c9;
-  border-radius:6px;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  line-height:1.4
-}
-.admin-sidebar nav a::before{
-  content:"";
-  width:5px;
-  height:5px;
-  flex-shrink:0;
-  background:#7e9c8d;
-  border-radius:1px
-}
-.admin-sidebar nav a:hover{
-  background:#244b49;
-  color:white
-}
-.admin-sidebar nav a.active{
-  background:#e8efe4;
-  color:#183c3c;
-  font-weight:650
-}
-.admin-sidebar nav a.active::before{
-  background:#bf4d2e
-}
-.admin-sidebar>form{
-  margin-top:auto;
-  padding-top:35px
-}
-.admin-sidebar>form .btn{
-  border-color:#56756a;
-  color:#dbe7e0;
-  font-size:.78rem
-}
 .admin-main{
-  margin-left:244px;
+  margin-left:var(--admin-sidebar-width);
   padding:0 32px 50px;
   max-width:1900px
 }
@@ -385,100 +378,122 @@ a.btn-brand:focus {
 .admin-main .form-control,.admin-main .form-select{
   font-size:.83rem
 }
-.admin-sidebar nav a[href$="/admin/support"]{
-  margin-bottom:12px
+/* ============================================================
+   ADMIN DESKTOP-ONLY POLICY (Screen width >= 1024px required)
+   ============================================================ */
+.admin-unsupported-screen {
+  display: none;
 }
-@media(max-width:1100px){
-  .admin-sidebar{
-    width:215px;
-    padding:25px 14px
+
+@media (max-width: 1023.98px) {
+  /* Ẩn hoàn toàn toàn bộ nội dung Admin Dashboard */
+  .admin-sidebar,
+  .admin-main,
+  .admin-body > *:not(.admin-unsupported-screen) {
+    display: none !important;
   }
-  .admin-main{
-    margin-left:215px;
-    padding-left:22px;
-    padding-right:22px
+
+  /* Hiển thị màn hình thông báo chặn toàn trang phong cách Apple Store */
+  .admin-unsupported-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    width: 100vw;
+    height: 100vh;
+    min-height: 100dvh;
+    background: #f5f5f7;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+    font-family: var(--font-apple-text, -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  .stat-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr))
+
+  .admin-unsupported-card {
+    background: #ffffff;
+    border: 1px solid #e5e5ea;
+    border-radius: 20px;
+    padding: 44px 32px 36px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03);
+    animation: adminFadeIn 0.3s ease-out;
   }
-  .variant-form-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr))
+
+  .admin-unsupported-icon {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 20px;
+    border-radius: 18px;
+    background: #f0f4f8;
+    color: #0071e3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-unsupported-icon svg {
+    width: 36px;
+    height: 36px;
+    stroke-width: 1.6;
+  }
+
+  .admin-unsupported-title {
+    font-family: var(--font-apple-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, sans-serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+    color: #1d1d1f;
+    margin: 0 0 12px;
+  }
+
+  .admin-unsupported-desc {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: #6e6e73;
+    margin: 0 0 28px;
+    font-weight: 400;
+  }
+
+  .admin-unsupported-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 26px;
+    background: #0071e3;
+    color: #ffffff !important;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    border-radius: 980px;
+    text-decoration: none !important;
+    transition: background 0.18s ease, transform 0.15s ease;
+  }
+
+  .admin-unsupported-btn:hover {
+    background: #0077ed;
+    transform: scale(1.02);
+    color: #ffffff !important;
+  }
+
+  .admin-unsupported-btn:active {
+    transform: scale(0.98);
   }
 }
-@media(max-width:800px){
-  .admin-sidebar{
-    position:static;
-    width:100%;
-    padding:16px;
-    overflow:visible
+
+@keyframes adminFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
   }
-  .admin-sidebar .brand{
-    margin:0 0 15px
-  }
-  .admin-sidebar .eyebrow{
-    display:none
-  }
-  .admin-sidebar nav{
-    display:flex;
-    overflow-x:auto;
-    gap:5px;
-    padding-bottom:6px;
-    scrollbar-width:thin;
-    -webkit-overflow-scrolling:touch;
-    mask-image:linear-gradient(to right,black calc(100% - 24px),transparent 100%)
-  }
-  .admin-sidebar nav a{
-    white-space:nowrap;
-    font-size:.74rem;
-    padding:10px 12px
-  }
-  .admin-sidebar nav a::before{
-    display:none
-  }
-  .admin-sidebar nav a[href$="/admin/support"]{
-    margin-bottom:0
-  }
-  .admin-sidebar>form{
-    display:block;
-    padding:0;
-    margin:10px 0 0;
-    align-self:flex-end
-  }
-  .admin-sidebar>form .btn{
-    margin-top:0!important;
-    min-height:40px;
-    padding:8px 14px
-  }
-  .admin-main{
-    margin:0;
-    padding:0 16px 35px
-  }
-  .admin-topbar{
-    min-height:56px;
-    margin-bottom:25px
-  }
-  .admin-main .page-heading h1{
-    font-size:1.55rem
-  }
-  .admin-main .panel{
-    padding:18px
-  }
-  .stat-grid{
-    gap:10px
-  }
-  .stat-grid article strong{
-    font-size:1.45rem;
-    margin-top:12px;
-    overflow-wrap:anywhere
-  }
-  .form-grid,.variant-form-grid{
-    grid-template-columns:1fr
-  }
-  .chart-box{
-    height:240px
-  }
-  .admin-topbar>span{
-    font-size:.67rem
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

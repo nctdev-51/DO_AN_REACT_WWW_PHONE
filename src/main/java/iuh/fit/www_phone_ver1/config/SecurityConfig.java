@@ -84,7 +84,9 @@ public class SecurityConfig {
         "/api/ai/chat", "/api/tracking", "/payments/qr/**", "/api/payments/qr/**"));
     http.authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/admin/**")
+                auth.requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info")
+                    .permitAll()
+                    .requestMatchers("/admin/**", "/actuator", "/actuator/**")
                     .hasRole("ADMIN")
                     .requestMatchers(
                         "/checkout/**", "/orders/**", "/account/**", "/payments/vnpay/return")

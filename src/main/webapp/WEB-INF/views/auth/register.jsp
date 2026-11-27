@@ -8,6 +8,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tạo tài khoản — PTV Mobile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/bootstrap/bootstrap.min.css">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/tokens.css">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth-split.css">
@@ -56,7 +59,7 @@
 
         <!-- Alerts thông báo -->
         <c:if test="${param.success != null}">
-          <div class="alert alert-success">Đăng ký thành công! Hãy kiểm tra hộp thư email và xác minh tài khoản trước khi đăng nhập. Liên kết có hiệu lực 24 giờ. <a href="${pageContext.request.contextPath}/resend-verification">Gửi lại email xác minh</a>.</div>
+          <div class="alert alert-success">🎉 <strong>Đăng ký thành công!</strong> Bạn có thể <a href="${pageContext.request.contextPath}/login" class="alert-link">đăng nhập ngay tại đây</a>.</div>
         </c:if>
 
         <!-- FORM ĐĂNG KÝ -->

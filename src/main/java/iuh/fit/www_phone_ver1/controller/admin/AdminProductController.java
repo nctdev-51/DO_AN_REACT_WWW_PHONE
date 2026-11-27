@@ -1,11 +1,14 @@
 package iuh.fit.www_phone_ver1.controller.admin;
 
+import iuh.fit.www_phone_ver1.config.CacheConfig;
 import iuh.fit.www_phone_ver1.dto.catalog.*;
 import iuh.fit.www_phone_ver1.repository.*;
 import iuh.fit.www_phone_ver1.service.catalog.CatalogService;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,8 +43,13 @@ public class AdminProductController {
   }
 
   @GetMapping
-  public String list(Model model) {
-    model.addAttribute("products", products.findAll(Sort.by(Sort.Direction.DESC, "id")));
+  public String list(@RequestParam(defaultValue = "") String q, Model model) {
+    String keyword = q.trim();
+    Sort sort = Sort.by(Sort.Direction.DESC, "id");
+    model.addAttribute("q", keyword);
+    model.addAttribute("products", keyword.isEmpty() ? products.findAll(sort)
+        : products.findByNameContainingIgnoreCase(keyword, sort));
+    model.addAttribute("categories", categories.findAll(Sort.by("name")));
     return "admin/products/list";
   }
 
@@ -136,6 +144,10 @@ public class AdminProductController {
     return "redirect:/admin/products/" + productId + "/variants";
   }
 
+  @Caching(evict = {
+    @CacheEvict(value = CacheConfig.CACHE_BRANDS, allEntries = true),
+    @CacheEvict(value = CacheConfig.CACHE_CATEGORIES, allEntries = true)
+  })
   @PostMapping("/{id}/toggle")
   public String toggleProduct(@PathVariable Long id, RedirectAttributes flash) {
     var product = products.findById(id)
@@ -147,5 +159,43 @@ public class AdminProductController {
     flash.addFlashAttribute("successMsg",
         newStatus == 1 ? "Đã kích hoạt sản phẩm #" + id : "Đã ngừng kinh doanh sản phẩm #" + id);
     return "redirect:/admin/products";
+  }
+
+  @PostMapping("/batch")
+  public String batch(@RequestParam(required = false) java.util.List<Long> ids,
+      @RequestParam String action, @RequestParam(required = false) Long categoryId,
+      RedirectAttributes flash) {
+    if (!java.util.Set.of("enable", "disable", "category", "delete").contains(action)
+        || ("category".equals(action) && categoryId == null)) {
+      flash.addFlashAttribute("errorMsg", "Chọn thao tác và danh mục đích nếu chuyển danh mục.");
+    } else {
+      AdminBatch.run(ids, id -> {
+        if ("delete".equals(action)) {
+          return catalog.deleteProduct(id) ? null : "được chuyển sang ngừng bán vì đã được sử dụng.";
+        }
+        if ("category".equals(action)) catalog.updateProductBatchFields(id, null, categoryId);
+        else catalog.updateProductBatchFields(id, "enable".equals(action) ? 1 : 0, null);
+        return null;
+      }, flash);
+    }
+    return "redirect:/admin/products";
+  }
+
+  @PostMapping("/{productId}/variants/batch")
+  public String batchVariants(@PathVariable Long productId,
+      @RequestParam(required = false) java.util.List<Long> ids,
+      @RequestParam String action, @RequestParam(required = false) Integer stock,
+      RedirectAttributes flash) {
+    if (!java.util.Set.of("enable", "disable", "stock").contains(action)
+        || ("stock".equals(action) && (stock == null || stock < 0 || stock > 1000000))) {
+      flash.addFlashAttribute("errorMsg", "Chọn thao tác và nhập tồn kho hợp lệ.");
+    } else {
+      AdminBatch.run(ids, id -> {
+        if ("stock".equals(action)) catalog.updateVariantBatchFields(productId, id, null, stock);
+        else catalog.updateVariantBatchFields(productId, id, "enable".equals(action), null);
+        return null;
+      }, flash);
+    }
+    return "redirect:/admin/products/" + productId + "/variants";
   }
 }

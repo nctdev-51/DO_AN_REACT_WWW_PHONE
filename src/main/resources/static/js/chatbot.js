@@ -154,8 +154,25 @@
             scrollMessages();
         }
 
+        function resolveProductImageUrl(rawUrl) {
+            if (!rawUrl || typeof rawUrl !== 'string' || !rawUrl.trim()) {
+                return null;
+            }
+            const trimmed = rawUrl.trim();
+            if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) {
+                return trimmed;
+            }
+            if (trimmed.startsWith('/')) {
+                return ctx + trimmed;
+            }
+            if (trimmed.startsWith('images/') || trimmed.startsWith('uploads/')) {
+                return ctx + '/' + trimmed;
+            }
+            return ctx + '/uploads/products/' + trimmed;
+        }
+
         // ── Helper: Safe Product Card Builder (anti-XSS) ──────────
-        function createSuggestionCardElement(productId, titleText, priceText) {
+        function createSuggestionCardElement(productId, titleText, priceText, imageUrl) {
             const safeId = Number(productId);
             if (!Number.isInteger(safeId) || safeId <= 0) {
                 return null;
@@ -167,9 +184,23 @@
             a.rel = 'noopener noreferrer';
             a.title = 'Xem chi tiết ' + titleText;
 
-            const icon = document.createElement('div');
-            icon.className = 'chatbot-card-icon';
-            icon.textContent = '📱';
+            // Product thumbnail image with fallback
+            const mediaWrap = document.createElement('div');
+            mediaWrap.className = 'chatbot-card-thumb';
+
+            const resolvedUrl = resolveProductImageUrl(imageUrl);
+            const fallbackSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='1.5'%3E%3Crect x='5' y='2' width='14' height='20' rx='2'/%3E%3Cline x1='12' y1='18' x2='12.01' y2='18'/%3E%3C/svg%3E";
+
+            const img = document.createElement('img');
+            img.src = resolvedUrl || fallbackSvg;
+            img.alt = titleText || 'Ảnh sản phẩm';
+            img.loading = 'lazy';
+            img.onerror = function () {
+                if (this.src !== fallbackSvg) {
+                    this.src = fallbackSvg;
+                }
+            };
+            mediaWrap.appendChild(img);
 
             const info = document.createElement('div');
             info.className = 'chatbot-card-info';
@@ -195,7 +226,8 @@
 
             info.appendChild(nameEl);
             info.appendChild(metaEl);
-            a.appendChild(icon);
+
+            a.appendChild(mediaWrap);
             a.appendChild(info);
             return a;
         }
@@ -218,10 +250,11 @@
             wrap.className = 'chatbot-suggestion-row';
             wrap.appendChild(createSuggestionRowHeader('Gợi ý xem chi tiết sản phẩm:'));
 
-            cards.slice(0, 3).forEach(function (p) {
+            cards.slice(0, 4).forEach(function (p) {
                 const name = p && p.name != null ? String(p.name) : ('Sản phẩm #' + (p && p.id ? p.id : ''));
                 const price = p && p.price != null ? String(p.price) : '';
-                const card = createSuggestionCardElement(p && p.id, name, price);
+                const img = p && p.imageUrl ? String(p.imageUrl) : '';
+                const card = createSuggestionCardElement(p && p.id, name, price, img);
                 if (card) {
                     wrap.appendChild(card);
                 }
@@ -237,8 +270,8 @@
             wrap.className = 'chatbot-suggestion-row';
             wrap.appendChild(createSuggestionRowHeader('Gợi ý xem chi tiết:'));
 
-            ids.slice(0, 3).forEach(function (id) {
-                const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '');
+            ids.slice(0, 4).forEach(function (id) {
+                const card = createSuggestionCardElement(id, 'Sản phẩm #' + Number(id), '', null);
                 if (card) {
                     wrap.appendChild(card);
                 }

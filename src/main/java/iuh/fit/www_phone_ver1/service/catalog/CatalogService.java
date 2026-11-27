@@ -1,5 +1,6 @@
 package iuh.fit.www_phone_ver1.service.catalog;
 
+import iuh.fit.www_phone_ver1.config.CacheConfig;
 import iuh.fit.www_phone_ver1.dto.catalog.*;
 import iuh.fit.www_phone_ver1.entity.*;
 import iuh.fit.www_phone_ver1.repository.*;
@@ -10,6 +11,8 @@ import java.util.Objects;
 import java.util.UUID;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,6 +91,10 @@ public class CatalogService {
         .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm."));
   }
 
+  @Caching(evict = {
+    @CacheEvict(value = CacheConfig.CACHE_BRANDS, allEntries = true),
+    @CacheEvict(value = CacheConfig.CACHE_CATEGORIES, allEntries = true)
+  })
   @Transactional
   public void saveProduct(Long id, ProductForm form, MultipartFile image) throws IOException {
     Product product = id == null ? new Product() : product(id);
@@ -119,6 +126,10 @@ public class CatalogService {
     publishProductChanged(product.getId(), !Integer.valueOf(1).equals(product.getStatus()));
   }
 
+  @Caching(evict = {
+    @CacheEvict(value = CacheConfig.CACHE_BRANDS, allEntries = true),
+    @CacheEvict(value = CacheConfig.CACHE_CATEGORIES, allEntries = true)
+  })
   @Transactional
   public boolean deleteProduct(Long id) throws IOException {
     Product product = product(id);
@@ -144,6 +155,7 @@ public class CatalogService {
     return true;
   }
 
+  @CacheEvict(value = CacheConfig.CACHE_CATEGORIES, allEntries = true)
   @Transactional
   public void saveCategory(Long id, CategoryForm form) {
     Category category =
@@ -157,13 +169,67 @@ public class CatalogService {
     categories.save(category);
   }
 
+  @CacheEvict(value = CacheConfig.CACHE_CATEGORIES, allEntries = true)
   @Transactional
   public void deleteCategory(Long id) {
+    var category = categories.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục."));
     if (products.countByCategoryId(id) > 0)
       throw new IllegalArgumentException("Không thể xóa danh mục đang có sản phẩm.");
-    categories.deleteById(id);
+    categories.delete(category);
   }
 
+  @CacheEvict(value = CacheConfig.CACHE_CATEGORIES, allEntries = true)
+  @Transactional
+  public void updateCategoryDescription(Long id, String description) {
+    var category = categories.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục."));
+    category.setDescription(description);
+  }
+
+  @Caching(evict = {
+    @CacheEvict(value = CacheConfig.CACHE_BRANDS, allEntries = true),
+    @CacheEvict(value = CacheConfig.CACHE_CATEGORIES, allEntries = true)
+  })
+  @Transactional
+  public void updateProductBatchFields(Long id, Integer status, Long categoryId) {
+    Product product = product(id);
+    if (categoryId != null) {
+      if (product.getCategory() != null && categoryId.equals(product.getCategory().getId()))
+        throw new IllegalArgumentException("Sản phẩm đã thuộc danh mục này.");
+      product.setCategory(categories.findById(categoryId)
+          .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục.")));
+    }
+    if (status != null) {
+      if (status.equals(product.getStatus()))
+        throw new IllegalArgumentException("Sản phẩm đã ở trạng thái này.");
+      product.setStatus(status);
+    }
+    publishProductChanged(id, !Integer.valueOf(1).equals(product.getStatus()));
+  }
+
+  @Caching(evict = {
+    @CacheEvict(value = CacheConfig.CACHE_COLORS, allEntries = true),
+    @CacheEvict(value = CacheConfig.CACHE_STORAGE, allEntries = true),
+    @CacheEvict(value = CacheConfig.CACHE_RAM, allEntries = true)
+  })
+  @Transactional
+  public void updateVariantBatchFields(Long productId, Long id, Boolean active, Integer stock) {
+    var variant = variants.lockAll(List.of(id)).stream()
+        .filter(v -> v.getProduct().getId().equals(productId))
+        .findFirst().orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiên bản."));
+    if (active != null) variant.setActive(active);
+    if (stock != null) variant.setStock(stock);
+    variants.flush();
+    updateMinimumPrice(variant.getProduct());
+    publishProductChanged(productId, !Integer.valueOf(1).equals(variant.getProduct().getStatus()));
+  }
+
+  @Caching(evict = {
+    @CacheEvict(value = CacheConfig.CACHE_COLORS, allEntries = true),
+    @CacheEvict(value = CacheConfig.CACHE_STORAGE, allEntries = true),
+    @CacheEvict(value = CacheConfig.CACHE_RAM, allEntries = true)
+  })
   @Transactional
   public void saveVariant(Long productId, Long id, VariantForm form) {
     Product product = product(productId);
@@ -184,6 +250,11 @@ public class CatalogService {
     publishProductChanged(productId, !Integer.valueOf(1).equals(product.getStatus()));
   }
 
+  @Caching(evict = {
+    @CacheEvict(value = CacheConfig.CACHE_COLORS, allEntries = true),
+    @CacheEvict(value = CacheConfig.CACHE_STORAGE, allEntries = true),
+    @CacheEvict(value = CacheConfig.CACHE_RAM, allEntries = true)
+  })
   @Transactional
   public void disableVariant(Long productId, Long id) {
     ProductVariant variant =

@@ -67,4 +67,7 @@ public class Promotion {
 
   @Column(nullable = false)
   private boolean active = true;
+
+  @Column(nullable = false)
+  private boolean combinableWithPoints = true;
 }

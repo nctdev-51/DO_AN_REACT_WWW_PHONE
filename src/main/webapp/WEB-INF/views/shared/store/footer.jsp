@@ -97,7 +97,7 @@
 
 <script src="${pageContext.request.contextPath}/vendor/bootstrap/bootstrap.bundle.min.js" defer>
 </script>
-<script src="${pageContext.request.contextPath}/js/store.js" defer>
+<script src="${pageContext.request.contextPath}/js/store.js?v=20261126b" defer>
 </script>
 <script src="${pageContext.request.contextPath}/js/offline-db.js" defer></script>
 <script src="${pageContext.request.contextPath}/js/offline-sync.js" defer></script>
@@ -110,6 +110,6 @@
 <script src="${pageContext.request.contextPath}/js/tracking.js" defer></script>
 <%-- Module AI Scripts (Tài) --%>
 <script src="${pageContext.request.contextPath}/js/ai-description.js" defer></script>
-<script src="${pageContext.request.contextPath}/js/chatbot.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/chatbot.js?v=20261126b" defer></script>
 </body>
 </html>

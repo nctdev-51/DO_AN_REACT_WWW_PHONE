@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/admin/header.jsp" />
 <a href="${pageContext.request.contextPath}/admin/products">← Danh sách sản phẩm</a>
 <section class="panel form-panel mt-3">
@@ -85,8 +85,7 @@
       <label for="image">Ảnh (PNG/JPEG, tối đa 5 MB)</label>
       <input id="image" name="image" type="file" class="form-control" accept="image/png,image/jpeg">
       <c:if test="${not empty image}">
-        <c:set var="resolvedImage" value="${fn:startsWith(image, 'http') ? image : pageContext.request.contextPath.concat(image)}" />
-        <img class="image-preview" src="${resolvedImage}" alt="Ảnh hiện tại">
+        <ui:adminProductImage path="${image}" cssClass="image-preview" alt="Ảnh hiện tại"/>
       </c:if>
     </div>
     <button class="btn btn-brand">Lưu sản phẩm</button>

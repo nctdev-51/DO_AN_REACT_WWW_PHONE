@@ -51,6 +51,7 @@ public class OrderService {
     this.orderDetails = orderDetails;
   }
 
+  @io.micrometer.core.annotation.Timed(value = "ptv.orders.place", histogram = true)
   @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
   public Order placeOrder(Cart cart, String email, CheckoutForm form) {
     if (cart == null || cart.getItemList().isEmpty())
@@ -147,6 +148,7 @@ public class OrderService {
       total = total.add(detail.getSubTotal());
     }
     var quote = pricing.reserve(total, form.getPromotionCode(), user.getId(), items);
+    quote.validatePointsCombination(form.getRedeemPoints());
     if ("VNPAY".equals(form.getPaymentMethod()) && quote.getTotal().signum() == 0)
       throw new IllegalArgumentException("Đơn 0 đồng vui lòng chọn thanh toán khi nhận hàng.");
     order.setSubtotal(total);

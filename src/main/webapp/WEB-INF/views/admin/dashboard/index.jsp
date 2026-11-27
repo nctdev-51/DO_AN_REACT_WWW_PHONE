@@ -58,7 +58,7 @@
               <ui:money value="${order.totalAmount}"/>
             </td>
             <td>
-              <c:out value="${order.status}"/>
+              <ui:adminOrderStatus value="${order.status}"/>
             </td>
           </tr>
         </c:forEach>

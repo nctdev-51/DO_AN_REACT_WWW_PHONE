@@ -8,41 +8,94 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>
       <c:out value="${pageTitle}"/> — PTV Mobile Admin</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/bootstrap/bootstrap.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/store.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css?v=20261126admin">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/tokens.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/motion.css"><link rel="stylesheet" href="${pageContext.request.contextPath}/css/retail.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/vendor/inter/inter.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/admin-sidebar.css?v=20261126admin">
         <c:if test="${currentPage == 'analytics'}">
           <link rel="stylesheet" href="${pageContext.request.contextPath}/css/components/analytics.css">
         </c:if>
       </head>
       <body class="admin-body">
-        <aside class="admin-sidebar">
-          <a class="brand" href="${pageContext.request.contextPath}/admin">PTV <span>Mobile</span>
+        <%-- Màn hình thông báo chặn thiết bị màn hình nhỏ (< 1024px) phong cách tối giản kiểu Apple Store --%>
+        <div class="admin-unsupported-screen" aria-live="polite">
+          <div class="admin-unsupported-card">
+            <div class="admin-unsupported-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <h2 class="admin-unsupported-title">Trang quản trị chỉ hỗ trợ màn hình máy tính</h2>
+            <p class="admin-unsupported-desc">
+              Vui lòng truy cập Admin Dashboard bằng máy tính hoặc thiết bị có chiều rộng màn hình từ 1024px trở lên để có trải nghiệm tốt nhất.
+            </p>
+            <a href="${pageContext.request.contextPath}/" class="admin-unsupported-btn">
+              Về trang chủ cửa hàng
+            </a>
+          </div>
+        </div>
+        <aside class="admin-sidebar" aria-label="Menu quản trị">
+          <a class="admin-sidebar-brand" href="${pageContext.request.contextPath}/admin">
+            <span class="admin-sidebar-mark" aria-hidden="true">P</span>
+            <span>PTV <strong>Mobile</strong></span>
           </a>
-          <p class="eyebrow">QUẢN TRỊ CỬA HÀNG</p>
-          <nav>
-            <a class="${currentPage == 'dashboard' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin">Tổng quan</a>
-            <a class="${currentPage == 'analytics' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/analytics">Theo dõi & thống kê</a>
-            <a class="${currentPage == 'products' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/products">Sản phẩm & tồn kho</a>
-            <a class="${currentPage == 'categories' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/categories">Danh mục</a>
-            <a class="${currentPage == 'orders' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/orders">Đơn hàng</a>
-            <a class="${currentPage == 'users' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/users">Người dùng</a>
-            <a class="${currentPage == 'promotions' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/promotions">Khuyến mãi & giao hàng</a>
-            <a class="${currentPage == 'support' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/support">Đổi trả & bảo hành</a>
-            <a class="${currentPage == 'experience' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/experience">Nội dung & điểm thưởng</a>
-            <a class="${currentPage == 'consultations' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/consultations">Tư vấn trả góp & thu cũ</a>
-            <a class="${currentPage == 'banners' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin/banners">Banner & chiến dịch</a>
+          <p class="admin-sidebar-label" id="admin-navigation-label">QUẢN TRỊ CỬA HÀNG</p>
+          <nav class="admin-sidebar-nav" aria-labelledby="admin-navigation-label">
+            <a href="${pageContext.request.contextPath}/admin" aria-current="${currentPage == 'dashboard' ? 'page' : 'false'}">
+              <ui:adminMenuIcon name="layout-dashboard"/><span>Tổng quan</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/admin/analytics" aria-current="${currentPage == 'analytics' ? 'page' : 'false'}">
+              <ui:adminMenuIcon name="chart-no-axes-combined"/><span>Theo dõi &amp; thống kê</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/admin/products" aria-current="${currentPage == 'products' ? 'page' : 'false'}">
+              <ui:adminMenuIcon name="package"/><span>Sản phẩm &amp; tồn kho</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/admin/categories" aria-current="${currentPage == 'categories' ? 'page' : 'false'}">
+              <ui:adminMenuIcon name="layers"/><span>Danh mục</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/admin/orders" aria-current="${currentPage == 'orders' ? 'page' : 'false'}">
+              <ui:adminMenuIcon name="clipboard-list"/><span>Đơn hàng</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/admin/users" aria-current="${currentPage == 'users' ? 'page' : 'false'}">
+              <ui:adminMenuIcon name="users"/><span>Người dùng</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/admin/promotions" aria-current="${currentPage == 'promotions' ? 'page' : 'false'}">
+              <ui:adminMenuIcon name="tags"/><span>Khuyến mãi &amp; giao hàng</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/admin/support" aria-current="${currentPage == 'support' ? 'page' : 'false'}">
+              <ui:adminMenuIcon name="shield-check"/><span>Đổi trả &amp; bảo hành</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/admin/experience" aria-current="${currentPage == 'experience' ? 'page' : 'false'}">
+              <ui:adminMenuIcon name="sparkles"/><span>Nội dung &amp; điểm thưởng</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/admin/consultations" aria-current="${currentPage == 'consultations' ? 'page' : 'false'}">
+              <ui:adminMenuIcon name="handshake"/><span>Tư vấn trả góp &amp; thu cũ</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/admin/banners" aria-current="${currentPage == 'banners' ? 'page' : 'false'}">
+              <ui:adminMenuIcon name="megaphone"/><span>Banner &amp; chiến dịch</span>
+            </a>
           </nav>
-          <form action="${pageContext.request.contextPath}/logout" method="post">
+          <form class="admin-sidebar-footer" action="${pageContext.request.contextPath}/logout" method="post">
             <ui:csrf/>
-            <button class="btn btn-outline-light w-100 mt-4">Đăng xuất</button>
+            <button class="admin-sidebar-signout" type="submit">
+              <ui:adminMenuIcon name="log-out"/><span>Đăng xuất</span>
+            </button>
           </form>
         </aside>
         <main class="admin-main">
-          <div class="admin-topbar"><span>PTV Mobile <span aria-hidden="true">/</span> <strong>Quản trị cửa hàng</strong></span><a href="${pageContext.request.contextPath}/" target="_blank" rel="noopener">Xem cửa hàng <ui:icon name="arrow"/></a></div>
+          <div class="admin-topbar">
+            <span>PTV Mobile <span aria-hidden="true">/</span> <strong>Quản trị cửa hàng</strong></span>
+            <a href="${pageContext.request.contextPath}/" target="_blank" rel="noopener">Xem cửa hàng <ui:icon name="arrow"/></a>
+          </div>
           <div class="page-heading">
             <div>
               <span class="eyebrow">KHÔNG GIAN QUẢN LÝ</span>
