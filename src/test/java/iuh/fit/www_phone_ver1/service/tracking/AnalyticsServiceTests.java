@@ -1,12 +1,15 @@
 package iuh.fit.www_phone_ver1.service.tracking;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import iuh.fit.www_phone_ver1.repository.OrderRepository;
+import iuh.fit.www_phone_ver1.entity.Product;
+import iuh.fit.www_phone_ver1.entity.ProductVariant;
 import iuh.fit.www_phone_ver1.repository.ProductRepository;
 import iuh.fit.www_phone_ver1.repository.mongo.UserEventRepository;
 import java.time.LocalDate;
@@ -19,6 +22,35 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 
 class AnalyticsServiceTests {
+  @Test
+  void flagsFivefoldViewSpikeWithTenUnitsAndNoCartAdds() {
+    MongoTemplate mongo = mock(MongoTemplate.class);
+    ProductRepository products = mock(ProductRepository.class);
+    OrderRepository orders = mock(OrderRepository.class);
+    ProductVariant variant = new ProductVariant();
+    variant.setActive(true);
+    variant.setStock(10);
+    when(products.findAll()).thenReturn(List.of(
+        Product.builder().id(2L).name("Galaxy").variants(List.of(variant)).build()));
+    var recent = new AnalyticsService.TopProductRow();
+    recent.setId(2L);
+    recent.setViews(50);
+    var baseline = new AnalyticsService.TopProductRow();
+    baseline.setId(2L);
+    baseline.setViews(70);
+    when(mongo.aggregate(any(Aggregation.class), eq("user_events"),
+        eq(AnalyticsService.TopProductRow.class)))
+        .thenReturn(new AggregationResults<>(List.of(recent), new Document()),
+            new AggregationResults<>(List.of(baseline), new Document()));
+
+    var result = new AnalyticsService(mock(UserEventRepository.class), mongo, orders, products)
+        .forecastStockoutRisk();
+
+    assertEquals(List.of("HIGH", "MODERATE"),
+        result.stream().map(AnalyticsService.StockoutForecast::riskLevel).toList());
+    assertTrue(result.get(0).riskBadge().contains("48 giờ"));
+  }
+
   @Test
   void reportBuildsMongoQueriesAndUsesTheSelectedRange() {
     MongoTemplate mongo = mock(MongoTemplate.class);

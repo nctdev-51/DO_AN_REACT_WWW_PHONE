@@ -50,6 +50,9 @@
                     return res.json();
                 })
                 .then(function (data) {
+                    if (!refresh && typeof window.trackEvent === 'function') {
+                        window.trackEvent('AI_DESCRIPTION_VIEW', {productId: Number(productId)});
+                    }
                     // Render description
                     if (descEl) {
                         const p = document.createElement('p');
