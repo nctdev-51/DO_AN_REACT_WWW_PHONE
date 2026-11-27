@@ -82,6 +82,7 @@ public class SecurityConfig {
     // Disable CSRF only for stateless public JSON REST endpoints; admin mutations keep CSRF.
     http.csrf(csrf -> csrf.ignoringRequestMatchers(
         "/api/ai/chat", "/api/tracking", "/payments/qr/**", "/api/payments/qr/**"));
+    http.headers(headers -> headers.cacheControl(cache -> cache.disable()));
     http.authorizeHttpRequests(
             auth ->
                 auth.requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info")

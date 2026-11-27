@@ -326,8 +326,74 @@
   }
   .auth-split-form-panel {
     flex: 1;
-    min-width: 100%;
+    width: 100%;
+    min-width: 0;
     padding: 32px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-split-container,
+  .auth-split-form-panel,
+  .auth-form-inner {
+    width: 100%;
+  }
+
+  .auth-split-form-panel {
+    align-items: flex-start;
+    padding: 20px 16px 28px;
+  }
+
+  .auth-mobile-header {
+    margin-bottom: 18px;
+  }
+
+  .auth-mobile-header .visual-brand {
+    color: #0f172a;
+  }
+
+  .auth-tabs-pill {
+    margin-bottom: 22px;
+  }
+
+  .auth-tab-btn {
+    min-height: 44px;
+  }
+
+  .form-heading {
+    margin-bottom: 18px;
+  }
+
+  .form-heading h2 {
+    font-size: 1.45rem;
+  }
+
+  .auth-form-section .field {
+    margin-bottom: 14px;
+  }
+
+  .auth-form-section .form-control,
+  .auth-form-section .btn-brand,
+  .login-password-toggle,
+  .login-remember,
+  .auth-links-row a {
+    min-height: 44px;
+  }
+
+  .auth-form-section .form-control {
+    font-size: 16px;
+  }
+
+  .auth-links-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .auth-links-row a,
+  .auth-switch-text a {
+    display: inline-flex;
+    align-items: center;
   }
 }
 .login-password-control { position: relative; }

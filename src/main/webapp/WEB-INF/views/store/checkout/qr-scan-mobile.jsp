@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/store/header.jsp" />
-<section class="panel" style="max-width:520px;margin:2rem auto;">
+<section class="panel qr-scan-panel">
   <span class="eyebrow">${platform.displayName}</span>
   <h1>Mô phỏng xác nhận chuyển khoản</h1>
   <p>Đơn hàng: <strong>#${order.id}</strong></p>

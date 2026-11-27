@@ -11,7 +11,7 @@
     <ui:money value="${order.totalAmount}"/>
   </p>
   <p>Giao đến: <c:out value="${order.shippingAddress}"/></p>
-  <div class="d-flex flex-wrap gap-3 justify-content-center">
+  <div class="success-actions d-flex flex-wrap gap-3 justify-content-center">
     <c:if test="${order.paymentMethod == 'QR' and order.paymentStatus != 'PAID' and order.status == 'Chờ xử lý'}">
       <a class="btn btn-brand" href="${pageContext.request.contextPath}/payments/qr/${order.id}">Thanh toán QR 5 phút</a>
     </c:if>

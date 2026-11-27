@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="ui" tagdir="/WEB-INF/tags" %>
 <jsp:include page="/WEB-INF/views/shared/store/header.jsp" />
-<section class="panel" style="max-width:760px;margin:2rem auto;">
+<section class="panel qr-payment-panel">
   <div class="page-heading">
     <div>
       <span class="eyebrow">THANH TOÁN QR</span>
@@ -11,7 +11,7 @@
     <strong class="price"><ui:money value="${order.totalAmount}"/></strong>
   </div>
 
-  <div class="d-flex flex-wrap gap-2 mb-4" role="tablist">
+  <div class="qr-platform-tabs d-flex flex-wrap gap-2 mb-4" role="tablist">
     <c:forEach var="item" items="${platforms}">
       <a class="btn ${item.name() == platform.name() ? 'btn-brand' : 'btn-outline-dark'}"
          href="${pageContext.request.contextPath}/payments/qr/${order.id}?platform=${item.name()}">${item.displayName}</a>
@@ -24,9 +24,9 @@
     </c:when>
     <c:otherwise>
       <div class="text-center">
-        <div style="border-left:6px solid ${platform.color};padding:1rem;">
+        <div class="qr-payment-card" style="border-left-color:${platform.color};">
           <h2>${platform.displayName}</h2>
-          <img src="${qrImage}" alt="Mã QR thanh toán ${platform.displayName}" width="320" height="320" />
+          <img class="qr-payment-image" src="${qrImage}" alt="Mã QR thanh toán ${platform.displayName}" width="320" height="320" loading="eager" decoding="async" />
           <p><strong>${platform.accountLabel}</strong></p>
           <p>Số tài khoản/ví: <strong>${platform.accountNumber}</strong></p>
           <p>Chủ tài khoản: <strong>${platform.accountOwner}</strong></p>
