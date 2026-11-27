@@ -1085,6 +1085,41 @@ textarea.form-control{
 .success-panel>.d-flex{
   flex-wrap:wrap
 }
+.qr-payment-panel{
+  max-width:760px;
+  width:calc(100% - 24px);
+  margin:2rem auto
+}
+.qr-payment-card{
+  border-left:6px solid var(--line);
+  padding:1rem
+}
+.qr-payment-image{
+  display:block;
+  width:min(320px,100%);
+  height:auto;
+  max-width:100%;
+  margin:0 auto
+}
+.qr-platform-tabs a,
+.qr-payment-panel button,
+.qr-scan-panel button{
+  min-height:44px
+}
+.qr-platform-tabs a{
+  flex:1 1 130px;
+  text-align:center
+}
+.qr-scan-panel{
+  max-width:520px;
+  width:calc(100% - 24px);
+  margin:2rem auto
+}
+#qr-countdown{
+  display:inline-block;
+  min-height:44px;
+  line-height:44px
+}
 .auth-panel{
   max-width:470px;
   margin:30px auto;
@@ -1529,6 +1564,14 @@ textarea.form-control{
   }
   .success-panel h1{
     font-size:1.7rem
+  }
+  .success-actions{
+    flex-direction:column;
+    width:100%
+  }
+  .success-actions .btn{
+    width:100%;
+    min-height:44px
   }
   .order-card{
     flex-direction:column

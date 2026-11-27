@@ -122,6 +122,17 @@
     });
   }
 
+  function sendItemWithCsrfRefresh(item, csrf) {
+    return sendItem(item, csrf).then(function (response) {
+      if (response.status !== 403) return {response: response, csrf: csrf};
+      return getCsrf().then(function (refreshedCsrf) {
+        return sendItem(item, refreshedCsrf).then(function (retryResponse) {
+          return {response: retryResponse, csrf: refreshedCsrf};
+        });
+      });
+    });
+  }
+
   function responseMessage(response) {
     return response.clone().json().then(function (body) {
       return body && (body.message || body.error || body.code)
@@ -142,9 +153,10 @@
       if (items.length === 0) return true;
       return getCsrf().then(function (csrf) {
         return items.reduce(function (chain, item) {
-          return chain.then(function (shouldContinue) {
-            if (!shouldContinue) return false;
-            return sendItem(item, csrf).then(function (response) {
+          return chain.then(function (state) {
+            if (!state.shouldContinue) return state;
+            return sendItemWithCsrfRefresh(item, state.csrf).then(function (result) {
+              const response = result.response;
               if (response.status === 200 || response.status === 201 || response.status === 204) {
                 return global.OfflineDB.remove(item.id).then(function () {
                   emit('offline:sync-item', {
@@ -152,13 +164,13 @@
                     status: 'synced',
                     responseStatus: response.status
                   });
-                  return true;
+                  return {shouldContinue: true, csrf: result.csrf};
                 });
               }
               if (response.status === 401) {
                 stoppedForAuthentication = true;
                 emit('offline:authentication-required', {item: item});
-                return false;
+                return {shouldContinue: false, csrf: result.csrf};
               }
               return responseMessage(response).then(function (message) {
                 if (response.status === 409) {
@@ -172,7 +184,7 @@
                       responseStatus: response.status,
                       errorMsg: message
                     });
-                    return true;
+                    return {shouldContinue: true, csrf: result.csrf};
                   });
                 }
                 if (response.status >= 400 && response.status < 500) {
@@ -186,7 +198,7 @@
                       responseStatus: response.status,
                       errorMsg: message
                     });
-                    return true;
+                    return {shouldContinue: true, csrf: result.csrf};
                   });
                 }
                 emit('offline:sync-paused', {
@@ -194,20 +206,22 @@
                   errorMsg: message,
                   responseStatus: response.status
                 });
-                return false;
+                return {shouldContinue: false, csrf: result.csrf};
               });
             }).catch(function (error) {
               if (error && error.authenticationRequired) {
                 stoppedForAuthentication = true;
                 emit('offline:authentication-required', {item: item, error: error});
-                return false;
+                return {shouldContinue: false, csrf: state.csrf};
               }
               setServerStatus(false);
               emit('offline:sync-paused', {item: item, error: error});
-              return false;
+              return {shouldContinue: false, csrf: state.csrf};
             });
           });
-        }, Promise.resolve(true));
+        }, Promise.resolve({shouldContinue: true, csrf: csrf})).then(function (state) {
+          return state.shouldContinue;
+        });
       });
     }).catch(function (error) {
       if (error && error.authenticationRequired) {

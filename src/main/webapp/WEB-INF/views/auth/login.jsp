@@ -38,8 +38,8 @@
       <div class="auth-form-inner">
         <!-- Top header trên mobile -->
         <div class="auth-mobile-header d-lg-none">
-          <a href="${pageContext.request.contextPath}/" class="visual-brand" style="color:#0f172a;">
-            <span class="brand-logo-icon">P</span> PTV <span style="color:#64748b;">Mobile</span>
+          <a href="${pageContext.request.contextPath}/" class="visual-brand">
+            <span class="brand-logo-icon">P</span> PTV <span>Mobile</span>
           </a>
           <a href="${pageContext.request.contextPath}/" class="mobile-back-link">
             ← Về trang chủ
